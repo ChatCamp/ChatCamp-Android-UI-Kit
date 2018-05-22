@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="40dp"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/message_gap">
+
+    <TextView
+        android:id="@+id/messageDateHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        tools:text="this is date"
+        android:padding="@dimen/message_date_header_padding"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/messageUserAvatar"
+            android:layout_width="@dimen/message_avatar_width"
+            android:layout_height="@dimen/message_avatar_height"
+            android:layout_margin="@dimen/message_avatar_margin"
+            android:layout_alignParentTop="true"/>
+
+        <LinearLayout
+            android:id="@+id/messageContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_alignParentTop="true">
+
+            <TextView
+                android:id="@+id/messageUsername"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="@dimen/message_username_padding_bottom"
+                android:textSize="@dimen/message_text_username"
+                tools:text="Username"/>
+
+            <FrameLayout
+                android:id="@+id/messageContentContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <LinearLayout
+                android:id="@+id/messageTimeContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="end">
+
+                <TextView
+                    android:id="@+id/messageTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingRight="@dimen/message_time_text_padding_right"
+                    android:textSize="@dimen/message_text_time"
+                    tools:text="12:30"/>
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical">
+
+                    <!--TODO Remove this image view and create a separate layout and add it as default view-->
+                    <ImageView
+                        android:id="@+id/messageReadReceipt"
+                        android:layout_width="@dimen/message_read_Receipt_width"
+                        android:layout_height="@dimen/message_read_Receipt_width"
+                        android:layout_gravity="center_vertical"
+                        android:src="@drawable/single_tick" />
+                </FrameLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
+</LinearLayout>

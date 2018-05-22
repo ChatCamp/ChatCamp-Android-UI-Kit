@@ -2,9 +2,9 @@
     android:shape="rectangle">
 
     <corners
-        android:bottomLeftRadius="0dp"
+        android:bottomLeftRadius="@dimen/message_bubble_corners_radius"
         android:bottomRightRadius="@dimen/message_bubble_corners_radius"
-        android:topLeftRadius="@dimen/message_bubble_corners_radius"
+        android:topLeftRadius="0dp"
         android:topRightRadius="@dimen/message_bubble_corners_radius" />
 
     <solid android:color="@color/white" />

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.chatcamp.uikit.preview.ShowImageActivity"
+    android:background="@color/black">
+
+    <FrameLayout
+        android:id="@+id/fl_container_video"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <VideoView
+            android:id="@+id/vv_video"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center" />
+    </FrameLayout>
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:indeterminate="false"
+        android:max="100"
+        android:progress="0"
+        android:layout_centerInParent="true"
+        android:progressDrawable="@drawable/progress_bar_circular"
+        android:secondaryProgress="100"
+        android:visibility="gone"/>
+</RelativeLayout>

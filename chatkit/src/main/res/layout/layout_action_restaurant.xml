@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/cv_action_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/iv_action_image"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:minHeight="100dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/restaurant" />
+
+            <TextView
+                android:id="@+id/tv_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/iv_action_image"
+                android:padding="8dp"
+                android:text="Al-Navaz"
+                android:textColor="@color/white" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_x"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
+                android:paddingLeft="@dimen/margin_x"
+                android:paddingRight="@dimen/margin_x"
+                android:text="Close Time: "
+                android:textColor="@color/dark_grey_two"
+                android:textSize="@dimen/normal_text" />
+
+            <TextView
+                android:id="@+id/tv_close"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:paddingRight="@dimen/margin_x"
+                android:text="8:00 pm"
+                android:textColor="@color/black"
+                android:textSize="@dimen/default_text" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_x"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
+                android:paddingLeft="@dimen/margin_x"
+                android:paddingRight="@dimen/margin_x"
+                android:text="Cost for Two : "
+                android:textColor="@color/dark_grey_two"
+                android:textSize="@dimen/normal_text" />
+
+            <TextView
+                android:id="@+id/tv_cost_for_two"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:paddingRight="@dimen/margin_x"
+                android:text="₹ 2000"
+                android:textColor="@color/black"
+                android:textSize="@dimen/default_text" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_x"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
+                android:paddingLeft="@dimen/margin_x"
+                android:paddingRight="@dimen/margin_x"
+                android:text="Rating:"
+                android:textColor="@color/dark_grey_two"
+                android:textSize="@dimen/normal_text" />
+
+            <TextView
+                android:id="@+id/tv_action_shipping_cost"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:paddingRight="@dimen/margin_x"
+                android:text="4.5"
+                android:textColor="@color/dark_mint"
+                android:textSize="@dimen/default_text"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="@dimen/margin_x"
+            android:background="@color/bg_divider" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:padding="12dp"
+            android:text="RESERVE NOW"
+            android:textColor="@color/action_confirm" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/bg_divider" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:padding="12dp"
+            android:text="SEE MENU"
+            android:textColor="@color/action_confirm" />
+    </LinearLayout>
+</LinearLayout>
+

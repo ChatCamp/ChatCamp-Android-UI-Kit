@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/messageUserAvatar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_margin="8dp"
+        android:src="@drawable/icon_default_contact" />
+
+    <com.wang.avi.AVLoadingIndicatorView
+        android:id="@+id/indication"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:indicatorColor="@color/black"
+        app:indicatorName="BallPulseIndicator"
+        style="@style/AVLoadingIndicatorView.Small"
+        android:layout_gravity="center_vertical"/>
+</LinearLayout>

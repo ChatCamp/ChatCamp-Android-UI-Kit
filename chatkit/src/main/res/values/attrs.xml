@@ -48,6 +48,7 @@
 
     <declare-styleable name="MessagesList">
 
+        <!--type of autolink like phone, web, email etc-->
         <attr name="textAutoLink">
             <flag name="all" value="15"/>
             <flag name="email" value="2"/>
@@ -56,26 +57,9 @@
             <flag name="phone" value="4"/>
             <flag name="web" value="1"/>
         </attr>
-
+        <!--incoming-->
+        <!--text-->
         <attr name="incomingTextLinkColor" format="color|reference"/>
-        <attr name="outcomingTextLinkColor" format="color|reference"/>
-
-        <attr name="incomingAvatarWidth" format="dimension|reference"/>
-        <attr name="incomingAvatarHeight" format="dimension|reference"/>
-
-        <attr name="incomingBubbleDrawable" format="reference"/>
-        <attr name="incomingDefaultBubbleColor" format="color|reference"/>
-        <attr name="incomingDefaultBubblePressedColor" format="color|reference"/>
-        <attr name="incomingDefaultBubbleSelectedColor" format="color|reference"/>
-
-        <attr name="incomingImageOverlayDrawable" format="reference"/>
-        <attr name="incomingDefaultImageOverlayPressedColor" format="color|reference"/>
-        <attr name="incomingDefaultImageOverlaySelectedColor" format="color|reference"/>
-
-        <attr name="incomingBubblePaddingLeft" format="dimension|reference"/>
-        <attr name="incomingBubblePaddingRight" format="dimension|reference"/>
-        <attr name="incomingBubblePaddingTop" format="dimension|reference"/>
-        <attr name="incomingBubblePaddingBottom" format="dimension|reference"/>
 
         <attr name="incomingTextColor" format="color|reference"/>
         <attr name="incomingTextSize" format="dimension|reference"/>
@@ -85,6 +69,25 @@
             <flag name="italic" value="2"/>
         </attr>
 
+        <!--bubble-->
+        <attr name="incomingBubbleDrawable" format="reference"/>
+        <attr name="incomingDefaultBubbleColor" format="color|reference"/>
+        <attr name="incomingDefaultBubblePressedColor" format="color|reference"/>
+        <attr name="incomingDefaultBubbleSelectedColor" format="color|reference"/>
+
+        <attr name="incomingBubblePaddingLeft" format="dimension|reference"/>
+        <attr name="incomingBubblePaddingRight" format="dimension|reference"/>
+        <attr name="incomingBubblePaddingTop" format="dimension|reference"/>
+        <attr name="incomingBubblePaddingBottom" format="dimension|reference"/>
+
+        <!--avatar-->
+        <attr name="incomingAvatarWidth" format="dimension|reference"/>
+        <attr name="incomingAvatarHeight" format="dimension|reference"/>
+        <attr name="incomingAvatarMarginLeft" format="dimension|reference"/>
+        <attr name="incomingAvatarMarginRight" format="dimension|reference"/>
+        <attr name="showIncomingAvatar" format="boolean|reference"/>
+
+        <!--time-->
         <attr name="incomingTimeTextColor" format="color|reference"/>
         <attr name="incomingTimeTextSize" format="dimension|reference"/>
         <attr name="incomingTimeTextStyle">
@@ -92,29 +95,37 @@
             <flag name="bold" value="1"/>
             <flag name="italic" value="2"/>
         </attr>
+        <attr name="incomingTimeTextPaddingLeft" format="dimension|reference"/>
+        <attr name="incomingTimeTextPaddingRight" format="dimension|reference"/>
+        <attr name="incomingTimeTextPaddingTop" format="dimension|reference"/>
+        <attr name="incomingTimeTextPaddingBottom" format="dimension|reference"/>
+        <attr name="incomingTimeTextFormat" format="string|reference"/>
+        <attr name="showIncomingTimeText" format="boolean|reference"/>
 
-        <attr name="incomingImageTimeTextColor" format="color|reference"/>
-        <attr name="incomingImageTimeTextSize" format="dimension|reference"/>
-        <attr name="incomingImageTimeTextStyle">
+        <!--read receipt-->
+        <attr name="incomingReadReceiptWidth" format="dimension|reference"/>
+        <attr name="incomingReadReceiptHeight" format="dimension|reference"/>
+        <attr name="incomingReadReceiptLayout" format="reference"/>
+        <attr name="showIncomingReadReceipt" format="boolean"/>
+
+        <!--username-->
+        <attr name="incomingUsernameTextColor" format="color|reference"/>
+        <attr name="incomingUsernameTextSize" format="dimension|reference"/>
+        <attr name="incomingUsernameTextStyle">
             <flag name="normal" value="0"/>
             <flag name="bold" value="1"/>
             <flag name="italic" value="2"/>
         </attr>
+        <attr name="incomingUsernameTextPaddingLeft" format="dimension|reference"/>
+        <attr name="incomingUsernameTextPaddingRight" format="dimension|reference"/>
+        <attr name="incomingUsernameTextPaddingTop" format="dimension|reference"/>
+        <attr name="incomingUsernameTextPaddingBottom" format="dimension|reference"/>
+        <attr name="showIncomingUsername" format="boolean|reference"/>
 
-        <attr name="outcomingBubbleDrawable" format="reference"/>
-        <attr name="outcomingDefaultBubbleColor" format="color|reference"/>
-        <attr name="outcomingDefaultBubblePressedColor" format="color|reference"/>
-        <attr name="outcomingDefaultBubbleSelectedColor" format="color|reference"/>
 
-        <attr name="outcomingImageOverlayDrawable" format="reference"/>
-        <attr name="outcomingDefaultImageOverlayPressedColor" format="color|reference"/>
-        <attr name="outcomingDefaultImageOverlaySelectedColor" format="color|reference"/>
-
-        <attr name="outcomingBubblePaddingLeft" format="dimension|reference"/>
-        <attr name="outcomingBubblePaddingRight" format="dimension|reference"/>
-        <attr name="outcomingBubblePaddingTop" format="dimension|reference"/>
-        <attr name="outcomingBubblePaddingBottom" format="dimension|reference"/>
-
+        <!--outcoming-->
+        <!--text-->
+        <attr name="outcomingTextLinkColor" format="color|reference"/>
         <attr name="outcomingTextColor" format="color|reference"/>
         <attr name="outcomingTextSize" format="dimension|reference"/>
         <attr name="outcomingTextStyle">
@@ -123,6 +134,24 @@
             <flag name="italic" value="2"/>
         </attr>
 
+        <!--bubble-->
+        <attr name="outcomingBubbleDrawable" format="reference"/>
+        <attr name="outcomingDefaultBubbleColor" format="color|reference"/>
+        <attr name="outcomingDefaultBubblePressedColor" format="color|reference"/>
+        <attr name="outcomingDefaultBubbleSelectedColor" format="color|reference"/>
+        <attr name="outcomingBubblePaddingLeft" format="dimension|reference"/>
+        <attr name="outcomingBubblePaddingRight" format="dimension|reference"/>
+        <attr name="outcomingBubblePaddingTop" format="dimension|reference"/>
+        <attr name="outcomingBubblePaddingBottom" format="dimension|reference"/>
+
+        <!--avatar-->
+        <attr name="outcomingAvatarWidth" format="dimension|reference"/>
+        <attr name="outcomingAvatarHeight" format="dimension|reference"/>
+        <attr name="outcomingAvatarMarginLeft" format="dimension|reference"/>
+        <attr name="outcomingAvatarMarginRight" format="dimension|reference"/>
+        <attr name="showOutcomingAvatar" format="boolean|reference"/>
+
+        <!--time-->
         <attr name="outcomingTimeTextColor" format="color|reference"/>
         <attr name="outcomingTimeTextSize" format="dimension|reference"/>
         <attr name="outcomingTimeTextStyle">
@@ -130,15 +159,34 @@
             <flag name="bold" value="1"/>
             <flag name="italic" value="2"/>
         </attr>
+        <attr name="outcomingTimeTextPaddingLeft" format="dimension|reference"/>
+        <attr name="outcomingTimeTextPaddingRight" format="dimension|reference"/>
+        <attr name="outcomingTimeTextPaddingTop" format="dimension|reference"/>
+        <attr name="outcomingTimeTextPaddingBottom" format="dimension|reference"/>
+        <attr name="outcomingTimeTextFormat" format="string|reference"/>
+        <attr name="showOutcomingTimeText" format="boolean|reference"/>
 
-        <attr name="outcomingImageTimeTextColor" format="color|reference"/>
-        <attr name="outcomingImageTimeTextSize" format="dimension|reference"/>
-        <attr name="outcomingImageTimeTextStyle">
+        <!--read receipt-->
+        <attr name="outcomingReadReceiptWidth" format="dimension|reference"/>
+        <attr name="outcomingReadReceiptHeight" format="dimension|reference"/>
+        <attr name="outcomingReadReceiptLayout" format="reference"/>
+        <attr name="showOutcomingReadReceipt" format="boolean"/>
+
+        <!--username-->
+        <attr name="outcomingUsernameTextColor" format="color|reference"/>
+        <attr name="outcomingUsernameTextSize" format="dimension|reference"/>
+        <attr name="outcomingUsernameTextStyle">
             <flag name="normal" value="0"/>
             <flag name="bold" value="1"/>
             <flag name="italic" value="2"/>
         </attr>
+        <attr name="outcomingUsernameTextPaddingLeft" format="dimension|reference"/>
+        <attr name="outcomingUsernameTextPaddingRight" format="dimension|reference"/>
+        <attr name="outcomingUsernameTextPaddingTop" format="dimension|reference"/>
+        <attr name="outcomingUsernameTextPaddingBottom" format="dimension|reference"/>
+        <attr name="showOutcomingUsername" format="boolean|reference"/>
 
+        <!--date-->
         <attr name="dateHeaderPadding" format="dimension|reference"/>
         <attr name="dateHeaderFormat" format="string|reference"/>
         <attr name="dateHeaderTextColor" format="color|reference"/>
@@ -148,7 +196,10 @@
             <flag name="bold" value="1"/>
             <flag name="italic" value="2"/>
         </attr>
-
+        <attr name="showDateHeader" format="boolean|reference"/>
+        <attr name="messageGap" format="dimension|reference"/>
+        <attr name="leftMargin" format="dimension|reference"/>
+        <attr name="rightMargin" format="dimension|reference"/>
     </declare-styleable>
 
     <attr name="DialogsListView" format="reference"/>
@@ -221,6 +272,54 @@
         <attr name="dialogItemBackground" format="color|reference"/>
         <attr name="dialogUnreadItemBackground" format="color|reference"/>
 
+    </declare-styleable>
+
+    <declare-styleable name="HeaderView">
+        <attr name="backgroundColor" format="color|reference"/>
+        <attr name="headerTitleTextSize" format="dimension|reference"/>
+        <attr name="headerTitleTextStyle">
+            <flag name="normal" value="0"/>
+            <flag name="bold" value="1"/>
+            <flag name="italic" value="2"/>
+        </attr>
+        <attr name="headerTitleTextColor" format="color|reference"/>
+        <attr name="imageHeight" format="dimension|reference"/>
+        <attr name="imageWidth" format="dimension|reference"/>
+        <attr name="headerTitleMarginLeft" format="dimension|reference"/>
+    </declare-styleable>
+
+    <declare-styleable name="ChannelList">
+        <attr name="avatarWidth" format="dimension|reference"/>
+        <attr name="avatarHeight" format="dimension|reference"/>
+        <attr name="nameTextSize" format="dimension|reference"/>
+        <attr name="nameTextStyle">
+            <flag name="normal" value="0"/>
+            <flag name="bold" value="1"/>
+            <flag name="italic" value="2"/>
+        </attr>
+        <attr name="nameTextColor" format="color|reference"/>
+        <attr name="lastMessageTextSize" format="dimension|reference"/>
+        <attr name="lastMessageTextStyle">
+            <flag name="normal" value="0"/>
+            <flag name="bold" value="1"/>
+            <flag name="italic" value="2"/>
+        </attr>
+        <attr name="lastMessageTextColor" format="color|reference"/>
+        <attr name="lastSeenTextSize" format="dimension|reference"/>
+        <attr name="lastSeenTextStyle">
+            <flag name="normal" value="0"/>
+            <flag name="bold" value="1"/>
+            <flag name="italic" value="2"/>
+        </attr>
+        <attr name="lastSeenTextColor" format="color|reference"/>
+        <attr name="unreadMessageCountTextSize" format="dimension|reference"/>
+        <attr name="unreadMessageCountTextColor" format="color|reference"/>
+        <attr name="unreadMessageCountTextStyle">
+            <flag name="normal" value="0"/>
+            <flag name="bold" value="1"/>
+            <flag name="italic" value="2"/>
+        </attr>
+        <attr name="unreadMessageCountBackgroundColor" format="color|reference"/>
     </declare-styleable>
 
 </resources>
