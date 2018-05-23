@@ -69,12 +69,13 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
     }
 
     public void setChannelType(BaseChannel.ChannelType channelType, GroupChannelListQuery.ParticipantState participantState) {
-        dataset.clear();
+
         if (channelType == BaseChannel.ChannelType.OPEN) {
             OpenChannelListQuery openChannelListQuery = OpenChannel.createOpenChannelListQuery();
             openChannelListQuery.get(new OpenChannelListQuery.ResultHandler() {
                 @Override
                 public void onResult(List<OpenChannel> openChannelList, ChatCampException e) {
+                    dataset.clear();
                     dataset.addAll(openChannelList);
                     notifyDataSetChanged();
                 }
@@ -85,6 +86,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
             groupChannelListQuery.get(new GroupChannelListQuery.ResultHandler() {
                 @Override
                 public void onResult(List<GroupChannel> groupChannelList, ChatCampException e) {
+                    dataset.clear();
                     dataset.addAll(groupChannelList);
                     notifyDataSetChanged();
                 }
