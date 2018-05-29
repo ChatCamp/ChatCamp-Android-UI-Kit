@@ -2,6 +2,7 @@ package com.chatcamp.uikit.messages.messagetypes;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
@@ -10,7 +11,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
-import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
@@ -25,6 +26,7 @@ import com.chatcamp.uikit.R;
 import com.chatcamp.uikit.preview.ShowVideoActivity;
 import com.chatcamp.uikit.utils.DownloadFileListener;
 import com.chatcamp.uikit.utils.FileUtils;
+import com.chatcamp.uikit.utils.Utils;
 
 import java.lang.ref.WeakReference;
 
@@ -37,14 +39,19 @@ import io.chatcamp.sdk.Message;
 public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.VideoMessageHolder> {
     private static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_MEDIA = 106;
 
-    private final WeakReference<Activity> activityWeakReference;
+    private final WeakReference<Object> objectWeakReference;
     private View view;
     private ProgressBar progressBar;
     private ImageView downloadIcon;
     private Handler handler;
 
     public VideoMessageFactory(Activity activity) {
-        activityWeakReference = new WeakReference<>(activity);
+        objectWeakReference = new WeakReference<Object>(activity);
+        handler = new Handler();
+    }
+
+    public VideoMessageFactory(Fragment fragment) {
+        objectWeakReference = new WeakReference<Object>(fragment);
         handler = new Handler();
     }
 
@@ -87,8 +94,8 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
 
     @Override
     public void bindMessageHolder(final VideoMessageHolder messageHolder, final Message message) {
-        final Activity activity = activityWeakReference.get();
-        if(activity == null) {
+        final Context context = Utils.getContext(objectWeakReference.get());
+        if (context == null) {
             messageHolder.downloadIcon.setVisibility(View.INVISIBLE);
             return;
         }
@@ -116,7 +123,7 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
             @Override
             public void onClick(View v) {
                 if (v.getTag() != null && v.getTag() instanceof Message) {
-                    if (!FileUtils.fileExists(activity, message.getAttachment().getUrl(), Environment.DIRECTORY_MOVIES)) {
+                    if (!FileUtils.fileExists(context, message.getAttachment().getUrl(), Environment.DIRECTORY_MOVIES)) {
                         messageHolder.progressBar.setVisibility(View.VISIBLE);
                         messageHolder.progressBar.setProgress(0);
                     } else {
@@ -126,7 +133,7 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
                 }
             }
         });
-        if (FileUtils.fileExists(activity, message.getAttachment().getUrl(), Environment.DIRECTORY_MOVIES)) {
+        if (FileUtils.fileExists(context, message.getAttachment().getUrl(), Environment.DIRECTORY_MOVIES)) {
             messageHolder.downloadIcon.setVisibility(View.INVISIBLE);
         } else {
             messageHolder.downloadIcon.setVisibility(View.VISIBLE);
@@ -135,28 +142,27 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
 
 
     private void onVideoClick(View v, ProgressBar progressBar, ImageView downloadIcon) {
-        Activity activity = activityWeakReference.get();
+        Context context = Utils.getContext(objectWeakReference.get());
 
-        if (activity == null) {
+        if (context == null) {
             return;
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN &&
-                ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
+                ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
             view = v;
             this.progressBar = progressBar;
             this.downloadIcon = downloadIcon;
-            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_MEDIA);
+            Utils.requestPermission(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_MEDIA, objectWeakReference.get());
 
         } else {
-            downloadVideo(v, progressBar, downloadIcon, activity);
+            downloadVideo(v, progressBar, downloadIcon);
         }
     }
 
-    protected void downloadVideo(View v, final ProgressBar progressBar, final ImageView downloadIcon,
-                                 final Activity activity) {
-        if (activity == null) {
+    protected void downloadVideo(View v, final ProgressBar progressBar, final ImageView downloadIcon) {
+        if (objectWeakReference.get() == null) {
             return;
         }
         if (v.getTag() != null && v.getTag() instanceof Message) {
@@ -170,9 +176,10 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
                     public void run() {
                         Uri path = null;
                         try {
-                            path = FileProvider.getUriForFile(activity,
-                                    activity.getPackageName() + ".chatcamp.fileprovider",
-                                    FileUtils.downloadFile(activity, imageUrl,
+                            Context context = Utils.getContext(objectWeakReference.get());
+                            path = FileProvider.getUriForFile(context,
+                                    context.getPackageName() + ".chatcamp.fileprovider",
+                                    FileUtils.downloadFile(context, imageUrl,
                                             Environment.DIRECTORY_MOVIES, new DownloadFileListener() {
                                                 @Override
                                                 public void downloadProgress(final int progress) {
@@ -199,10 +206,9 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
                                             }));
 
                             final Uri finalPath = path;
-                            Intent intent = new Intent(activity, ShowVideoActivity.class);
+                            Intent intent = new Intent(context, ShowVideoActivity.class);
                             intent.putExtra(ShowVideoActivity.VIDEO_URL, finalPath.toString());
-                            activity.startActivity(intent);
-
+                            Utils.startActivity(intent, objectWeakReference.get());
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -218,7 +224,7 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
                                            int[] grantResults) {
         if (requestCode == PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_MEDIA) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                downloadVideo(view, progressBar, downloadIcon, activityWeakReference.get());
+                downloadVideo(view, progressBar, downloadIcon);
             }
         }
     }

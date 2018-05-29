@@ -2,6 +2,7 @@ package com.chatcamp.uikit.messages.sender;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -11,13 +12,14 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.chatcamp.uikit.utils.FileUtils;
+import com.chatcamp.uikit.utils.Utils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -36,29 +38,35 @@ public class CameraAttachmentSender extends AttachmentSender {
 
     private static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_MEDIA = 103;
     private static final int CAPTURE_MEDIA_RESULT_CODE = 123;
-    private WeakReference<Activity> activityWeakReference;
+    private WeakReference<Object> objectWeakReference;
     private String currentPhotoPath;
 
     public CameraAttachmentSender(@NonNull Activity activity, @NonNull BaseChannel channel, @NonNull String title, @NonNull int drawableRes) {
         super(channel, title, drawableRes);
-        activityWeakReference = new WeakReference<>(activity);
+        objectWeakReference = new WeakReference<Object>(activity);
+    }
+
+    public CameraAttachmentSender(@NonNull Fragment fragment, @NonNull BaseChannel channel, @NonNull String title, @NonNull int drawableRes) {
+        super(channel, title, drawableRes);
+        objectWeakReference = new WeakReference<Object>(fragment);
     }
 
     @Override
     public void clickSend() {
-        Activity activity = activityWeakReference.get();
-        if (activity == null) {
+
+        Context context = Utils.getContext(objectWeakReference.get());
+        if (context == null) {
             return;
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN && ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED ||  ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED ) {
-            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA},
-                    PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_MEDIA);
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN && ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            Utils.requestPermission(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA},
+                    PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_MEDIA, objectWeakReference.get());
         } else {
-            openCamera(activity);
+            openCamera();
         }
+
     }
 
     @Override
@@ -66,23 +74,27 @@ public class CameraAttachmentSender extends AttachmentSender {
         if (requestCode == PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_MEDIA) {
             if (grantResults.length > 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED
                     && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                if (activityWeakReference.get() != null) {
-                    openCamera(activityWeakReference.get());
+                if (objectWeakReference.get() != null) {
+                    openCamera();
                 }
             }
         }
     }
 
-    private void openCamera(Activity activity) {
+    private void openCamera() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         try {
+            Context context = Utils.getContext(objectWeakReference.get());
+            if (context == null) {
+                return;
+            }
             File file = createImageFile();
             if (file == null) {
                 return;
             }
             //TODO take care of this file provider
-            Uri photoURI = FileProvider.getUriForFile(activity,
-                    activity.getPackageName() + ".chatcamp.fileprovider",
+            Uri photoURI = FileProvider.getUriForFile(context,
+                    context.getPackageName() + ".chatcamp.fileprovider",
                     file);
 
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
@@ -90,7 +102,7 @@ public class CameraAttachmentSender extends AttachmentSender {
             Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
             Intent chooserIntent = Intent.createChooser(takePictureIntent, "Capture Image or Video");
             chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{takeVideoIntent});
-            activity.startActivityForResult(chooserIntent, CAPTURE_MEDIA_RESULT_CODE);
+            Utils.startActivityForResult(chooserIntent, CAPTURE_MEDIA_RESULT_CODE, objectWeakReference.get());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -98,13 +110,13 @@ public class CameraAttachmentSender extends AttachmentSender {
 
     private File createImageFile() throws IOException {
         // Create an image file name
-        Activity activity = activityWeakReference.get();
-        if (activity == null) {
+        Context context = Utils.getContext(objectWeakReference.get());
+        if (context == null) {
             return null;
         }
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
@@ -130,11 +142,11 @@ public class CameraAttachmentSender extends AttachmentSender {
     }
 
     private void uploadFile(Uri uri) {
-        Activity activity = activityWeakReference.get();
-        if (activity == null) {
+        Context context = Utils.getContext(objectWeakReference.get());
+        if (context == null) {
             return;
         }
-        String path = FileUtils.getPath(activity, uri);
+        String path = FileUtils.getPath(context, uri);
         String fileName = "";
         String contentType = "";
         File file;
@@ -143,8 +155,8 @@ public class CameraAttachmentSender extends AttachmentSender {
             fileName = new File(path).getName();
             contentType = "image/*";
         } else {
-            fileName = FileUtils.getFileName(activity, uri);
-            contentType = activity.getContentResolver().getType(uri);
+            fileName = FileUtils.getFileName(context, uri);
+            contentType = context.getContentResolver().getType(uri);
         }
         if (TextUtils.isEmpty(contentType)) {
             return;

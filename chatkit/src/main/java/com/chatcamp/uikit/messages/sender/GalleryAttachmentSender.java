@@ -2,6 +2,7 @@ package com.chatcamp.uikit.messages.sender;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -10,13 +11,14 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.chatcamp.uikit.preview.MediaPreviewActivity;
 import com.chatcamp.uikit.utils.FileUtils;
+import com.chatcamp.uikit.utils.Utils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -38,26 +40,31 @@ public class GalleryAttachmentSender extends AttachmentSender {
     private static final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE_MEDIA = 101;
     private static final int PICK_MEDIA_RESULT_CODE = 121;
     private static final int PREVIEW_FILE_RESULT_CODE = 102;
-    private WeakReference<Activity> activityWeakReference;
+    private WeakReference<Object> objectWeakReference;
 
     public GalleryAttachmentSender(@NonNull Activity activity, @NonNull BaseChannel channel, @NonNull String title, @NonNull int drawableRes) {
         super(channel, title, drawableRes);
-        activityWeakReference = new WeakReference<>(activity);
+        objectWeakReference = new WeakReference<Object>(activity);
+    }
+
+    public GalleryAttachmentSender(@NonNull Fragment fragment, @NonNull BaseChannel channel, @NonNull String title, @NonNull int drawableRes) {
+        super(channel, title, drawableRes);
+        objectWeakReference = new WeakReference<Object>(fragment);
     }
 
     @Override
     public void clickSend() {
-        Activity activity = activityWeakReference.get();
-        if (activity == null) {
+        Context context = Utils.getContext(objectWeakReference.get());
+        if (context == null) {
             return;
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN && ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN && ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                    PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE_MEDIA);
+            Utils.requestPermission(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE_MEDIA, objectWeakReference.get());
 
         } else {
-            chooseMedia(activity);
+            chooseMedia();
         }
     }
 
@@ -65,24 +72,25 @@ public class GalleryAttachmentSender extends AttachmentSender {
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE_MEDIA) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                if (activityWeakReference.get() != null) {
-                    chooseMedia(activityWeakReference.get());
+                if (objectWeakReference.get() != null) {
+                    chooseMedia();
                 }
             }
         }
     }
 
-    private void chooseMedia(Activity activity) {
+    private void chooseMedia() {
         if (Build.VERSION.SDK_INT < 19) {
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("image/* video/*");
-            activity.startActivityForResult(Intent.createChooser(intent, "Select Media"), PICK_MEDIA_RESULT_CODE);
+            Utils.startActivityForResult(Intent.createChooser(intent, "Select Media"),
+                    PICK_MEDIA_RESULT_CODE, objectWeakReference.get());
         } else {
             Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
             intent.addCategory(Intent.CATEGORY_OPENABLE);
             intent.setType("image/*");
             intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"image/*", "video/*"});
-            activity.startActivityForResult(intent, PICK_MEDIA_RESULT_CODE);
+            Utils.startActivityForResult(intent, PICK_MEDIA_RESULT_CODE, objectWeakReference.get());
         }
     }
 
@@ -94,13 +102,13 @@ public class GalleryAttachmentSender extends AttachmentSender {
                 if (uri == null) {
                     return;
                 }
-                Activity activity = activityWeakReference.get();
-                if (activity == null) {
+                Context context = Utils.getContext(objectWeakReference.get());
+                if (context == null) {
                     return;
                 }
-                Intent intent = new Intent(activity, MediaPreviewActivity.class);
+                Intent intent = new Intent(context, MediaPreviewActivity.class);
                 intent.putExtra(MediaPreviewActivity.IMAGE_URI, uri.toString());
-                activity.startActivityForResult(intent, PREVIEW_FILE_RESULT_CODE);
+                Utils.startActivityForResult(intent, PREVIEW_FILE_RESULT_CODE, objectWeakReference.get());
             } else if (requestCode == PREVIEW_FILE_RESULT_CODE) {
                 String uriMedia = dataFile.getExtras().getString(MediaPreviewActivity.IMAGE_URI);
                 uploadFile(Uri.parse(uriMedia));
@@ -109,16 +117,16 @@ public class GalleryAttachmentSender extends AttachmentSender {
     }
 
     private void uploadFile(Uri uri) {
-        Activity activity = activityWeakReference.get();
-        if (activity == null) {
+        Context context = Utils.getContext(objectWeakReference.get());
+        if (context == null) {
             return;
         }
-        String path = FileUtils.getPath(activity, uri);
+        String path = FileUtils.getPath(context, uri);
         if (TextUtils.isEmpty(path)) {
             return;
         }
-        String fileName = FileUtils.getFileName(activity, uri);
-        String contentType = activity.getContentResolver().getType(uri);
+        String fileName = FileUtils.getFileName(context, uri);
+        String contentType = context.getContentResolver().getType(uri);
         if (TextUtils.isEmpty(contentType)) {
             return;
         }
@@ -143,13 +151,13 @@ public class GalleryAttachmentSender extends AttachmentSender {
 
     private File createImageFile() throws IOException {
         // Create an image file name
-        Activity activity = activityWeakReference.get();
-        if (activity == null) {
+        Context context = Utils.getContext(objectWeakReference.get());
+        if (context == null) {
             return null;
         }
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
