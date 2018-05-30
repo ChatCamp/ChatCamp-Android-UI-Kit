@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.chatcamp.uikit.commons.ImageLoader;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.chatcamp.uikit.R;
@@ -48,6 +49,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
     private ChannelClickedListener channelClickedListener;
     private Context context;
     private ChannelListStyle channelListStyle;
+    private ImageLoader imageLoader;
 
     public ChannelAdapter(Context context) {
         dataset = new ArrayList<>();
@@ -96,6 +98,10 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
 
     public void setStyle(ChannelListStyle channelListStyle) {
         this.channelListStyle = channelListStyle;
+    }
+
+    public void setAvatarImageLoader(ImageLoader imageLoader) {
+        this.imageLoader = imageLoader;
     }
 
     @Override
@@ -214,24 +220,28 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
         }
 
         private void populateTitle(String imageUrl, String title) {
-            Picasso.with(context).load(imageUrl)
-                    .placeholder(R.drawable.icon_default_contact)
-                    .error(R.drawable.icon_default_contact)
-                    .into(avatarIv, new Callback() {
-                        @Override
-                        public void onSuccess() {
-                            Bitmap imageBitmap = ((BitmapDrawable) avatarIv.getDrawable()).getBitmap();
-                            RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(context.getResources(), imageBitmap);
-                            imageDrawable.setCircular(true);
-                            imageDrawable.setCornerRadius(Math.max(imageBitmap.getWidth(), imageBitmap.getHeight()) / 2.0f);
-                            avatarIv.setImageDrawable(imageDrawable);
-                        }
+            if(imageLoader != null) {
+                imageLoader.loadImage(avatarIv, imageUrl);
+            } else {
+                Picasso.with(context).load(imageUrl)
+                        .placeholder(R.drawable.icon_default_contact)
+                        .error(R.drawable.icon_default_contact)
+                        .into(avatarIv, new Callback() {
+                            @Override
+                            public void onSuccess() {
+                                Bitmap imageBitmap = ((BitmapDrawable) avatarIv.getDrawable()).getBitmap();
+                                RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(context.getResources(), imageBitmap);
+                                imageDrawable.setCircular(true);
+                                imageDrawable.setCornerRadius(Math.max(imageBitmap.getWidth(), imageBitmap.getHeight()) / 2.0f);
+                                avatarIv.setImageDrawable(imageDrawable);
+                            }
 
-                        @Override
-                        public void onError() {
-                            avatarIv.setImageResource(R.drawable.icon_default_contact);
-                        }
-                    });
+                            @Override
+                            public void onError() {
+                                avatarIv.setImageResource(R.drawable.icon_default_contact);
+                            }
+                        });
+            }
 
             titleTv.setText(title);
 

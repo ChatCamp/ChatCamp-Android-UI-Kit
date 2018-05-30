@@ -8,6 +8,8 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.util.AttributeSet;
 
+import com.chatcamp.uikit.commons.ImageLoader;
+
 import io.chatcamp.sdk.BaseChannel;
 import io.chatcamp.sdk.GroupChannelListQuery;
 
@@ -45,6 +47,12 @@ public class ChannelList extends RecyclerView {
     public void setChannelClickListener(ChannelAdapter.ChannelClickedListener channelClickListener) {
         clickListener = channelClickListener;
         adapter.setChannelClickedListener(channelClickListener);
+    }
+
+    public void setAvatarImageLoader(ImageLoader imageLoader) {
+        if(adapter != null) {
+            adapter.setAvatarImageLoader(imageLoader);
+        }
     }
 
     @Override

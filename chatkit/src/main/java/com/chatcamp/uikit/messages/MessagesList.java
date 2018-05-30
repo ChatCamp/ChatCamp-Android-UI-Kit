@@ -2,6 +2,7 @@ package com.chatcamp.uikit.messages;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.Image;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -9,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.util.AttributeSet;
 
+import com.chatcamp.uikit.commons.ImageLoader;
 import com.chatcamp.uikit.messages.messagetypes.MessageFactory;
 import com.chatcamp.uikit.messages.typing.TypingFactory;
 
@@ -55,6 +57,10 @@ public class MessagesList extends RecyclerView {
     public void setChannel(BaseChannel channel) {
         this.channel = channel;
         adapter.setChannel(channel);
+    }
+
+    public void setAvatarImageLoader(ImageLoader imageLoader) {
+        adapter.setAvatarImageLoader(imageLoader);
     }
 
     /**

@@ -16,7 +16,6 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.squareup.picasso.Picasso;
 import com.chatcamp.uikit.R;
 import com.chatcamp.uikit.commons.ImageLoader;
 import com.chatcamp.uikit.messages.database.ChatCampDatabaseHelper;
@@ -24,6 +23,7 @@ import com.chatcamp.uikit.messages.messagetypes.MessageFactory;
 import com.chatcamp.uikit.messages.typing.TypingFactory;
 import com.chatcamp.uikit.utils.CircleTransform;
 import com.chatcamp.uikit.utils.DateFormatter;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -53,7 +53,6 @@ public class MessagesListAdapter
 
     private List<Message> items;
 
-    private ImageLoader imageLoader;
     private MessagesListStyle messagesListStyle;
 
     private List<MessageFactory> messageFactories = new ArrayList<>();
@@ -83,6 +82,7 @@ public class MessagesListAdapter
     private boolean loadingFirstTime = true;
 
     private Context context;
+    private ImageLoader avatarImageLoader;
 
     public MessagesListAdapter(Context context) {
         items = new ArrayList<>();
@@ -129,6 +129,10 @@ public class MessagesListAdapter
         //TODO get the number of message from client
         loadMessages();
         addChannelListener();
+    }
+
+    public void setAvatarImageLoader(ImageLoader imageLoader) {
+        this.avatarImageLoader = imageLoader;
     }
 
     //TODO We can create a layout for showing loading indicator for pagination.
@@ -398,9 +402,13 @@ public class MessagesListAdapter
             params.width = avatarWidth;
             params.height = avatarHeight;
             params.setMargins(avatarMarginLeft, 0, avatarMarginRight, 0);
-            Picasso.with(context).load(message.getUser().getAvatarUrl())
-                    .placeholder(R.drawable.icon_default_contact)
-                    .transform(new CircleTransform()).into(holder.messageUserAvatar);
+            if (avatarImageLoader != null) {
+                avatarImageLoader.loadImage(holder.messageUserAvatar, message.getUser().getAvatarUrl());
+            } else {
+                Picasso.with(context).load(message.getUser().getAvatarUrl())
+                        .placeholder(R.drawable.icon_default_contact)
+                        .transform(new CircleTransform()).into(holder.messageUserAvatar);
+            }
         } else {
             holder.messageUserAvatar.setVisibility(View.GONE);
         }
@@ -412,7 +420,7 @@ public class MessagesListAdapter
                     + messagesListStyle.getOutcomingAvatarMarginLeft()
                     + messagesListStyle.getOutcomingAvatarMarginRight()
                     : messagesListStyle.getRightMargin();
-            int messageContainerMarginLeft = messagesListStyle.isShowIncomingAvatar() ?  messagesListStyle.getIncomingAvatarWidth()
+            int messageContainerMarginLeft = messagesListStyle.isShowIncomingAvatar() ? messagesListStyle.getIncomingAvatarWidth()
                     + messagesListStyle.getIncomingAvatarMarginLeft()
                     + messagesListStyle.getIncomingAvatarMarginRight() : messagesListStyle.getLeftMargin();
             messageContainerParams.setMargins(messageContainerMarginLeft, 0, messageContainerMarginRight, 0);

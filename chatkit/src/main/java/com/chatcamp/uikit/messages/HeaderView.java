@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.chatcamp.uikit.commons.ImageLoader;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.chatcamp.uikit.R;
@@ -44,7 +45,7 @@ public class HeaderView extends LinearLayout {
     private BaseChannel channel;
     private Participant otherParticipant;
     private HeaderStyle headerStyle;
-    private AvatarLoader avatarLoader;
+    private ImageLoader avatarLoader;
     private HeaderViewClickListener headerViewClickListener;
 
     public HeaderView(Context context) {
@@ -86,7 +87,7 @@ public class HeaderView extends LinearLayout {
         groupTitleTv.setLayoutParams(titleParams);
     }
 
-    public void setAvatarLoader(AvatarLoader avatarLoader) {
+    public void setAvatarLoader(ImageLoader avatarLoader) {
         this.avatarLoader = avatarLoader;
     }
 
