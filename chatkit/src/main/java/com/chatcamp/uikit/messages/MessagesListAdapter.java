@@ -298,15 +298,19 @@ public class MessagesListAdapter
         {
             boolean readReceiptVisibility = messageType.isMe ? messagesListStyle.isShowOutcomingReadReceipt() : messagesListStyle.isShowIncomingReadReceipt();
             if (readReceiptVisibility) {
-                holder.messageReadReceipt.setVisibility(View.VISIBLE);
+                holder.readReceiptContainer.setVisibility(View.VISIBLE);
+                holder.readReceiptContainer.removeAllViews();
                 if (message.getInsertedAt() * 1000 > lastReadTime) {
                     // message is not read by everyone
-                    holder.messageReadReceipt.setImageResource(R.drawable.single_tick);
+                    int layoutRes = messagesListStyle.getReadReceiptUnReadLayout();
+                    holder.readReceiptContainer.addView(LayoutInflater.from(context).inflate(layoutRes, holder.readReceiptContainer, false));
                 } else {
-                    holder.messageReadReceipt.setImageResource(R.drawable.double_tick);
+                    int layoutRes = messagesListStyle.getReadReceiptReadLayout();
+                    holder.readReceiptContainer.addView(LayoutInflater.from(context).inflate(layoutRes, holder.readReceiptContainer, false));
                 }
             } else {
-                holder.messageReadReceipt.setVisibility(View.GONE);
+                holder.readReceiptContainer.removeAllViews();
+                holder.readReceiptContainer.setVisibility(View.GONE);
             }
         }
         Cluster cluster = getClustering(message, position);
@@ -686,7 +690,8 @@ public class MessagesListAdapter
         protected ViewGroup messageContentContainer;
         protected ViewGroup messageTimeContainer;
         protected TextView messageTime;
-        protected ImageView messageReadReceipt;
+//        protected ImageView messageReadReceipt;
+        protected ViewGroup readReceiptContainer;
 
         protected MessageFactory.MessageHolder messageHolder;
         protected MessageFactory.MessageSpecs messageSpecs;
@@ -700,7 +705,8 @@ public class MessagesListAdapter
             messageContentContainer = itemView.findViewById(R.id.messageContentContainer);
             messageTimeContainer = itemView.findViewById(R.id.messageTimeContainer);
             messageTime = itemView.findViewById(R.id.messageTime);
-            messageReadReceipt = itemView.findViewById(R.id.messageReadReceipt);
+//            messageReadReceipt = itemView.findViewById(R.id.messageReadReceipt);
+            readReceiptContainer = itemView.findViewById(R.id.readReceiptContainer);
         }
     }
 }

@@ -62,17 +62,11 @@
                     tools:text="12:30"/>
 
                 <FrameLayout
+                    android:id="@+id/readReceiptContainer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical">
 
-                    <!--TODO Remove this image view and create a separate layout and add it as default view-->
-                    <ImageView
-                        android:id="@+id/messageReadReceipt"
-                        android:layout_width="@dimen/message_read_Receipt_width"
-                        android:layout_height="@dimen/message_read_Receipt_width"
-                        android:layout_gravity="center_vertical"
-                        android:src="@drawable/single_tick" />
                 </FrameLayout>
             </LinearLayout>
         </LinearLayout>

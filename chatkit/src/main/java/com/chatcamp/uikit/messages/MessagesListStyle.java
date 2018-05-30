@@ -63,9 +63,6 @@ public class MessagesListStyle extends Style {
 
 
     //read receipt
-    private int incomingReadReceiptWidth;
-    private int incomingReadReceiptHeight;
-    private int incomingReadReceiptLayout;
     private boolean showIncomingReadReceipt;
 
     // username
@@ -117,9 +114,6 @@ public class MessagesListStyle extends Style {
     private boolean showOutcomingTimeText;
 
     //read receipt
-    private int outcomingReadReceiptWidth;
-    private int outcomingReadReceiptHeight;
-    private int outcomingReadReceiptLayout;
     private boolean showOutcomingReadReceipt;
 
     // username
@@ -149,6 +143,10 @@ public class MessagesListStyle extends Style {
     private int leftMargin;
     //right space of message
     private int rightMargin;
+
+    //read receipt layout
+    private int readReceiptReadLayout;
+    private int readReeiptUnReadLayout;
 
     static MessagesListStyle parse(Context context, AttributeSet attrs) {
         MessagesListStyle style = new MessagesListStyle(context, attrs);
@@ -212,12 +210,6 @@ public class MessagesListStyle extends Style {
         style.showIncomingTimeText = typedArray.getBoolean(R.styleable.MessagesList_showIncomingTimeText, true);
 
         //read receipt
-        style.incomingReadReceiptHeight = typedArray.getDimensionPixelSize(R.styleable.MessagesList_incomingReadReceiptHeight,
-                style.getDimension(R.dimen.message_read_Receipt_height));
-        style.incomingReadReceiptWidth = typedArray.getDimensionPixelSize(R.styleable.MessagesList_incomingReadReceiptWidth,
-                style.getDimension(R.dimen.message_read_Receipt_width));
-        //TODO add layout for read receipt
-//        style.incomingReadReceiptLayout = typedArray.getResourceId(R.styleable.MessagesList_incomingReadReceiptLayout, R.layout.activity_group_detail)
         style.showIncomingReadReceipt = typedArray.getBoolean(R.styleable.MessagesList_showIncomingReadReceipt, true);
 
         // Username
@@ -289,10 +281,6 @@ public class MessagesListStyle extends Style {
         style.showOutcomingTimeText = typedArray.getBoolean(R.styleable.MessagesList_showOutcomingTimeText, true);
 
         //read receipt
-        style.outcomingReadReceiptHeight = typedArray.getDimensionPixelSize(R.styleable.MessagesList_outcomingReadReceiptHeight,
-                style.getDimension(R.dimen.message_read_Receipt_height));
-        style.outcomingReadReceiptWidth = typedArray.getDimensionPixelSize(R.styleable.MessagesList_outcomingReadReceiptWidth,
-                style.getDimension(R.dimen.message_read_Receipt_width));
         //TODO add layout for read receipt
 //        style.outcomingReadReceiptLayout = typedArray.getResourceId(R.styleable.MessagesList_outcomingReadReceiptLayout, R.layout.activity_group_detail)
         style.showOutcomingReadReceipt = typedArray.getBoolean(R.styleable.MessagesList_showOutcomingReadReceipt, true);
@@ -331,6 +319,9 @@ public class MessagesListStyle extends Style {
         // right space of message
         style.rightMargin = typedArray.getDimensionPixelSize(R.styleable.MessagesList_rightMargin,
                 style.getDimension(R.dimen.message_margin));
+        // read receipt layout
+        style.readReceiptReadLayout = typedArray.getResourceId(R.styleable.MessagesList_readReceiptReadLayout, R.layout.layout_read_receipt_read);
+        style.readReeiptUnReadLayout = typedArray.getResourceId(R.styleable.MessagesList_readReceiptUnReadLayout, R.layout.layout_read_receipt_unread);
         typedArray.recycle();
         return style;
     }
@@ -465,18 +456,6 @@ public class MessagesListStyle extends Style {
     }
 
     //read receipt
-
-    public int getIncomingReadReceiptWidth() {
-        return incomingReadReceiptWidth;
-    }
-
-    public int getIncomingReadReceiptHeight() {
-        return incomingReadReceiptHeight;
-    }
-
-    public int getIncomingReadReceiptLayout() {
-        return incomingReadReceiptLayout;
-    }
 
     public boolean isShowIncomingReadReceipt() {
         return showIncomingReadReceipt;
@@ -620,17 +599,6 @@ public class MessagesListStyle extends Style {
     }
 
     //read receipt
-    public int getOutcomingReadReceiptWidth() {
-        return outcomingReadReceiptWidth;
-    }
-
-    public int getOutcomingReadReceiptHeight() {
-        return outcomingReadReceiptHeight;
-    }
-
-    public int getOutcomingReadReceiptLayout() {
-        return outcomingReadReceiptLayout;
-    }
 
     public boolean isShowOutcomingReadReceipt() {
         return showOutcomingReadReceipt;
@@ -707,5 +675,15 @@ public class MessagesListStyle extends Style {
     // right space of message
     public int getRightMargin() {
         return rightMargin;
+    }
+
+    // read receipt layout
+
+    public int getReadReceiptReadLayout() {
+        return readReceiptReadLayout;
+    }
+
+    public int getReadReceiptUnReadLayout() {
+        return readReeiptUnReadLayout;
     }
 }

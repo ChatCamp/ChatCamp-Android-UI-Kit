@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--TODO Remove this image view and create a separate layout and add it as default view-->
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/message_read_Receipt_width"
+    android:layout_height="@dimen/message_read_Receipt_width"
+    android:layout_gravity="center_vertical"
+    android:src="@drawable/double_tick" />
