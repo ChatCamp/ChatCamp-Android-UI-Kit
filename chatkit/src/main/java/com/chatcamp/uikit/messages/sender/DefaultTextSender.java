@@ -1,6 +1,7 @@
 package com.chatcamp.uikit.messages.sender;
 
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 
 import io.chatcamp.sdk.BaseChannel;
 import io.chatcamp.sdk.ChatCampException;
@@ -18,11 +19,13 @@ public class DefaultTextSender extends TextSender {
 
     @Override
     public void sendMessage(@NonNull String message) {
-        channel.sendMessage(message, new BaseChannel.SendMessageListener() {
-            @Override
-            public void onSent(Message message, ChatCampException e) {
-                // can do something here
-            }
-        });
+        if(!TextUtils.isEmpty(message.trim())) {
+            channel.sendMessage(message, new BaseChannel.SendMessageListener() {
+                @Override
+                public void onSent(Message message, ChatCampException e) {
+                    // can do something here
+                }
+            });
+        }
     }
 }
