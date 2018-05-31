@@ -690,7 +690,6 @@ public class MessagesListAdapter
         protected ViewGroup messageContentContainer;
         protected ViewGroup messageTimeContainer;
         protected TextView messageTime;
-//        protected ImageView messageReadReceipt;
         protected ViewGroup readReceiptContainer;
 
         protected MessageFactory.MessageHolder messageHolder;
@@ -705,7 +704,6 @@ public class MessagesListAdapter
             messageContentContainer = itemView.findViewById(R.id.messageContentContainer);
             messageTimeContainer = itemView.findViewById(R.id.messageTimeContainer);
             messageTime = itemView.findViewById(R.id.messageTime);
-//            messageReadReceipt = itemView.findViewById(R.id.messageReadReceipt);
             readReceiptContainer = itemView.findViewById(R.id.readReceiptContainer);
         }
     }
