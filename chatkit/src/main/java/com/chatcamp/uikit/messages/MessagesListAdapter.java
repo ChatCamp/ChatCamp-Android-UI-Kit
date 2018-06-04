@@ -248,12 +248,17 @@ public class MessagesListAdapter
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        if(viewType == -1){
+            LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
+            ViewHolder viewHolder = new ViewHolder(layoutInflater.inflate(TypingViewHolder.RESOURCE_ID_CONTAINER, parent, false));
+            return viewHolder;
+        }
         if (viewType == VIEW_TYPE_FOOTER) {
             LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
-            TypingViewHolder typingViewHolder = new TypingViewHolder(layoutInflater.inflate(TypingViewHolder.RESOURCE_ID_FOOTER, parent, false));
+            TypingViewHolder typingViewHolder = new TypingViewHolder(layoutInflater.inflate(TypingViewHolder.RESOURCE_ID_CONTAINER, parent, false));
             typingViewHolder.typingHolder = typingFactory.createView(typingViewHolder.vgContainer, layoutInflater);
             return typingViewHolder;
-//            return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(ViewHolder.RESOURCE_ID_FOOTER, parent, false));
+//            return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(ViewHolder.RESOURCE_ID_CONTAINER, parent, false));
         } else {
             MessageType messageType = viewTypeMessageTypeMap.get(viewType);
             int resId = messageType.isMe ? MessageViewHolder.RESOURCE_ID_MY : MessageViewHolder.RESOURCE_ID_THEIR;
@@ -293,7 +298,6 @@ public class MessagesListAdapter
         MessageFactory.MessageHolder messageHolder = holder.messageHolder;
         holder.messageSpecs.isMe = messageType.isMe;
         holder.messageSpecs.position = position;
-        // TODO for receipt we can pass a layout and use it, also add other custom attrs here
         // read receipt
         {
             boolean readReceiptVisibility = messageType.isMe ? messagesListStyle.isShowOutcomingReadReceipt() : messagesListStyle.isShowIncomingReadReceipt();
@@ -392,7 +396,6 @@ public class MessagesListAdapter
             holder.messageUsername.setVisibility(View.GONE);
         }
 
-        //TODO use imageloader
         // avatar
 
         boolean avatarVisibility = messageType.isMe ? messagesListStyle.isShowOutcomingAvatar() : messagesListStyle.isShowIncomingAvatar();
@@ -440,7 +443,6 @@ public class MessagesListAdapter
                 holder.messageSpecs.isFirstMessage = false;
             } else {
                 //show both avatar and name
-                //TODO use imageloader to load the image
                 if (avatarVisibility) {
                     holder.messageUserAvatar.setVisibility(View.VISIBLE);
                 } else {
@@ -657,7 +659,7 @@ public class MessagesListAdapter
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public static final int RESOURCE_ID_FOOTER = R.layout.layout_message_footer;
+        public static final int RESOURCE_ID_CONTAINER = R.layout.layout_container;
 
         protected ViewGroup vgContainer;
 
