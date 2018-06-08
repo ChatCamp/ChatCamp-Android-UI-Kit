@@ -18,7 +18,7 @@ import android.widget.TextView;
 
 import com.chatcamp.uikit.R;
 import com.chatcamp.uikit.commons.ImageLoader;
-import com.chatcamp.uikit.messages.database.ChatCampDatabaseHelper;
+import com.chatcamp.uikit.database.ChatCampDatabaseHelper;
 import com.chatcamp.uikit.messages.messagetypes.MessageFactory;
 import com.chatcamp.uikit.messages.typing.TypingFactory;
 import com.chatcamp.uikit.utils.CircleTransform;
@@ -126,6 +126,9 @@ public class MessagesListAdapter
 
     public void setChannel(final BaseChannel channel) {
         this.channel = channel;
+        if(channel instanceof GroupChannel) {
+            databaseHelper.addGroupChannel((GroupChannel) channel);
+        }
         //TODO get the number of message from client
         loadMessages();
         addChannelListener();
@@ -191,6 +194,11 @@ public class MessagesListAdapter
                     }
                     restoreScrollPositionAfterAdAdded();
                 }
+            }
+
+            @Override
+            public void onGroupChannelUpdated(GroupChannel groupChannel) {
+                // DO nothing
             }
 
             @Override

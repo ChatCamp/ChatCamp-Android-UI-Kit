@@ -41,7 +41,11 @@ public class ChannelList extends RecyclerView {
     }
 
     public void setChannelType(BaseChannel.ChannelType channelType, GroupChannelListQuery.ParticipantState participantState) {
-        adapter.setChannelType(channelType, participantState);
+        setChannelType(channelType, participantState, null);
+    }
+
+    public void setChannelType(BaseChannel.ChannelType channelType, GroupChannelListQuery.ParticipantState participantState, ChannelAdapter.ChannelComparator comparator) {
+        adapter.setChannelType(channelType, participantState, comparator);
     }
 
     public void setChannelClickListener(ChannelAdapter.ChannelClickedListener channelClickListener) {
