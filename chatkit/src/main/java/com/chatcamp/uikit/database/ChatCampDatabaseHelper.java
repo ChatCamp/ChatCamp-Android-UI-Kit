@@ -207,7 +207,7 @@ public class ChatCampDatabaseHelper extends SQLiteOpenHelper {
                         values.put(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP,
                                 groupChannels.get(i).serialize());
                         sqliteDatabase.update(ChatCampDatabaseContract.GroupEntry.TABLE_NAME, values,
-                                ChatCampDatabaseContract.GroupEntry._ID + "=?", new String[]{groupChannel.getId()});
+                                ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP_ID + "=?", new String[]{groupChannel.getId()});
                     }
                 }
             }

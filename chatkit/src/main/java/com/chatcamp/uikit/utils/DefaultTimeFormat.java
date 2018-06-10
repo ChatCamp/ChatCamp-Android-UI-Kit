@@ -27,14 +27,14 @@ public class DefaultTimeFormat implements TimeFormat {
         }
 
         long now = Calendar.getInstance().getTimeInMillis();
-        if (time > now || time <= 0) {
+        if (time <= 0) {
             timeString = "";
             textView.setText(timeString);
             return;
         }
 
         // TODO: localize
-        final long diff = now - time;
+        final long diff = Math.abs(now - time);
         if (diff < MINUTE_MILLIS) {
             timeString = "just now";
         } else if (diff < 2 * MINUTE_MILLIS) {
