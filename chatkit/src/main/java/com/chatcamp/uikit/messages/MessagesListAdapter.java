@@ -511,10 +511,12 @@ public class MessagesListAdapter
             return VIEW_TYPE_FOOTER;
         }
         Message message = getItem(position);
-        boolean isMe = message.getUser().getId().equals(ChatCamp.getCurrentUser().getId());
-        for (MessageFactory messageFactory : messageFactories) {
-            if (messageFactory.isBindable(message)) {
-                return isMe ? factoryMyViewTypeMap.get(messageFactory) : factoryTheirViewTypeMap.get(messageFactory);
+        if(message.getUser() != null) {
+            boolean isMe = message.getUser().getId().equals(ChatCamp.getCurrentUser().getId());
+            for (MessageFactory messageFactory : messageFactories) {
+                if (messageFactory.isBindable(message)) {
+                    return isMe ? factoryMyViewTypeMap.get(messageFactory) : factoryTheirViewTypeMap.get(messageFactory);
+                }
             }
         }
         return -1;

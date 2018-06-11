@@ -34,6 +34,7 @@ import io.chatcamp.sdk.ChatCamp;
 import io.chatcamp.sdk.ChatCampException;
 import io.chatcamp.sdk.GroupChannel;
 import io.chatcamp.sdk.GroupChannelListQuery;
+import io.chatcamp.sdk.Message;
 import io.chatcamp.sdk.OpenChannel;
 import io.chatcamp.sdk.OpenChannelListQuery;
 import io.chatcamp.sdk.Participant;
@@ -55,6 +56,8 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
     private ImageLoader imageLoader;
     private ChatCampDatabaseHelper chatCampDatabaseHelper;
     private TimeFormat timeFormat;
+    private GroupChannelListQuery.ParticipantState participantState;
+    private BaseChannel.ChannelType channelType;
 
     public ChannelAdapter(Context context) {
         dataset = new ArrayList<>();
@@ -86,8 +89,55 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
         this.timeFormat = timeFormat;
     }
 
-    public void setChannelType(BaseChannel.ChannelType channelType, final GroupChannelListQuery.ParticipantState participantState,
+    public void setChannelType(final BaseChannel.ChannelType channelType, final GroupChannelListQuery.ParticipantState participantState,
                                ChannelComparator comparator) {
+        this.participantState = participantState;
+        this.channelType = channelType;
+
+        ChatCamp.addChannelListener("", new ChatCamp.ChannelListener() {
+            @Override
+            public void onOpenChannelMessageReceived(OpenChannel openChannel, Message message) {
+
+            }
+
+            @Override
+            public void onGroupChannelMessageReceived(GroupChannel groupChannel, Message message) {
+
+            }
+
+            @Override
+            public void onGroupChannelUpdated(GroupChannel groupChannel) {
+                if (channelType == BaseChannel.ChannelType.GROUP) {
+                    for (int i = 0; i < dataset.size(); ++i) {
+                        if (dataset.get(i).getId().equals(groupChannel.getId())) {
+                            dataset.set(i, groupChannel);
+                            chatCampDatabaseHelper.addGroupChannel(groupChannel);
+                            notifyItemChanged(i);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onGroupChannelTypingStatusChanged(GroupChannel groupChannel) {
+
+            }
+
+            @Override
+            public void onOpenChannelTypingStatusChanged(OpenChannel openChannel) {
+
+            }
+
+            @Override
+            public void onGroupChannelReadStatusUpdated(GroupChannel groupChannel) {
+
+            }
+
+            @Override
+            public void onOpenChannelReadStatusUpdated(OpenChannel openChannel) {
+
+            }
+        });
 
         if (comparator == null) {
             comparator = new LastMessageChannelComparator();
