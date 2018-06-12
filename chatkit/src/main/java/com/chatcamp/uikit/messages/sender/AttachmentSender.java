@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import java.io.File;
 
 import io.chatcamp.sdk.BaseChannel;
+import io.chatcamp.sdk.ChatCampException;
 import io.chatcamp.sdk.GroupChannel;
 
 /**
@@ -28,7 +29,7 @@ public abstract class AttachmentSender {
 
         void onUploadSuccess();
 
-        void onUploadFailed();
+        void onUploadFailed(ChatCampException error);
     }
 
     public AttachmentSender(@NonNull BaseChannel channel, @NonNull String title, @NonNull @DrawableRes int drawableRes) {
@@ -77,10 +78,17 @@ public abstract class AttachmentSender {
                     @Override
                     public void onUploadFailed(Throwable error) {
                         if (uploadListener != null) {
-                            uploadListener.onUploadFailed();
+                            ChatCampException exception = new ChatCampException(error.getMessage(), "FILE UPLOAD FAILED");
+                            uploadListener.onUploadFailed(exception);
                         }
                     }
                 });
+    }
+
+    protected void sendAttachmentError(ChatCampException e) {
+        if(uploadListener != null) {
+            uploadListener.onUploadFailed(e);
+        }
     }
 
     public void onRequestPermissionsResult(int requestCode, String[] permissions,

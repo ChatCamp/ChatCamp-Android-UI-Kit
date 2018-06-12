@@ -29,6 +29,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import io.chatcamp.sdk.BaseChannel;
+import io.chatcamp.sdk.ChatCampException;
 
 /**
  * Created by shubhamdhabhai on 18/04/18.
@@ -56,6 +57,8 @@ public class CameraAttachmentSender extends AttachmentSender {
 
         Context context = Utils.getContext(objectWeakReference.get());
         if (context == null) {
+            ChatCampException exception = new ChatCampException("Context is null", "CAMERA FILE UPLOAD ERROR");
+            sendAttachmentError(exception);
             return;
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN && ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -86,10 +89,14 @@ public class CameraAttachmentSender extends AttachmentSender {
         try {
             Context context = Utils.getContext(objectWeakReference.get());
             if (context == null) {
+                ChatCampException exception = new ChatCampException("Context is null", "CAMERA FILE UPLOAD ERROR");
+                sendAttachmentError(exception);
                 return;
             }
             File file = createImageFile();
             if (file == null) {
+                ChatCampException exception = new ChatCampException("File is null", "CAMERA FILE UPLOAD ERROR");
+                sendAttachmentError(exception);
                 return;
             }
             //TODO take care of this file provider
@@ -105,6 +112,8 @@ public class CameraAttachmentSender extends AttachmentSender {
             Utils.startActivityForResult(chooserIntent, CAPTURE_MEDIA_RESULT_CODE, objectWeakReference.get());
         } catch (IOException e) {
             e.printStackTrace();
+            ChatCampException exception = new ChatCampException(e.getMessage(), "CAMERA FILE UPLOAD ERROR");
+            sendAttachmentError(exception);
         }
     }
 
@@ -112,6 +121,8 @@ public class CameraAttachmentSender extends AttachmentSender {
         // Create an image file name
         Context context = Utils.getContext(objectWeakReference.get());
         if (context == null) {
+            ChatCampException exception = new ChatCampException("Context is null", "CAMERA FILE UPLOAD ERROR");
+            sendAttachmentError(exception);
             return null;
         }
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -144,6 +155,8 @@ public class CameraAttachmentSender extends AttachmentSender {
     private void uploadFile(Uri uri) {
         Context context = Utils.getContext(objectWeakReference.get());
         if (context == null) {
+            ChatCampException exception = new ChatCampException("Context is null", "CAMERA FILE UPLOAD ERROR");
+            sendAttachmentError(exception);
             return;
         }
         String path = FileUtils.getPath(context, uri);
@@ -159,6 +172,9 @@ public class CameraAttachmentSender extends AttachmentSender {
             contentType = context.getContentResolver().getType(uri);
         }
         if (TextUtils.isEmpty(contentType)) {
+            Log.e("CameraAttachmentSender", "content type is empty");
+            ChatCampException exception = new ChatCampException("content type is empty", "CAMERA FILE UPLOAD ERROR");
+            sendAttachmentError(exception);
             return;
         }
         if (contentType.contains("image")) {
@@ -166,13 +182,18 @@ public class CameraAttachmentSender extends AttachmentSender {
             try {
                 File compressedFile = createImageFile();
                 if (compressedFile == null) {
+                    Log.e("CameraAttachmentSender", "Error compressing file.");
+                    ChatCampException exception = new ChatCampException("Error compressing file", "CAMERA FILE UPLOAD ERROR");
+                    sendAttachmentError(exception);
                     return;
                 }
                 Bitmap bitmap = decodeSampledBitmapFromFile(path, 1280, 800);
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, new FileOutputStream(compressedFile));
                 file = compressedFile;
             } catch (Throwable t) {
-                Log.e("ERROR", "Error compressing file." + t.toString());
+                Log.e("CameraAttachmentSender", "Error compressing file." + t.toString());
+                ChatCampException exception = new ChatCampException("Error compressing file." + t.toString(), "CAMERA FILE UPLOAD ERROR");
+                sendAttachmentError(exception);
                 t.printStackTrace();
             }
         } else {

@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.chatcamp.uikit.utils.FileUtils;
 import com.chatcamp.uikit.utils.Utils;
@@ -19,6 +20,7 @@ import java.io.File;
 import java.lang.ref.WeakReference;
 
 import io.chatcamp.sdk.BaseChannel;
+import io.chatcamp.sdk.ChatCampException;
 
 /**
  * Created by shubhamdhabhai on 18/04/18.
@@ -45,6 +47,8 @@ public class FileAttachmentSender extends AttachmentSender {
     public void clickSend() {
         Context context = Utils.getContext(objectWeakReference.get());
         if (context == null) {
+            ChatCampException exception = new ChatCampException("Context is null", "FILE UPLOAD ERROR");
+            sendAttachmentError(exception);
             return;
         }
 
@@ -87,10 +91,15 @@ public class FileAttachmentSender extends AttachmentSender {
     private void uploadFile(Uri uri) {
         Context context = Utils.getContext(objectWeakReference.get());
         if (context == null) {
+            ChatCampException exception = new ChatCampException("Context is null", "FILE UPLOAD ERROR");
+            sendAttachmentError(exception);
             return;
         }
         String path = FileUtils.getPath(context, uri);
         if (TextUtils.isEmpty(path)) {
+            Log.e("FileAttachmentSender", "File path is null");
+            ChatCampException exception = new ChatCampException("File Path is null", "FILE UPLOAD ERROR");
+            sendAttachmentError(exception);
             return;
         }
         String fileName = FileUtils.getFileName(context, uri);

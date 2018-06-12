@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import io.chatcamp.sdk.BaseChannel;
+import io.chatcamp.sdk.ChatCampException;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -56,6 +57,8 @@ public class GalleryAttachmentSender extends AttachmentSender {
     public void clickSend() {
         Context context = Utils.getContext(objectWeakReference.get());
         if (context == null) {
+            ChatCampException exception = new ChatCampException("Context is null", "GALLERY UPLOAD ERROR");
+            sendAttachmentError(exception);
             return;
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN && ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -100,10 +103,14 @@ public class GalleryAttachmentSender extends AttachmentSender {
             if (requestCode == PICK_MEDIA_RESULT_CODE) {
                 Uri uri = dataFile.getData();
                 if (uri == null) {
+                    ChatCampException exception = new ChatCampException("Picked file is not valid", "GALLERY UPLOAD ERROR");
+                    sendAttachmentError(exception);
                     return;
                 }
                 Context context = Utils.getContext(objectWeakReference.get());
                 if (context == null) {
+                    ChatCampException exception = new ChatCampException("Context is null", "GALLERY UPLOAD ERROR");
+                    sendAttachmentError(exception);
                     return;
                 }
                 Intent intent = new Intent(context, MediaPreviewActivity.class);
@@ -119,15 +126,22 @@ public class GalleryAttachmentSender extends AttachmentSender {
     private void uploadFile(Uri uri) {
         Context context = Utils.getContext(objectWeakReference.get());
         if (context == null) {
+            ChatCampException exception = new ChatCampException("Context is null", "GALLERY UPLOAD ERROR");
+            sendAttachmentError(exception);
             return;
         }
         String path = FileUtils.getPath(context, uri);
         if (TextUtils.isEmpty(path)) {
+            Log.e("GalleryAttachmentSender", "File path is null");
+            ChatCampException exception = new ChatCampException("File path is null", "GALLERY UPLOAD ERROR");
+            sendAttachmentError(exception);
             return;
         }
         String fileName = FileUtils.getFileName(context, uri);
         String contentType = context.getContentResolver().getType(uri);
         if (TextUtils.isEmpty(contentType)) {
+            ChatCampException exception = new ChatCampException("File content type is null", "GALLERY UPLOAD ERROR");
+            sendAttachmentError(exception);
             return;
         }
         File file;
@@ -135,12 +149,18 @@ public class GalleryAttachmentSender extends AttachmentSender {
             file = new File(path);
             try {
                 File compressedFile = createImageFile();
-                if(compressedFile == null) return;
+                if (compressedFile == null) {
+                    ChatCampException exception = new ChatCampException("Error compressing image", "GALLERY UPLOAD ERROR");
+                    sendAttachmentError(exception);
+                    return;
+                }
                 Bitmap bitmap = decodeSampledBitmapFromFile(path, 1280, 800);
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, new FileOutputStream(compressedFile));
                 file = compressedFile;
             } catch (Throwable t) {
                 Log.e("ERROR", t.toString());
+                ChatCampException exception = new ChatCampException(t.toString(), "GALLERY UPLOAD ERROR");
+                sendAttachmentError(exception);
                 t.printStackTrace();
             }
         } else {
@@ -153,6 +173,8 @@ public class GalleryAttachmentSender extends AttachmentSender {
         // Create an image file name
         Context context = Utils.getContext(objectWeakReference.get());
         if (context == null) {
+            ChatCampException exception = new ChatCampException("Context is null", "GALLERY UPLOAD ERROR");
+            sendAttachmentError(exception);
             return null;
         }
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
