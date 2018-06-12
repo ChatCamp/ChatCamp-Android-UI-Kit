@@ -28,6 +28,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -149,6 +150,13 @@ public class MessagesListAdapter
         previousMessageListQuery.load(20, true, new PreviousMessageListQuery.ResultListener() {
             @Override
             public void onResult(List<Message> list, ChatCampException e) {
+                //TODO handle announcements
+                Iterator<Message> iterator = list.iterator();
+                while (iterator.hasNext()) {
+                    if(iterator.next().getType().equals("announcement")) {
+                        iterator.remove();
+                    }
+                }
                 if (loadingFirstTime) {
                     items.clear();
                     items.addAll(list);
@@ -178,6 +186,10 @@ public class MessagesListAdapter
             @Override
             public void onGroupChannelMessageReceived(GroupChannel groupChannel, Message message) {
                 if (groupChannel.getId().equals(channel.getId())) {
+                    //TODO handle announcements
+                    if(message.getType().equals("announcement")) {
+                        return;
+                    }
                     items.add(0, message);
                     databaseHelper.addMessage(message, channel.getId(), channel.isGroupChannel()
                             ? BaseChannel.ChannelType.GROUP : BaseChannel.ChannelType.OPEN);
