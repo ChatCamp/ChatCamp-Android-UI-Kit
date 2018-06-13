@@ -8,6 +8,7 @@ import android.os.Looper;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,6 +42,8 @@ import io.chatcamp.sdk.OpenChannel;
 import io.chatcamp.sdk.Participant;
 import io.chatcamp.sdk.PreviousMessageListQuery;
 
+import static android.view.View.VISIBLE;
+
 /**
  * Adapter for {@link MessagesList}.
  */
@@ -50,7 +53,7 @@ public class MessagesListAdapter
         implements RecyclerScrollMoreListener.OnLoadMoreListener {
 
     private static final int VIEW_TYPE_FOOTER = 0;
-    private static final String CHANNEL_LISTENER = "channel_listener";
+    private static final String CHANNEL_LISTENER = "message_list_channel_listener";
 
     private List<Message> items;
 
@@ -99,6 +102,10 @@ public class MessagesListAdapter
         super.onAttachedToRecyclerView(recyclerView);
     }
 
+    private void removeChannelListener() {
+        ChatCamp.removeChannelListener(CHANNEL_LISTENER);
+    }
+
     public void addMessageFactories(MessageFactory... messageFactories) {
         for (MessageFactory messageFactory : messageFactories) {
             messageFactory.setMessageStyle(messagesListStyle);
@@ -132,7 +139,14 @@ public class MessagesListAdapter
         }
         //TODO get the number of message from client
         loadMessages();
-        addChannelListener();
+    }
+
+    public void onWindowVisibilityChanged(int visibility) {
+        if(visibility == VISIBLE) {
+            addChannelListener();
+        } else {
+            removeChannelListener();
+        }
     }
 
     public void setAvatarImageLoader(ImageLoader imageLoader) {
@@ -185,6 +199,9 @@ public class MessagesListAdapter
 
             @Override
             public void onGroupChannelMessageReceived(GroupChannel groupChannel, Message message) {
+                if(channel == null) {
+                    return;
+                }
                 if (groupChannel.getId().equals(channel.getId())) {
                     //TODO handle announcements
                     if(message.getType().equals("announcement")) {
@@ -215,6 +232,9 @@ public class MessagesListAdapter
 
             @Override
             public void onGroupChannelTypingStatusChanged(GroupChannel groupChannel) {
+                if(channel == null) {
+                    return;
+                }
                 //TODO use same method for open and group channel
                 List<Participant> typingParticipants = groupChannel.getTypingParticipants();
                 boolean isTyping;
@@ -605,7 +625,6 @@ public class MessagesListAdapter
         d2.setTime(t2 * 1000);
         return (d1.getYear() != d2.getYear()) || (d1.getMonth() != d2.getMonth()) || (d1.getDay() != d2.getDay());
     }
-
 
     private static class Cluster {
         public boolean dateBoundaryWithPrevious;
