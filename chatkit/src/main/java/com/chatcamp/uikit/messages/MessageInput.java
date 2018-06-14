@@ -233,6 +233,9 @@ public class MessageInput extends RelativeLayout
         for (AttachmentSender attachmentSender : attachmentSenderList) {
             attachmentSender.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
+        if(voiceSender != null) {
+            voiceSender.onRequestPermissionsResult(requestCode, permissions,grantResults);
+        }
     }
 
     private void init(Context context, AttributeSet attrs) {

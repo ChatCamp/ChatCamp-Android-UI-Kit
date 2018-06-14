@@ -11,6 +11,7 @@ import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.chatcamp.uikit.utils.Utils;
@@ -80,10 +81,13 @@ public class VoiceSender extends AttachmentSender {
     }
 
     private void stopRecording() {
-        recorder.stop();
-        recorder.release();
-        recorder = null;
-        File file = new File(currentAudioFile);
+        if(recorder != null) {
+            recorder.stop();
+            recorder.release();
+            recorder = null;
+        }
+        if(!TextUtils.isEmpty(currentAudioFile)) {
+            File file = new File(currentAudioFile);
 //        MediaPlayer mediaPlayer = new MediaPlayer();
 //        try {
 //            mediaPlayer.setDataSource(currentAudioFile);
@@ -92,7 +96,8 @@ public class VoiceSender extends AttachmentSender {
 //        } catch (IOException e) {
 //            Log.e("sdsf", "prepare() failed");
 //        }
-        sendAttachment(file, file.getName(), "audio/mp3");
+            sendAttachment(file, file.getName(), "audio/mp3");
+        }
     }
 
     private void startAudioRecording() {
