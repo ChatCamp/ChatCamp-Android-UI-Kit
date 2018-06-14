@@ -21,6 +21,7 @@ import com.chatcamp.uikit.R;
 import com.chatcamp.uikit.commons.ImageLoader;
 import com.chatcamp.uikit.database.ChatCampDatabaseHelper;
 import com.chatcamp.uikit.messages.messagetypes.MessageFactory;
+import com.chatcamp.uikit.messages.messagetypes.VoiceMessageFactory;
 import com.chatcamp.uikit.messages.typing.TypingFactory;
 import com.chatcamp.uikit.utils.CircleTransform;
 import com.chatcamp.uikit.utils.DateFormatter;
@@ -146,6 +147,12 @@ public class MessagesListAdapter
             addChannelListener();
         } else {
             removeChannelListener();
+            //TODO find a more elegant solution
+            for(MessageFactory messageFactory : messageFactories) {
+                if(messageFactory instanceof VoiceMessageFactory) {
+                    ((VoiceMessageFactory)messageFactory).freeResources();
+                }
+            }
         }
     }
 
