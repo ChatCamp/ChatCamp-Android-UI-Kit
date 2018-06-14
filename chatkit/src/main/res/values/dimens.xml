@@ -7,6 +7,9 @@
     <dimen name="input_padding_right">16sp</dimen>
     <dimen name="input_padding_top">8sp</dimen>
     <dimen name="input_padding_bottom">8sp</dimen>
+    <dimen name="voice_message_button_width">36dp</dimen>
+    <dimen name="voice_message_button_height">36dp</dimen>
+    <dimen name="voice_message_margin">16dp</dimen>
 
     <dimen name="message_bubble_corners_radius">15dp</dimen>
     <dimen name="message_avatar_corners_radius">100dp</dimen>

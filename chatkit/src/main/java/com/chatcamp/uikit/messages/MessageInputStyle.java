@@ -66,6 +66,22 @@ class MessageInputStyle extends Style {
     private int inputDefaultPaddingTop;
     private int inputDefaultPaddingBottom;
 
+    private int voiceMessageButtonBackground;
+    private int voiceMessageButtonDefaultBgColor;
+    private int voiceMessageButtonDefaultBgPressedColor;
+    private int voiceMessageButtonDefaultBgDisabledColor;
+
+    private int voiceMessageButtonIcon;
+    private int voiceMessageButtonMuteIcon;
+    private int voiceMessageButtonDefaultIconColor;
+    private int voiceMessageButtonDefaultIconPressedColor;
+    private int voiceMessageButtonDefaultIconDisabledColor;
+
+    private int voiceMessageButtonWidth;
+    private int voiceMessageButtonHeight;
+    private int voiceMessageButtonMargin;
+    private boolean showVoiceMessageButton;
+
     static MessageInputStyle parse(Context context, AttributeSet attrs) {
         MessageInputStyle style = new MessageInputStyle(context, attrs);
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MessageInput);
@@ -122,6 +138,28 @@ class MessageInputStyle extends Style {
 
         style.inputBackground = typedArray.getDrawable(R.styleable.MessageInput_inputBackground);
         style.inputCursorDrawable = typedArray.getDrawable(R.styleable.MessageInput_inputCursorDrawable);
+
+        style.voiceMessageButtonBackground = typedArray.getResourceId(R.styleable.MessageInput_voiceMessageButtonBackground, -1);
+        style.voiceMessageButtonDefaultBgColor = typedArray.getColor(R.styleable.MessageInput_voiceMessageButtonDefaultBgColor,
+                style.getColor(R.color.cornflower_blue_two));
+        style.voiceMessageButtonDefaultBgPressedColor = typedArray.getColor(R.styleable.MessageInput_voiceMessageButtonDefaultBgPressedColor,
+                style.getColor(R.color.cornflower_blue_two_dark));
+        style.voiceMessageButtonDefaultBgDisabledColor = typedArray.getColor(R.styleable.MessageInput_voiceMessageButtonDefaultBgDisabledColor,
+                style.getColor(R.color.white_four));
+
+        style.voiceMessageButtonIcon = typedArray.getResourceId(R.styleable.MessageInput_voiceMessageButtonIcon, -1);
+        style.voiceMessageButtonMuteIcon = typedArray.getResourceId(R.styleable.MessageInput_voiceMessageButtonMuteIcon, -1);
+        style.voiceMessageButtonDefaultIconColor = typedArray.getColor(R.styleable.MessageInput_voiceMessageButtonDefaultIconColor,
+                style.getColor(R.color.white));
+        style.voiceMessageButtonDefaultIconPressedColor = typedArray.getColor(R.styleable.MessageInput_voiceMessageButtonDefaultIconPressedColor,
+                style.getColor(R.color.white));
+        style.voiceMessageButtonDefaultIconDisabledColor = typedArray.getColor(R.styleable.MessageInput_voiceMessageButtonDefaultIconDisabledColor,
+                style.getColor(R.color.warm_grey));
+
+        style.voiceMessageButtonWidth = typedArray.getDimensionPixelSize(R.styleable.MessageInput_voiceMessageButtonWidth, style.getDimension(R.dimen.input_button_width));
+        style.voiceMessageButtonHeight = typedArray.getDimensionPixelSize(R.styleable.MessageInput_voiceMessageButtonHeight, style.getDimension(R.dimen.input_button_height));
+        style.voiceMessageButtonMargin = typedArray.getDimensionPixelSize(R.styleable.MessageInput_voiceMessageButtonMargin, style.getDimension(R.dimen.input_button_margin));
+        style.showVoiceMessageButton = typedArray.getBoolean(R.styleable.MessageInput_showVoiceMessageButton, false);
 
         typedArray.recycle();
 
@@ -264,6 +302,73 @@ class MessageInputStyle extends Style {
 
     protected int getInputDefaultPaddingBottom() {
         return inputDefaultPaddingBottom;
+    }
+
+    public Drawable getVoiceMessageButtonBackground() {
+        if (inputButtonBackground == -1) {
+            return getSelector(inputButtonDefaultBgColor, inputButtonDefaultBgPressedColor,
+                    inputButtonDefaultBgDisabledColor, R.drawable.mask);
+        } else {
+            return getDrawable(inputButtonBackground);
+        }
+    }
+
+    public int getVoiceMessageButtonDefaultBgColor() {
+        return voiceMessageButtonDefaultBgColor;
+    }
+
+    public int getVoiceMessageButtonDefaultBgPressedColor() {
+        return voiceMessageButtonDefaultBgPressedColor;
+    }
+
+    public int getVoiceMessageButtonDefaultBgDisabledColor() {
+        return voiceMessageButtonDefaultBgDisabledColor;
+    }
+
+    public Drawable getVoiceMessageButtonIcon() {
+        if (voiceMessageButtonIcon == -1) {
+            return getSelector(inputButtonDefaultIconColor, inputButtonDefaultIconPressedColor,
+                    inputButtonDefaultIconDisabledColor, R.drawable.ic_mic);
+        } else {
+            return getDrawable(voiceMessageButtonIcon);
+        }
+    }
+
+    public Drawable getVoiceMessageButtonMuteIcon() {
+        if (voiceMessageButtonMuteIcon == -1) {
+            return getSelector(inputButtonDefaultIconColor, inputButtonDefaultIconPressedColor,
+                    inputButtonDefaultIconDisabledColor, R.drawable.ic_mic_mute);
+        } else {
+            return getDrawable(voiceMessageButtonMuteIcon);
+        }
+    }
+
+    public int getVoiceMessageButtonDefaultIconColor() {
+        return voiceMessageButtonDefaultIconColor;
+    }
+
+    public int getVoiceMessageButtonDefaultIconPressedColor() {
+        return voiceMessageButtonDefaultIconPressedColor;
+    }
+
+    public int getVoiceMessageButtonDefaultIconDisabledColor() {
+        return voiceMessageButtonDefaultIconDisabledColor;
+    }
+
+    public int getVoiceMessageButtonWidth() {
+        return voiceMessageButtonWidth;
+    }
+
+    public int getVoiceMessageButtonHeight() {
+        return voiceMessageButtonHeight;
+    }
+
+    public int getVoiceMessageButtonMargin() {
+        return voiceMessageButtonMargin;
+    }
+
+    public boolean isShowVoiceMessageButton() {
+        return showVoiceMessageButton;
     }
 
 }

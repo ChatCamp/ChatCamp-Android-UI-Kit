@@ -9,6 +9,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import com.chatcamp.uikit.commons.ImageLoader;
 import com.chatcamp.uikit.messages.messagetypes.MessageFactory;
@@ -115,5 +116,11 @@ public class MessagesList extends RecyclerView {
                                            int[] grantResults) {
         adapter.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
+    }
+
+    @Override
+    protected void onWindowVisibilityChanged(int visibility) {
+        super.onWindowVisibilityChanged(visibility);
+        adapter.onWindowVisibilityChanged(visibility);
     }
 }

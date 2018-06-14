@@ -7,6 +7,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.util.AttributeSet;
+import android.view.ViewAnimationUtils;
 
 import com.chatcamp.uikit.commons.ImageLoader;
 
@@ -81,5 +82,11 @@ public class ChannelList extends RecyclerView {
 
     private void parseStyle(Context context, AttributeSet attrs) {
         channelListStyle = ChannelListStyle.parseStyle(context, attrs);
+    }
+
+    @Override
+    protected void onWindowVisibilityChanged(int visibility) {
+        super.onWindowVisibilityChanged(visibility);
+        adapter.onWindowVisibilityChanged(visibility);
     }
 }

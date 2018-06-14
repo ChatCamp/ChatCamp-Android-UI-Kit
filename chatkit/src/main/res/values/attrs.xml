@@ -42,6 +42,22 @@
 
         <attr name="inputBackground" format="reference"/>
         <attr name="inputCursorDrawable" format="reference"/>
+
+        <attr name="voiceMessageButtonBackground" format="reference"/>
+        <attr name="voiceMessageButtonDefaultBgColor" format="color|reference"/>
+        <attr name="voiceMessageButtonDefaultBgPressedColor" format="color|reference"/>
+        <attr name="voiceMessageButtonDefaultBgDisabledColor" format="color|reference"/>
+
+        <attr name="voiceMessageButtonIcon" format="reference"/>
+        <attr name="voiceMessageButtonMuteIcon" format="reference"/>
+        <attr name="voiceMessageButtonDefaultIconColor" format="color|reference"/>
+        <attr name="voiceMessageButtonDefaultIconPressedColor" format="color|reference"/>
+        <attr name="voiceMessageButtonDefaultIconDisabledColor" format="color|reference"/>
+
+        <attr name="voiceMessageButtonMargin" format="dimension|reference"/>
+        <attr name="voiceMessageButtonWidth" format="dimension|reference"/>
+        <attr name="voiceMessageButtonHeight" format="dimension|reference"/>
+        <attr name="showVoiceMessageButton" format="boolean"/>
     </declare-styleable>
 
     <attr name="MessagesList" format="reference"/>

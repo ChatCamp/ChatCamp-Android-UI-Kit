@@ -25,6 +25,7 @@ import com.chatcamp.uikit.R;
 import com.chatcamp.uikit.messages.sender.AttachmentSender;
 import com.chatcamp.uikit.messages.sender.DefaultTextSender;
 import com.chatcamp.uikit.messages.sender.TextSender;
+import com.chatcamp.uikit.messages.sender.VoiceSender;
 
 import org.apmem.tools.layouts.FlowLayout;
 
@@ -45,6 +46,7 @@ public class MessageInput extends RelativeLayout
     protected ImageButton messageSendButton;
     protected ImageButton attachmentButton;
     protected Space sendButtonSpace, attachmentButtonSpace;
+    protected ImageButton voiceMessageSendButton;
 
     private CharSequence input;
     private AttachmentsListener attachmentsListener;
@@ -55,6 +57,11 @@ public class MessageInput extends RelativeLayout
     private TextSender textSender;
     private List<AttachmentSender> attachmentSenderList;
     private OnSendCLickedListener sendClickListener;
+
+    private VoiceSender voiceSender;
+
+    private boolean isRecording;
+    private MessageInputStyle style;
 
     public MessageInput(Context context) {
         super(context);
@@ -99,6 +106,10 @@ public class MessageInput extends RelativeLayout
         return messageSendButton;
     }
 
+    public ImageButton getVoiceMessageSendButton() {
+        return voiceMessageSendButton;
+    }
+
     @Override
     public void onClick(View view) {
         int id = view.getId();
@@ -108,6 +119,15 @@ public class MessageInput extends RelativeLayout
             }
             textSender.sendMessage(input.toString());
             messageInput.setText("");
+        } else if (id == R.id.voiceMessageSendButton) {
+            if(!isRecording) {
+                voiceSender.startRecording();
+                voiceMessageSendButton.setImageDrawable(style.getVoiceMessageButtonMuteIcon());
+            } else {
+                voiceSender.clickSend();
+                voiceMessageSendButton.setImageDrawable(style.getVoiceMessageButtonIcon());
+            }
+            isRecording = !isRecording;
         } else if (id == R.id.attachmentButton) {
             boolean continueExecution = true;
             if (attachmentsListener != null) {
@@ -189,6 +209,10 @@ public class MessageInput extends RelativeLayout
         this.textSender = textSender;
     }
 
+    public void setVoiceSender(@NonNull VoiceSender voiceSender) {
+        this.voiceSender = voiceSender;
+    }
+
     public void setAttachmentSenderList(List<AttachmentSender> attachmentSenderList) {
         this.attachmentSenderList = attachmentSenderList;
     }
@@ -213,7 +237,7 @@ public class MessageInput extends RelativeLayout
 
     private void init(Context context, AttributeSet attrs) {
         init(context);
-        MessageInputStyle style = MessageInputStyle.parse(context, attrs);
+        style = MessageInputStyle.parse(context, attrs);
 
         this.messageInput.setMaxLines(style.getInputMaxLines());
         this.messageInput.setHint(style.getInputHint());
@@ -239,6 +263,11 @@ public class MessageInput extends RelativeLayout
         ViewCompat.setBackground(messageSendButton, style.getInputButtonBackground());
         this.sendButtonSpace.getLayoutParams().width = style.getInputButtonMargin();
 
+        this.voiceMessageSendButton.setImageDrawable(style.getVoiceMessageButtonIcon());
+        this.voiceMessageSendButton.getLayoutParams().width = style.getInputButtonWidth();
+        this.voiceMessageSendButton.getLayoutParams().height = style.getInputButtonHeight();
+        ViewCompat.setBackground(voiceMessageSendButton, style.getInputButtonBackground());
+
         if (getPaddingLeft() == 0
                 && getPaddingRight() == 0
                 && getPaddingTop() == 0
@@ -260,9 +289,11 @@ public class MessageInput extends RelativeLayout
         attachmentButton = (ImageButton) findViewById(R.id.attachmentButton);
         sendButtonSpace = (Space) findViewById(R.id.sendButtonSpace);
         attachmentButtonSpace = (Space) findViewById(R.id.attachmentButtonSpace);
+        voiceMessageSendButton =  findViewById(R.id.voiceMessageSendButton);
 
         messageSendButton.setOnClickListener(this);
         attachmentButton.setOnClickListener(this);
+        voiceMessageSendButton.setOnClickListener(this);
         messageInput.addTextChangedListener(this);
         messageInput.setText("");
     }
@@ -305,5 +336,13 @@ public class MessageInput extends RelativeLayout
 
     public interface OnSendCLickedListener {
         void onSendClicked(String text);
+    }
+
+    @Override
+    protected void onWindowVisibilityChanged(int visibility) {
+        super.onWindowVisibilityChanged(visibility);
+        if(visibility != VISIBLE) {
+            voiceSender.freeResources();
+        }
     }
 }

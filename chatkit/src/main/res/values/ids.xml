@@ -14,6 +14,7 @@
     <item name="attachmentButtonSpace" type="id" />
     <item name="sendButtonSpace" type="id" />
     <item name="messageInput" type="id" />
+    <item name="voiceMessageSendButton" type="id" />
 
     <!-- DIALOGS LIST ITEM -->
     <item name="dialogRootLayout" type="id" />
@@ -26,5 +27,7 @@
     <item name="dialogLastMessageUserAvatar" type="id" />
     <item name="dialogDividerContainer" type="id" />
     <item name="dialogDivider" type="id" />
+    <item name="seekbar" type="id" />
+    <item name="message" type="id" />
 
 </resources>

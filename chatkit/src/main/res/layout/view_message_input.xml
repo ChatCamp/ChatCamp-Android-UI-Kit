@@ -36,11 +36,19 @@
         android:layout_toStartOf="@id/messageSendButton"/>
 
     <ImageButton
+        android:id="@id/voiceMessageSendButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@id/messageSendButton"
+        android:layout_toStartOf="@id/messageSendButton"
+        android:layout_centerVertical="true" />
+
+    <ImageButton
         android:id="@id/messageSendButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"/>
+        android:layout_centerVertical="true" />
 
 </merge>

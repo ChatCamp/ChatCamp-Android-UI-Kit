@@ -39,11 +39,16 @@ import io.chatcamp.sdk.OpenChannel;
 import io.chatcamp.sdk.OpenChannelListQuery;
 import io.chatcamp.sdk.Participant;
 
+import static android.view.View.VISIBLE;
+import static android.view.View.resolveSize;
+
 /**
  * Created by shubhamdhabhai on 18/05/18.
  */
 
 public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelViewHolder> {
+
+    private static final String CHANNEL_LISTENER = "channel_list_channel_listener";
 
     public interface ChannelClickedListener {
         void onClick(BaseChannel baseChannel);
@@ -77,24 +82,17 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
         notifyDataSetChanged();
     }
 
-    public void setChannelClickedListener(ChannelClickedListener channelClickedListener) {
-        this.channelClickedListener = channelClickedListener;
+    public void onWindowVisibilityChanged(int visibility) {
+        if(visibility == VISIBLE) {
+            addChannelListener();
+        } else {
+            removeChannelListener();
+        }
+
     }
 
-    public void setChannelType(BaseChannel.ChannelType channelType, GroupChannelListQuery.ParticipantState participantState) {
-        setChannelType(channelType, participantState, null);
-    }
-
-    public void setTimeFormat(TimeFormat timeFormat) {
-        this.timeFormat = timeFormat;
-    }
-
-    public void setChannelType(final BaseChannel.ChannelType channelType, final GroupChannelListQuery.ParticipantState participantState,
-                               ChannelComparator comparator) {
-        this.participantState = participantState;
-        this.channelType = channelType;
-
-        ChatCamp.addChannelListener("", new ChatCamp.ChannelListener() {
+    private void addChannelListener() {
+        ChatCamp.addChannelListener(CHANNEL_LISTENER, new ChatCamp.ChannelListener() {
             @Override
             public void onOpenChannelMessageReceived(OpenChannel openChannel, Message message) {
 
@@ -107,6 +105,9 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
 
             @Override
             public void onGroupChannelUpdated(GroupChannel groupChannel) {
+                if(channelType == null) {
+                    return;
+                }
                 if (channelType == BaseChannel.ChannelType.GROUP) {
                     for (int i = 0; i < dataset.size(); ++i) {
                         if (dataset.get(i).getId().equals(groupChannel.getId())) {
@@ -138,6 +139,28 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
 
             }
         });
+    }
+
+    private void removeChannelListener() {
+        ChatCamp.removeChannelListener(CHANNEL_LISTENER);
+    }
+
+    public void setChannelClickedListener(ChannelClickedListener channelClickedListener) {
+        this.channelClickedListener = channelClickedListener;
+    }
+
+    public void setChannelType(BaseChannel.ChannelType channelType, GroupChannelListQuery.ParticipantState participantState) {
+        setChannelType(channelType, participantState, null);
+    }
+
+    public void setTimeFormat(TimeFormat timeFormat) {
+        this.timeFormat = timeFormat;
+    }
+
+    public void setChannelType(final BaseChannel.ChannelType channelType, final GroupChannelListQuery.ParticipantState participantState,
+                               ChannelComparator comparator) {
+        this.participantState = participantState;
+        this.channelType = channelType;
 
         if (comparator == null) {
             comparator = new LastMessageChannelComparator();
@@ -271,7 +294,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
                 timeTv.setText("");
             }
             if (baseChannel instanceof GroupChannel && ((GroupChannel) baseChannel).getUnreadMessageCount() > 0) {
-                unreadMessageTv.setVisibility(View.VISIBLE);
+                unreadMessageTv.setVisibility(VISIBLE);
                 unreadMessageTv.setText(String.valueOf(((GroupChannel) baseChannel).getUnreadMessageCount()));
             } else {
                 unreadMessageTv.setVisibility(View.GONE);
