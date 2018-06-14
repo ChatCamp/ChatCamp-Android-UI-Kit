@@ -373,8 +373,7 @@ public class MessagesListStyle extends Style {
     // bubble
     public Drawable getIncomingBubbleDrawable() {
         if (incomingBubbleDrawable == -1) {
-            return getMessageSelector(incomingDefaultBubbleColor, incomingDefaultBubbleSelectedColor,
-                    incomingDefaultBubblePressedColor, R.drawable.shape_incoming_message);
+            return getDrawable(R.drawable.shape_incoming_message);
         } else {
             return getDrawable(incomingBubbleDrawable);
         }
