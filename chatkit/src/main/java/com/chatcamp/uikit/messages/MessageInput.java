@@ -348,7 +348,7 @@ public class MessageInput extends RelativeLayout
     @Override
     protected void onWindowVisibilityChanged(int visibility) {
         super.onWindowVisibilityChanged(visibility);
-        if(visibility != VISIBLE) {
+        if(visibility != VISIBLE && voiceSender != null) {
             voiceSender.freeResources();
         }
     }
