@@ -239,7 +239,10 @@ public class MessagesListAdapter
 
             @Override
             public void onGroupChannelTypingStatusChanged(GroupChannel groupChannel) {
-                if(channel == null) {
+                if(channel == null ) {
+                    return;
+                }
+                if(!groupChannel.getId().equals(channel.getId())) {
                     return;
                 }
                 //TODO use same method for open and group channel
