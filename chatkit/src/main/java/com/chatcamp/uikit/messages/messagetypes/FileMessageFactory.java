@@ -58,10 +58,10 @@ public class FileMessageFactory<T> extends MessageFactory<FileMessageFactory.Doc
     @Override
     public boolean isBindable(Message message) {
         if (message.getType().equals("attachment")) {
-//            if (message.getAttachment().isDocument()) {
-//                return true;
-//            }
-            return true;
+            if (message.getAttachment().getType().contains("application") || message.getAttachment().getType().contains("css") ||
+                    message.getAttachment().getType().contains("csv") || message.getAttachment().getType().contains("text")) {
+                return true;
+            }
         }
         return false;
     }

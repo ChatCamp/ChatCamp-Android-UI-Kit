@@ -265,11 +265,15 @@ public class MessageInput extends RelativeLayout
         this.messageSendButton.getLayoutParams().height = style.getInputButtonHeight();
         ViewCompat.setBackground(messageSendButton, style.getInputButtonBackground());
         this.sendButtonSpace.getLayoutParams().width = style.getInputButtonMargin();
-
-        this.voiceMessageSendButton.setImageDrawable(style.getVoiceMessageButtonIcon());
-        this.voiceMessageSendButton.getLayoutParams().width = style.getInputButtonWidth();
-        this.voiceMessageSendButton.getLayoutParams().height = style.getInputButtonHeight();
-        ViewCompat.setBackground(voiceMessageSendButton, style.getInputButtonBackground());
+        if(style.isShowVoiceMessageButton()) {
+            this.voiceMessageSendButton.setVisibility(VISIBLE);
+            this.voiceMessageSendButton.setImageDrawable(style.getVoiceMessageButtonIcon());
+            this.voiceMessageSendButton.getLayoutParams().width = style.getInputButtonWidth();
+            this.voiceMessageSendButton.getLayoutParams().height = style.getInputButtonHeight();
+            ViewCompat.setBackground(voiceMessageSendButton, style.getInputButtonBackground());
+        } else {
+            this.voiceMessageSendButton.setVisibility(GONE);
+        }
 
         if (getPaddingLeft() == 0
                 && getPaddingRight() == 0
