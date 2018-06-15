@@ -60,20 +60,20 @@ public class TextMessageFactory extends MessageFactory<TextMessageFactory.TextMe
         float cornerRadius = cellHolder.messageText.getContext()
                 .getResources().getDimensionPixelSize(R.dimen.message_bubble_corners_radius);
 
-//        if (isFirstMessage) {
-//            float[] cornerRadii = messageSpecs.isMe ? new float[]{cornerRadius, cornerRadius,
-//                    0f, 0f, cornerRadius, cornerRadius, cornerRadius, cornerRadius}
-//                    : new float[]{0f, 0f, cornerRadius, cornerRadius,
-//                    cornerRadius, cornerRadius, cornerRadius, cornerRadius};
-//            ((GradientDrawable) backgroundDrawable).setCornerRadii(cornerRadii);
-//        } else {
-//            ((GradientDrawable) backgroundDrawable).setCornerRadius(cornerRadius);
-//        }
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-//            cellHolder.messageText.setBackground(backgroundDrawable);
-//        } else {
-//            cellHolder.messageText.setBackgroundDrawable(backgroundDrawable);
-//        }
+        if (isFirstMessage) {
+            float[] cornerRadii = messageSpecs.isMe ? new float[]{cornerRadius, cornerRadius,
+                    0f, 0f, cornerRadius, cornerRadius, cornerRadius, cornerRadius}
+                    : new float[]{0f, 0f, cornerRadius, cornerRadius,
+                    cornerRadius, cornerRadius, cornerRadius, cornerRadius};
+            ((GradientDrawable) backgroundDrawable).setCornerRadii(cornerRadii);
+        } else {
+            ((GradientDrawable) backgroundDrawable).setCornerRadius(cornerRadius);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            cellHolder.messageText.setBackground(backgroundDrawable);
+        } else {
+            cellHolder.messageText.setBackgroundDrawable(backgroundDrawable);
+        }
     }
 
     public static class TextMessageHolder extends MessageFactory.MessageHolder {

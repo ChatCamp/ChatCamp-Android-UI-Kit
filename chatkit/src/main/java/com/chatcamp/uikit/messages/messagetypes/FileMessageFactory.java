@@ -58,10 +58,10 @@ public class FileMessageFactory<T> extends MessageFactory<FileMessageFactory.Doc
     @Override
     public boolean isBindable(Message message) {
         if (message.getType().equals("attachment")) {
-//            if (message.getAttachment().isDocument()) {
-//                return true;
-//            }
-            return true;
+            if (message.getAttachment().getType().contains("application") || message.getAttachment().getType().contains("css") ||
+                    message.getAttachment().getType().contains("csv") || message.getAttachment().getType().contains("text")) {
+                return true;
+            }
         }
         return false;
     }
@@ -104,20 +104,20 @@ public class FileMessageFactory<T> extends MessageFactory<FileMessageFactory.Doc
         boolean isFirstMessage = messageSpecs.isFirstMessage;
         float cornerRadius = messageHolder.view.getContext()
                 .getResources().getDimensionPixelSize(R.dimen.message_bubble_corners_radius);
-//        if (isFirstMessage) {
-//            float[] cornerRadii = messageSpecs.isMe ? new float[]{cornerRadius, cornerRadius,
-//                    0f, 0f, cornerRadius, cornerRadius, cornerRadius, cornerRadius}
-//                    : new float[]{0f, 0f, cornerRadius, cornerRadius,
-//                    cornerRadius, cornerRadius, cornerRadius, cornerRadius};
-//            ((GradientDrawable) backgroundDrawable).setCornerRadii(cornerRadii);
-//        } else {
-//            ((GradientDrawable) backgroundDrawable).setCornerRadius(cornerRadius);
-//        }
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-//            messageHolder.view.setBackground(backgroundDrawable);
-//        } else {
-//            messageHolder.view.setBackgroundDrawable(backgroundDrawable);
-//        }
+        if (isFirstMessage) {
+            float[] cornerRadii = messageSpecs.isMe ? new float[]{cornerRadius, cornerRadius,
+                    0f, 0f, cornerRadius, cornerRadius, cornerRadius, cornerRadius}
+                    : new float[]{0f, 0f, cornerRadius, cornerRadius,
+                    cornerRadius, cornerRadius, cornerRadius, cornerRadius};
+            ((GradientDrawable) backgroundDrawable).setCornerRadii(cornerRadii);
+        } else {
+            ((GradientDrawable) backgroundDrawable).setCornerRadius(cornerRadius);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            messageHolder.view.setBackground(backgroundDrawable);
+        } else {
+            messageHolder.view.setBackgroundDrawable(backgroundDrawable);
+        }
         messageHolder.view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -112,20 +112,20 @@ public class VoiceMessageFactory extends MessageFactory<VoiceMessageFactory.Voic
         boolean isFirstMessage = messageSpecs.isFirstMessage;
         float cornerRadius = messageHolder.view.getContext()
                 .getResources().getDimensionPixelSize(R.dimen.message_bubble_corners_radius);
-//        if (isFirstMessage) {
-//            float[] cornerRadii = messageSpecs.isMe ? new float[]{cornerRadius, cornerRadius,
-//                    0f, 0f, cornerRadius, cornerRadius, cornerRadius, cornerRadius}
-//                    : new float[]{0f, 0f, cornerRadius, cornerRadius,
-//                    cornerRadius, cornerRadius, cornerRadius, cornerRadius};
-//            ((GradientDrawable) backgroundDrawable).setCornerRadii(cornerRadii);
-//        } else {
-//            ((GradientDrawable) backgroundDrawable).setCornerRadius(cornerRadius);
-//        }
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-//            messageHolder.view.setBackground(backgroundDrawable);
-//        } else {
-//            messageHolder.view.setBackgroundDrawable(backgroundDrawable);
-//        }
+        if (isFirstMessage) {
+            float[] cornerRadii = messageSpecs.isMe ? new float[]{cornerRadius, cornerRadius,
+                    0f, 0f, cornerRadius, cornerRadius, cornerRadius, cornerRadius}
+                    : new float[]{0f, 0f, cornerRadius, cornerRadius,
+                    cornerRadius, cornerRadius, cornerRadius, cornerRadius};
+            ((GradientDrawable) backgroundDrawable).setCornerRadii(cornerRadii);
+        } else {
+            ((GradientDrawable) backgroundDrawable).setCornerRadius(cornerRadius);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            messageHolder.view.setBackground(backgroundDrawable);
+        } else {
+            messageHolder.view.setBackgroundDrawable(backgroundDrawable);
+        }
         if (messageId != null && message.getId().equals(messageId)) {
             final int duration = mediaPlayer.getDuration();
             messageHolder.seekBar.setMax(duration);

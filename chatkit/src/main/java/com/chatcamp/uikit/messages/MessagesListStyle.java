@@ -3,6 +3,7 @@ package com.chatcamp.uikit.messages;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.ColorInt;
@@ -373,7 +374,9 @@ public class MessagesListStyle extends Style {
     // bubble
     public Drawable getIncomingBubbleDrawable() {
         if (incomingBubbleDrawable == -1) {
-            return getDrawable(R.drawable.shape_incoming_message);
+            Drawable drawable = getDrawable(R.drawable.shape_incoming_message).mutate();
+            drawable.setColorFilter(incomingDefaultBubbleColor, PorterDuff.Mode.SRC_ATOP);
+            return drawable;
         } else {
             return getDrawable(incomingBubbleDrawable);
         }
@@ -516,8 +519,9 @@ public class MessagesListStyle extends Style {
     //bubble
     public Drawable getOutcomingBubbleDrawable() {
         if (outcomingBubbleDrawable == -1) {
-            return getMessageSelector(outcomingDefaultBubbleColor, outcomingDefaultBubbleSelectedColor,
-                    outcomingDefaultBubblePressedColor, R.drawable.shape_outcoming_message);
+            Drawable drawable = getDrawable(R.drawable.shape_outcoming_message).mutate();
+            drawable.setColorFilter(outcomingDefaultBubbleColor, PorterDuff.Mode.SRC_ATOP);
+            return drawable;
         } else {
             return getDrawable(outcomingBubbleDrawable);
         }
