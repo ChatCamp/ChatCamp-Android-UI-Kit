@@ -125,7 +125,7 @@ public class FileMessageFactory<T> extends MessageFactory<FileMessageFactory.Doc
                 if (context == null) {
                     return;
                 }
-                if (!FileUtils.fileExists(context, message.getAttachment().getUrl(), Environment.DIRECTORY_DOWNLOADS)) {
+                if (!FileUtils.fileExists(context, message.getAttachment().getUrl(), Environment.DIRECTORY_DOCUMENTS)) {
                     messageHolder.progressBar.setVisibility(View.VISIBLE);
                     messageHolder.progressBar.setProgress(0);
                 } else {
