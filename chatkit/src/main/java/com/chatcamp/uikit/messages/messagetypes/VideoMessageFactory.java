@@ -23,12 +23,16 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.chatcamp.uikit.R;
+import com.chatcamp.uikit.messages.PermissionsCode;
 import com.chatcamp.uikit.preview.ShowVideoActivity;
+import com.chatcamp.uikit.utils.Directory;
 import com.chatcamp.uikit.utils.DownloadFileListener;
 import com.chatcamp.uikit.utils.FileUtils;
 import com.chatcamp.uikit.utils.Utils;
 
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.chatcamp.sdk.Message;
 
@@ -37,22 +41,22 @@ import io.chatcamp.sdk.Message;
  */
 
 public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.VideoMessageHolder> {
-    private static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_MEDIA = 106;
+
 
     private final WeakReference<Object> objectWeakReference;
-    private View view;
-    private ProgressBar progressBar;
-    private ImageView downloadIcon;
     private Handler handler;
+    private Map<String, VideoMessageFactory.HelperClass> messageIdHelperClassMap;
 
     public VideoMessageFactory(Activity activity) {
         objectWeakReference = new WeakReference<Object>(activity);
         handler = new Handler();
+        messageIdHelperClassMap = new HashMap<>();
     }
 
     public VideoMessageFactory(Fragment fragment) {
         objectWeakReference = new WeakReference<Object>(fragment);
         handler = new Handler();
+        messageIdHelperClassMap = new HashMap<>();
     }
 
     @Override
@@ -99,6 +103,18 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
             messageHolder.downloadIcon.setVisibility(View.INVISIBLE);
             return;
         }
+        VideoMessageFactory.HelperClass helperClass = new VideoMessageFactory.HelperClass();
+
+        if(messageIdHelperClassMap.get(message.getId()) != null) {
+            messageHolder.downloadIcon.setVisibility(messageIdHelperClassMap.get(message.getId()).downloadIcon.getVisibility());
+            messageHolder.progressBar.setVisibility(messageIdHelperClassMap.get(message.getId()).progressBar.getVisibility());
+        }
+
+        helperClass.downloadIcon = messageHolder.downloadIcon;
+        helperClass.progressBar = messageHolder.progressBar;
+        helperClass.imageUrl = message.getAttachment().getUrl();
+        helperClass.isMe = messageSpecs.isMe;
+        messageIdHelperClassMap.put(message.getId(), helperClass);
         messageHolder.view.setTag(message);
         messageHolder.videoName.setText(message.getAttachment().getName());
         Drawable backgroundDrawable = messageHolder.view.getBackground().mutate();
@@ -114,34 +130,33 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
         } else {
             ((GradientDrawable) backgroundDrawable).setCornerRadius(cornerRadius);
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            messageHolder.view.setBackground(backgroundDrawable);
+
+        messageHolder.view.setBackground(backgroundDrawable);
+
+        if (FileUtils.fileExists(context, message.getAttachment().getUrl(), Directory.VIDEOS, messageSpecs.isMe)) {
+            messageHolder.downloadIcon.setVisibility(View.INVISIBLE);
         } else {
-            messageHolder.view.setBackgroundDrawable(backgroundDrawable);
+            messageHolder.downloadIcon.setVisibility(View.VISIBLE);
         }
         messageHolder.view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (v.getTag() != null && v.getTag() instanceof Message) {
-                    if (!FileUtils.fileExists(context, message.getAttachment().getUrl(), Environment.DIRECTORY_MOVIES)) {
-                        messageHolder.progressBar.setVisibility(View.VISIBLE);
-                        messageHolder.progressBar.setProgress(0);
-                    } else {
-                        messageHolder.progressBar.setVisibility(View.INVISIBLE);
-                    }
-                    onVideoClick(v, messageHolder.progressBar, messageHolder.downloadIcon);
+//                    if (!FileUtils.fileExists(context, message.getAttachment().getUrl(), Environment.DIRECTORY_MOVIES)) {
+//                        messageHolder.progressBar.setVisibility(View.VISIBLE);
+//                        messageHolder.progressBar.setProgress(0);
+//                    } else {
+//                        messageHolder.progressBar.setVisibility(View.INVISIBLE);
+//                    }
+                    onVideoClick((Message) v.getTag());
                 }
             }
         });
-        if (FileUtils.fileExists(context, message.getAttachment().getUrl(), Environment.DIRECTORY_MOVIES)) {
-            messageHolder.downloadIcon.setVisibility(View.INVISIBLE);
-        } else {
-            messageHolder.downloadIcon.setVisibility(View.VISIBLE);
-        }
+
     }
 
 
-    private void onVideoClick(View v, ProgressBar progressBar, ImageView downloadIcon) {
+    private void onVideoClick(Message message) {
         Context context = Utils.getContext(objectWeakReference.get());
 
         if (context == null) {
@@ -150,71 +165,77 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN &&
                 ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                         != PackageManager.PERMISSION_GRANTED) {
-            view = v;
-            this.progressBar = progressBar;
-            this.downloadIcon = downloadIcon;
             Utils.requestPermission(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_MEDIA, objectWeakReference.get());
+                    PermissionsCode.VIDEO_MESSAGE_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_MEDIA, objectWeakReference.get());
 
         } else {
-            downloadVideo(v, progressBar, downloadIcon);
+            downloadVideo(message);
         }
     }
 
-    protected void downloadVideo(View v, final ProgressBar progressBar, final ImageView downloadIcon) {
+    protected void downloadVideo(final Message message) {
         if (objectWeakReference.get() == null) {
             return;
         }
-        if (v.getTag() != null && v.getTag() instanceof Message) {
-            if (downloadIcon != null) {
-                downloadIcon.setVisibility(View.INVISIBLE);
-            }
-            final Message message = (Message) v.getTag();
-            final String imageUrl = message.getAttachment().getUrl();
-            if (!TextUtils.isEmpty(imageUrl)) {
-                new Thread(new Runnable() {
-                    public void run() {
-                        Uri path = null;
-                        try {
-                            Context context = Utils.getContext(objectWeakReference.get());
-                            path = FileProvider.getUriForFile(context,
-                                    context.getPackageName() + ".chatcamp.fileprovider",
-                                    FileUtils.downloadFile(context, imageUrl,
-                                            Environment.DIRECTORY_MOVIES, new DownloadFileListener() {
-                                                @Override
-                                                public void downloadProgress(final int progress) {
-                                                    handler.post(new Runnable() {
-                                                        @Override
-                                                        public void run() {
-                                                            if (progressBar != null) {
-                                                                progressBar.setProgress(progress);
-                                                            }
+        if (FileUtils.fileExists(Utils.getContext(objectWeakReference.get()), message.getAttachment().getUrl(),
+                Directory.VIDEOS, messageIdHelperClassMap.get(message.getId()).isMe)) {
+            messageIdHelperClassMap.get(message.getId()).progressBar.setVisibility(View.INVISIBLE);
+        } else {
+            messageIdHelperClassMap.get(message.getId()).progressBar.setVisibility(View.VISIBLE);
+        }
+        messageIdHelperClassMap.get(message.getId()).downloadIcon.setVisibility(View.GONE);
+        final String videoUrl = message.getAttachment().getUrl();
+        if (!TextUtils.isEmpty(videoUrl)) {
+            new Thread(new Runnable() {
+                public void run() {
+                    Uri path = null;
+                    try {
+                        Context context = Utils.getContext(objectWeakReference.get());
+                        path = FileProvider.getUriForFile(context,
+                                context.getPackageName() + ".chatcamp.fileprovider",
+                                FileUtils.downloadFile(context, videoUrl,
+                                        Directory.VIDEOS, messageIdHelperClassMap.get(message.getId()).isMe, new DownloadFileListener() {
+                                            @Override
+                                            public void downloadProgress(final int progress) {
+                                                handler.post(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        ProgressBar progressBar = messageIdHelperClassMap
+                                                                .get(message.getId()) == null ? null : messageIdHelperClassMap
+                                                                .get(message.getId()).progressBar;
+                                                        if ( progressBar!= null && progressBar.getVisibility() == View.VISIBLE) {
+                                                            progressBar.setProgress(progress);
                                                         }
-                                                    });
-                                                }
+                                                    }
+                                                });
+                                            }
 
-                                                @Override
-                                                public void downloadComplete() {
-                                                    handler.post(new Runnable() {
-                                                        @Override
-                                                        public void run() {
+                                            @Override
+                                            public void downloadComplete() {
+                                                handler.post(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        ProgressBar progressBar = messageIdHelperClassMap
+                                                                .get(message.getId()) == null ? null : messageIdHelperClassMap
+                                                                .get(message.getId()).progressBar;
+                                                        if(progressBar != null) {
                                                             progressBar.setVisibility(View.INVISIBLE);
-
                                                         }
-                                                    });
-                                                }
-                                            }));
 
-                            final Uri finalPath = path;
-                            Intent intent = new Intent(context, ShowVideoActivity.class);
-                            intent.putExtra(ShowVideoActivity.VIDEO_URL, finalPath.toString());
-                            Utils.startActivity(intent, objectWeakReference.get());
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                                                    }
+                                                });
+                                            }
+                                        }));
+
+                        final Uri finalPath = path;
+                        Intent intent = new Intent(context, ShowVideoActivity.class);
+                        intent.putExtra(ShowVideoActivity.VIDEO_URL, finalPath.toString());
+                        Utils.startActivity(intent, objectWeakReference.get());
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                }).start();
-            }
+                }
+            }).start();
         }
 
     }
@@ -222,11 +243,12 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions,
                                            int[] grantResults) {
-        if (requestCode == PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_MEDIA) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                downloadVideo(view, progressBar, downloadIcon);
-            }
-        }
+        //do nothing, I will not do anything when the permission is granted, let the user click again.
+//        if (requestCode == PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_MEDIA) {
+//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                downloadVideo(view, progressBar, downloadIcon);
+//            }
+//        }
     }
 
     public static class VideoMessageHolder extends MessageFactory.MessageHolder {
@@ -244,5 +266,12 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
             videoName = view.findViewById(R.id.tv_video_name);
         }
 
+    }
+
+    public class HelperClass {
+        public ProgressBar progressBar;
+        public ImageView downloadIcon;
+        public String imageUrl;
+        public boolean isMe;
     }
 }

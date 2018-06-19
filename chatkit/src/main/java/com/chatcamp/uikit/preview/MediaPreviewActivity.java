@@ -55,7 +55,7 @@ public class MediaPreviewActivity extends AppCompatActivity {
         } else if(getContentResolver().getType(Uri.parse(uri)).contains("video")) {
             imageView.setVisibility(View.GONE);
             frameLayout.setVisibility(View.VISIBLE);
-            videoView.setVideoPath((FileUtils.getPath(this, Uri.parse(uri))));
+            videoView.setVideoURI(Uri.parse(uri));
             MediaController mediaController = new MediaController(this);
             videoView.setMediaController(mediaController);
             videoView.start();

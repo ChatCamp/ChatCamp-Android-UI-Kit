@@ -2,6 +2,7 @@ package com.chatcamp.uikit.messages.sender;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -14,8 +15,8 @@ import android.os.ParcelFileDescriptor;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.text.TextUtils;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 
 import com.chatcamp.uikit.messages.ActivityRequestCode;
 import com.chatcamp.uikit.messages.PermissionsCode;
@@ -26,6 +27,7 @@ import com.chatcamp.uikit.utils.Utils;
 
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -126,64 +128,50 @@ public class GalleryAttachmentSender extends AttachmentSender {
             sendAttachmentError(exception);
             return;
         }
-        String path = null;//FileUtils.getPath(context, uri);
-        if (TextUtils.isEmpty(path)) {
-            try {
+        try {
 
-                //TODO Do this in background async task
-                ParcelFileDescriptor parcelFileDescriptor =
-                        context.getContentResolver().openFileDescriptor(uri, "r");
-                FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+            //TODO Do this in background async task
+            ParcelFileDescriptor parcelFileDescriptor =
+                    context.getContentResolver().openFileDescriptor(uri, "r");
+            FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+
+            if (FileUtils.getMimeType(context, uri).contains("image")) {
+                File file = createFile(uri, "image", Directory.PICTURES);
                 Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
                 Bitmap bitmap = getResizedBitmap(image, 1280, 800);
                 parcelFileDescriptor.close();
-                File compressedFile = createImageFile();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, new FileOutputStream(compressedFile));
-                File file = compressedFile;
-                String fileName = FileUtils.getFileName(context, uri);
-                String contentType = context.getContentResolver().getType(uri);
+
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, new FileOutputStream(file));
+                String fileName = file.getName();
+                String contentType = FileUtils.getMimeType(context, uri);
                 sendAttachment(file, fileName, contentType);
-            } catch (Exception e) {
-                e.printStackTrace();
-                Log.e("GalleryAttachmentSender", "File path is null");
-                ChatCampException exception = new ChatCampException("File path is null", "GALLERY UPLOAD ERROR");
-                sendAttachmentError(exception);
+            } else {
+                File file = createFile(uri, "video", Directory.VIDEOS);
+                FileInputStream inputStream = new FileInputStream(fileDescriptor);
+                FileOutputStream outputStream = new FileOutputStream(file);
+                byte[] buffer = new byte[1024 * 1024];
+                int bufferLength = 0;
+
+                while ((bufferLength = inputStream.read(buffer)) > 0) {
+                    outputStream.write(buffer, 0, bufferLength);
+                }
+                inputStream.close();
+                outputStream.close();
+
+                parcelFileDescriptor.close();
+                String fileName = file.getName();
+                String contentType = FileUtils.getMimeType(context, uri);
+                sendAttachment(file, fileName, contentType);
             }
-            return;
-        }
-        String fileName = FileUtils.getFileName(context, uri);
-        String contentType = context.getContentResolver().getType(uri);
-        if (TextUtils.isEmpty(contentType)) {
-            ChatCampException exception = new ChatCampException("File content type is null", "GALLERY UPLOAD ERROR");
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e("GalleryAttachmentSender", "File path is null");
+            ChatCampException exception = new ChatCampException("File path is null", "GALLERY UPLOAD ERROR");
             sendAttachmentError(exception);
-            return;
         }
-        File file = new File(path);
-//        if (contentType.contains("image")) {
-//            file = new File(path);
-//            try {
-//                File compressedFile = createImageFile();
-//                if (compressedFile == null) {
-//                    ChatCampException exception = new ChatCampException("Error compressing image", "GALLERY UPLOAD ERROR");
-//                    sendAttachmentError(exception);
-//                    return;
-//                }
-//                Bitmap bitmap = decodeSampledBitmapFromFile(path, 1280, 800);
-//                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, new FileOutputStream(compressedFile));
-//                file = compressedFile;
-//            } catch (Throwable t) {
-//                Log.e("ERROR", t.toString());
-//                ChatCampException exception = new ChatCampException(t.toString(), "GALLERY UPLOAD ERROR");
-//                sendAttachmentError(exception);
-//                t.printStackTrace();
-//            }
-//        } else {
-//            file = new File(path);
-//        }
-        sendAttachment(file, fileName, contentType);
     }
 
-    private File createImageFile() throws IOException {
+    private File createFile(Uri uri, String type, Directory directory) throws IOException {
         // Create an image file name
         Context context = Utils.getContext(objectWeakReference.get());
         if (context == null) {
@@ -192,15 +180,25 @@ public class GalleryAttachmentSender extends AttachmentSender {
             return null;
         }
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + ".jpg";
-        File image = FileUtils.getFile(Directory.PICTURES, imageFileName, true);
-        image.createNewFile();
+
+        // Since this will either contain video or image so this is going to be a content type
+        ContentResolver cR = context.getContentResolver();
+        MimeTypeMap mime = MimeTypeMap.getSingleton();
+        String extension = mime.getExtensionFromMimeType(cR.getType(uri));
+        String fileName = "";
+        if (type.contains("image")) {
+            fileName = "IMG_" + timeStamp + "." + extension;
+        } else {
+            fileName = "VID_" + timeStamp + "." + extension;
+        }
+        File file = FileUtils.getFile(directory, fileName, true);
+        file.createNewFile();
 //        File image = File.createTempFile(
 //                imageFileName,  /* prefix */
 //                ".jpg",         /* suffix */
 //                storageDir      /* directory */
 //        );
-        return image;
+        return file;
     }
 
     public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {

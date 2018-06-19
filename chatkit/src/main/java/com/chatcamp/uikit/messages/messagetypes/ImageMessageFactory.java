@@ -78,6 +78,10 @@ public class ImageMessageFactory extends MessageFactory<ImageMessageFactory.Imag
     @Override
     public void bindMessageHolder(final ImageMessageHolder messageHolder, final Message message) {
         final Context context = Utils.getContext(objectWeakReference.get());
+        if(messageIdHelperClassMap.get(message.getId()) != null) {
+            messageHolder.downloadIcon.setVisibility(messageIdHelperClassMap.get(message.getId()).downloadIcon.getVisibility());
+            messageHolder.progressBar.setVisibility(messageIdHelperClassMap.get(message.getId()).progressBar.getVisibility());
+        }
         HelperClass helperClass = new HelperClass();
         helperClass.downloadIcon = messageHolder.downloadIcon;
         helperClass.progressBar = messageHolder.progressBar;
@@ -169,7 +173,9 @@ public class ImageMessageFactory extends MessageFactory<ImageMessageFactory.Imag
                                                         ProgressBar progressBar = messageIdHelperClassMap
                                                                 .get(message.getId()) == null ? null : messageIdHelperClassMap
                                                                 .get(message.getId()).progressBar;
-                                                        progressBar.setVisibility(View.GONE);
+                                                        if(progressBar != null) {
+                                                            progressBar.setVisibility(View.GONE);
+                                                        }
 
                                                     }
                                                 });
@@ -192,7 +198,7 @@ public class ImageMessageFactory extends MessageFactory<ImageMessageFactory.Imag
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions,
                                            int[] grantResults) {
-        //do nothing, I will not do anything when the permission is granted, let the click again.
+        //do nothing, I will not do anything when the permission is granted, let the user click again.
 //        if (requestCode == PermissionsCode.IMAGE_MESSAGE_FACTORY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_MEDIA) {
 //            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 //                downloadImage(view, progressBar, downloadIcon);
