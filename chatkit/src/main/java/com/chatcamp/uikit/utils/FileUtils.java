@@ -8,6 +8,7 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -370,6 +371,24 @@ public class FileUtils {
             // create a new file, to save the downloaded file
             if (isExternalStorageWritable()) {
                 file = getFile(directory, fileName, isSent);
+                try {
+
+
+                    MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                    retriever.setDataSource(context, Uri.fromFile(file));
+
+                    String hasVideo = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO);
+                    boolean isVideo = "yes".equals(hasVideo);
+                    if (isVideo) {
+                        return true;
+                    } else {
+                        file.delete();
+                        return false;
+                    }
+                } catch (Exception e) {
+                    file.delete();
+                    return false;
+                }
             } else {
                 if (context == null) {
                     return false;

@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -363,13 +362,15 @@ public class VoiceMessageFactory extends MessageFactory<VoiceMessageFactory.Voic
         }
     }
 
-    public void freeResources() {
-        if (mediaPlayer != null) {
-            mediaPlayer.reset();
-            mediaPlayer.release();
-            mediaPlayer = null;
+    @Override
+    public void onViewVisibilityChange(int visibility) {
+        if (visibility != View.VISIBLE) {
+            if (mediaPlayer != null) {
+                mediaPlayer.reset();
+                mediaPlayer.release();
+                mediaPlayer = null;
+            }
         }
     }
-
 
 }

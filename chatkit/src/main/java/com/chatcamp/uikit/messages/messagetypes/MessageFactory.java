@@ -68,4 +68,8 @@ public abstract class MessageFactory<T extends MessageFactory.MessageHolder> {
         public boolean isFirstMessage;
 //        public MessagesListStyle messageStyle;
     }
+
+    public void onViewVisibilityChange(int visibility) {
+
+    }
 }

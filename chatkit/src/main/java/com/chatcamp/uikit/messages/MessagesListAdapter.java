@@ -8,7 +8,6 @@ import android.os.Looper;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,7 +20,6 @@ import com.chatcamp.uikit.R;
 import com.chatcamp.uikit.commons.ImageLoader;
 import com.chatcamp.uikit.database.ChatCampDatabaseHelper;
 import com.chatcamp.uikit.messages.messagetypes.MessageFactory;
-import com.chatcamp.uikit.messages.messagetypes.VoiceMessageFactory;
 import com.chatcamp.uikit.messages.typing.TypingFactory;
 import com.chatcamp.uikit.utils.CircleTransform;
 import com.chatcamp.uikit.utils.DateFormatter;
@@ -135,7 +133,7 @@ public class MessagesListAdapter
 
     public void setChannel(final BaseChannel channel) {
         this.channel = channel;
-        if(channel instanceof GroupChannel) {
+        if (channel instanceof GroupChannel) {
             databaseHelper.addGroupChannel((GroupChannel) channel);
         }
         //TODO get the number of message from client
@@ -143,16 +141,19 @@ public class MessagesListAdapter
     }
 
     public void onWindowVisibilityChanged(int visibility) {
-        if(visibility == VISIBLE) {
+        for (MessageFactory messageFactory : messageFactories) {
+            messageFactory.onViewVisibilityChange(visibility);
+        }
+        if (visibility == VISIBLE) {
             addChannelListener();
+            //TODO find a way to load messages when app is in background and some messages are
+            // received and app comes to foreground
+            // May be call load messages and check the last message id.
+//            if (channel != null) {
+//                loadMessages();
+//            }
         } else {
             removeChannelListener();
-            //TODO find a more elegant solution
-            for(MessageFactory messageFactory : messageFactories) {
-                if(messageFactory instanceof VoiceMessageFactory) {
-                    ((VoiceMessageFactory)messageFactory).freeResources();
-                }
-            }
         }
     }
 
@@ -174,7 +175,7 @@ public class MessagesListAdapter
                 //TODO handle announcements
                 Iterator<Message> iterator = list.iterator();
                 while (iterator.hasNext()) {
-                    if(iterator.next().getType().equals("announcement")) {
+                    if (iterator.next().getType().equals("announcement")) {
                         iterator.remove();
                     }
                 }
@@ -206,12 +207,12 @@ public class MessagesListAdapter
 
             @Override
             public void onGroupChannelMessageReceived(GroupChannel groupChannel, Message message) {
-                if(channel == null) {
+                if (channel == null) {
                     return;
                 }
                 if (groupChannel.getId().equals(channel.getId())) {
                     //TODO handle announcements
-                    if(message.getType().equals("announcement")) {
+                    if (message.getType().equals("announcement")) {
                         return;
                     }
                     items.add(0, message);
@@ -239,10 +240,10 @@ public class MessagesListAdapter
 
             @Override
             public void onGroupChannelTypingStatusChanged(GroupChannel groupChannel) {
-                if(channel == null ) {
+                if (channel == null) {
                     return;
                 }
-                if(!groupChannel.getId().equals(channel.getId())) {
+                if (!groupChannel.getId().equals(channel.getId())) {
                     return;
                 }
                 //TODO use same method for open and group channel
@@ -298,7 +299,7 @@ public class MessagesListAdapter
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        if(viewType == -1){
+        if (viewType == -1) {
             LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
             ViewHolder viewHolder = new ViewHolder(layoutInflater.inflate(TypingViewHolder.RESOURCE_ID_CONTAINER, parent, false));
             return viewHolder;
@@ -553,7 +554,7 @@ public class MessagesListAdapter
             return VIEW_TYPE_FOOTER;
         }
         Message message = getItem(position);
-        if(message.getUser() != null) {
+        if (message.getUser() != null) {
             boolean isMe = message.getUser().getId().equals(ChatCamp.getCurrentUser().getId());
             for (MessageFactory messageFactory : messageFactories) {
                 if (messageFactory.isBindable(message)) {

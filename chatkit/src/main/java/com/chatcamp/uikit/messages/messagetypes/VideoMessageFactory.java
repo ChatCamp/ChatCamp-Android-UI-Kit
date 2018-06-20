@@ -2,19 +2,19 @@ package com.chatcamp.uikit.messages.messagetypes;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.FileProvider;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,15 +23,17 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.chatcamp.uikit.R;
+import com.chatcamp.uikit.messages.DownloadVideoIntentService;
 import com.chatcamp.uikit.messages.PermissionsCode;
 import com.chatcamp.uikit.preview.ShowVideoActivity;
 import com.chatcamp.uikit.utils.Directory;
-import com.chatcamp.uikit.utils.DownloadFileListener;
 import com.chatcamp.uikit.utils.FileUtils;
 import com.chatcamp.uikit.utils.Utils;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import io.chatcamp.sdk.Message;
@@ -42,21 +44,25 @@ import io.chatcamp.sdk.Message;
 
 public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.VideoMessageHolder> {
 
-
     private final WeakReference<Object> objectWeakReference;
-    private Handler handler;
     private Map<String, VideoMessageFactory.HelperClass> messageIdHelperClassMap;
+    // id of the message that is being downloaded, only one file can be downloaded at a time
+    private List<String> messageIds = new ArrayList<>();
+    private DownloadResultReceiver downloadResultReceiver = new DownloadResultReceiver();
 
     public VideoMessageFactory(Activity activity) {
         objectWeakReference = new WeakReference<Object>(activity);
-        handler = new Handler();
         messageIdHelperClassMap = new HashMap<>();
+        // Since the first time onViewVisibilityChanged is called before se set factories we have to register the broadcast receiver here
+        IntentFilter intentFilter = new IntentFilter(DownloadResultReceiver.ACTION);
+        Utils.getContext(objectWeakReference.get()).registerReceiver(downloadResultReceiver, intentFilter);
     }
 
     public VideoMessageFactory(Fragment fragment) {
         objectWeakReference = new WeakReference<Object>(fragment);
-        handler = new Handler();
         messageIdHelperClassMap = new HashMap<>();
+        IntentFilter intentFilter = new IntentFilter(DownloadResultReceiver.ACTION);
+        Utils.getContext(objectWeakReference.get()).registerReceiver(downloadResultReceiver, intentFilter);
     }
 
     @Override
@@ -87,12 +93,7 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
         int downloadIcon = isMe ? R.drawable.ic_download_white : R.drawable.ic_download;
         ImageView downloadImage = view.findViewById(R.id.iv_download);
         downloadImage.setImageResource(downloadIcon);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            view.setBackground(backgroundDrawable);
-        } else {
-            view.setBackgroundDrawable(backgroundDrawable);
-        }
+        view.setBackground(backgroundDrawable);
         return new VideoMessageHolder(view);
     }
 
@@ -104,16 +105,24 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
             return;
         }
         VideoMessageFactory.HelperClass helperClass = new VideoMessageFactory.HelperClass();
-
-        if(messageIdHelperClassMap.get(message.getId()) != null) {
-            messageHolder.downloadIcon.setVisibility(messageIdHelperClassMap.get(message.getId()).downloadIcon.getVisibility());
-            messageHolder.progressBar.setVisibility(messageIdHelperClassMap.get(message.getId()).progressBar.getVisibility());
+        if (FileUtils.fileExists(context, message.getAttachment().getUrl(), Directory.VIDEOS, messageSpecs.isMe)) {
+            messageHolder.downloadIcon.setVisibility(View.INVISIBLE);
+            messageHolder.progressBar.setVisibility(View.INVISIBLE);
+        } else {
+            if (messageIds.contains(message.getId())) {
+                messageHolder.progressBar.setVisibility(View.VISIBLE);
+                messageHolder.downloadIcon.setVisibility(View.GONE);
+            } else {
+                messageHolder.progressBar.setVisibility(View.INVISIBLE);
+                messageHolder.downloadIcon.setVisibility(View.VISIBLE);
+            }
         }
 
         helperClass.downloadIcon = messageHolder.downloadIcon;
         helperClass.progressBar = messageHolder.progressBar;
         helperClass.imageUrl = message.getAttachment().getUrl();
         helperClass.isMe = messageSpecs.isMe;
+        Log.d("adding to map", "adding to map" + helperClass.progressBar.toString());
         messageIdHelperClassMap.put(message.getId(), helperClass);
         messageHolder.view.setTag(message);
         messageHolder.videoName.setText(message.getAttachment().getName());
@@ -132,22 +141,10 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
         }
 
         messageHolder.view.setBackground(backgroundDrawable);
-
-        if (FileUtils.fileExists(context, message.getAttachment().getUrl(), Directory.VIDEOS, messageSpecs.isMe)) {
-            messageHolder.downloadIcon.setVisibility(View.INVISIBLE);
-        } else {
-            messageHolder.downloadIcon.setVisibility(View.VISIBLE);
-        }
         messageHolder.view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (v.getTag() != null && v.getTag() instanceof Message) {
-//                    if (!FileUtils.fileExists(context, message.getAttachment().getUrl(), Environment.DIRECTORY_MOVIES)) {
-//                        messageHolder.progressBar.setVisibility(View.VISIBLE);
-//                        messageHolder.progressBar.setProgress(0);
-//                    } else {
-//                        messageHolder.progressBar.setVisibility(View.INVISIBLE);
-//                    }
                     onVideoClick((Message) v.getTag());
                 }
             }
@@ -158,12 +155,15 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
 
     private void onVideoClick(Message message) {
         Context context = Utils.getContext(objectWeakReference.get());
+        if (messageIds.contains(message.getId())) {
+            // if the video is already downloading we will not do anything on clicking that video again
+            return;
+        }
 
         if (context == null) {
             return;
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN &&
-                ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                         != PackageManager.PERMISSION_GRANTED) {
             Utils.requestPermission(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     PermissionsCode.VIDEO_MESSAGE_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE_MEDIA, objectWeakReference.get());
@@ -177,6 +177,7 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
         if (objectWeakReference.get() == null) {
             return;
         }
+        messageIds.add(message.getId());
         if (FileUtils.fileExists(Utils.getContext(objectWeakReference.get()), message.getAttachment().getUrl(),
                 Directory.VIDEOS, messageIdHelperClassMap.get(message.getId()).isMe)) {
             messageIdHelperClassMap.get(message.getId()).progressBar.setVisibility(View.INVISIBLE);
@@ -186,56 +187,11 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
         messageIdHelperClassMap.get(message.getId()).downloadIcon.setVisibility(View.GONE);
         final String videoUrl = message.getAttachment().getUrl();
         if (!TextUtils.isEmpty(videoUrl)) {
-            new Thread(new Runnable() {
-                public void run() {
-                    Uri path = null;
-                    try {
-                        Context context = Utils.getContext(objectWeakReference.get());
-                        path = FileProvider.getUriForFile(context,
-                                context.getPackageName() + ".chatcamp.fileprovider",
-                                FileUtils.downloadFile(context, videoUrl,
-                                        Directory.VIDEOS, messageIdHelperClassMap.get(message.getId()).isMe, new DownloadFileListener() {
-                                            @Override
-                                            public void downloadProgress(final int progress) {
-                                                handler.post(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        ProgressBar progressBar = messageIdHelperClassMap
-                                                                .get(message.getId()) == null ? null : messageIdHelperClassMap
-                                                                .get(message.getId()).progressBar;
-                                                        if ( progressBar!= null && progressBar.getVisibility() == View.VISIBLE) {
-                                                            progressBar.setProgress(progress);
-                                                        }
-                                                    }
-                                                });
-                                            }
-
-                                            @Override
-                                            public void downloadComplete() {
-                                                handler.post(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        ProgressBar progressBar = messageIdHelperClassMap
-                                                                .get(message.getId()) == null ? null : messageIdHelperClassMap
-                                                                .get(message.getId()).progressBar;
-                                                        if(progressBar != null) {
-                                                            progressBar.setVisibility(View.INVISIBLE);
-                                                        }
-
-                                                    }
-                                                });
-                                            }
-                                        }));
-
-                        final Uri finalPath = path;
-                        Intent intent = new Intent(context, ShowVideoActivity.class);
-                        intent.putExtra(ShowVideoActivity.VIDEO_URL, finalPath.toString());
-                        Utils.startActivity(intent, objectWeakReference.get());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }).start();
+            Intent intent = new Intent(Utils.getContext(objectWeakReference.get()), DownloadVideoIntentService.class);
+            intent.putExtra(DownloadVideoIntentService.VIDEO_URL, videoUrl);
+            intent.putExtra(DownloadVideoIntentService.IS_ME, messageIdHelperClassMap.get(message.getId()).isMe);
+            intent.putExtra(DownloadVideoIntentService.MESSAGE_ID, message.getId());
+            Utils.getContext(objectWeakReference.get()).startService(intent);
         }
 
     }
@@ -268,10 +224,60 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
 
     }
 
+    @Override
+    public void onViewVisibilityChange(int visibility) {
+        if(visibility == View.VISIBLE) {
+            IntentFilter intentFilter = new IntentFilter(DownloadResultReceiver.ACTION);
+            Utils.getContext(objectWeakReference.get()).registerReceiver(downloadResultReceiver, intentFilter);
+        } else {
+            try {
+                //We need to add try catch here as the app crashes when the receiver is not registered and
+                // we try to unregister it. and there is no api to test it, bloody android
+                Utils.getContext(objectWeakReference.get()).unregisterReceiver(downloadResultReceiver);
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public class HelperClass {
         public ProgressBar progressBar;
         public ImageView downloadIcon;
         public String imageUrl;
         public boolean isMe;
+    }
+
+    public class DownloadResultReceiver extends BroadcastReceiver {
+        public static final String PROGRESS = "progress";
+        public static final String STATUS = "status";
+        public static final String MESSAGE_ID = "message_id";
+        public static final String VIDEO_URI = "video_uri";
+        public static final String ACTION = "io.chatcamp.chatcamp.download_video";
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.e("receiving data", "receiving data");
+            String messageId = intent.getStringExtra(MESSAGE_ID);
+            if (!TextUtils.isEmpty(messageId)) {
+                if (intent.hasExtra(STATUS) && intent.getStringExtra(STATUS).equals("progress")) {
+                    messageIdHelperClassMap.get(messageId).progressBar.setVisibility(View.VISIBLE);
+                    messageIdHelperClassMap.get(messageId).progressBar.setProgress(intent.getIntExtra(PROGRESS, 0));
+
+                } else if (intent.hasExtra(STATUS) && intent.getStringExtra(STATUS).equals("complete")) {
+                    if (intent.hasExtra(VIDEO_URI)) {
+                        messageIdHelperClassMap.get(messageId).progressBar.setVisibility(View.INVISIBLE);
+                        messageIds.remove(messageId);
+//                        messageIdHelperClassMap.get(messageId).progressBar.setProgress(intent.getIntExtra(PROGRESS, 100));
+                        Intent showVideoIntent = new Intent(context, ShowVideoActivity.class);
+                        showVideoIntent.putExtra(ShowVideoActivity.VIDEO_URL, intent.getStringExtra(VIDEO_URI));
+                        Utils.startActivity(showVideoIntent, Utils.getContext(objectWeakReference.get()));
+                    } else {
+                        messageIdHelperClassMap.get(messageId).progressBar.setVisibility(View.VISIBLE);
+                        messageIdHelperClassMap.get(messageId).progressBar.setProgress(intent.getIntExtra(PROGRESS, 100));
+                    }
+                }
+            }
+
+        }
     }
 }

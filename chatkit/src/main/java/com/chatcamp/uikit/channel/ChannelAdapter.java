@@ -306,6 +306,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
                 if (groupChannel != null && groupChannel.getParticipants() != null && groupChannel.getParticipants().size() > 0) {
                     List<Participant> participants = groupChannel.getParticipants();
                     for (Participant participant : participants) {
+                        //TODO check if the chatcamp current user id is null or not, probably the user is not set when the app crashes and try to reconnect.
                         if (!participant.getId().equals(ChatCamp.getCurrentUser().getId())) {
                             populateTitle(participant.getAvatarUrl(), participant.getDisplayName());
                         }

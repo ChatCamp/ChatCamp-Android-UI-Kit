@@ -6,7 +6,7 @@ android {
     compileSdkVersion 26
 
     defaultConfig {
-        minSdkVersion 15
+        minSdkVersion 19
         targetSdkVersion 26
         versionCode 4
         versionName "0.0.4"
@@ -30,5 +30,5 @@ dependencies {
     compile 'org.apmem.tools:layouts:1.10@aar'
     compile "com.squareup.picasso:picasso:2.5.2"
     compile 'me.zhanghai.android.materialprogressbar:library:1.4.2'
-    //api project(':chatcamp')
+//    api project(':chatcamp')
 }
