@@ -338,7 +338,7 @@ public class FileUtils {
         return file;
     }
 
-    public static boolean fileExists(@NonNull Context context, String downloadFilePath, String directory) {
+    public static boolean fileExists(@NonNull Context context, @NonNull String downloadFilePath,@NonNull String directory) {
         try {
             File file = null;
             File serverFile = new File(downloadFilePath);
@@ -362,7 +362,7 @@ public class FileUtils {
         return false;
     }
 
-    public static boolean fileExists(@NonNull Context context, String downloadFilePath, Directory directory, boolean isSent) {
+    public static boolean fileExists(@NonNull Context context,@NonNull String downloadFilePath, @NonNull Directory directory, boolean isSent) {
         try {
             File file = null;
             File serverFile = new File(downloadFilePath);

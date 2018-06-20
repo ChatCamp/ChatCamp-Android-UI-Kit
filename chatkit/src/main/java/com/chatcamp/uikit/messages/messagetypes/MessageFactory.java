@@ -1,6 +1,7 @@
 package com.chatcamp.uikit.messages.messagetypes;
 
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -24,7 +25,7 @@ public abstract class MessageFactory<T extends MessageFactory.MessageHolder> {
 
     public abstract T createMessageHolder(ViewGroup cellView, boolean isMe, LayoutInflater layoutInflater);
 
-    public abstract void bindMessageHolder(T messageHolder, Message message);
+    public abstract void bindMessageHolder(T messageHolder,@NonNull Message message);
 
     public void setMessageSpecs(MessageSpecs messageStyle) {
         this.messageSpecs = messageStyle;
