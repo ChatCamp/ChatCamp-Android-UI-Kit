@@ -33,6 +33,14 @@
         android:layout_height="wrap_content">
 
         <ImageView
+            android:id="@+id/iv_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:src="@drawable/ic_mic"
+            android:visibility="invisible"/>
+
+        <ImageView
             android:id="@+id/iv_download"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

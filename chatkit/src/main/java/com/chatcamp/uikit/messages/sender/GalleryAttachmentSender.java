@@ -44,6 +44,7 @@ import static android.app.Activity.RESULT_OK;
  */
 
 public class GalleryAttachmentSender extends AttachmentSender {
+    private static final String TAG = "GalleryAttachmentSender";
 
     private WeakReference<Object> objectWeakReference;
 
@@ -62,10 +63,11 @@ public class GalleryAttachmentSender extends AttachmentSender {
         Context context = Utils.getContext(objectWeakReference.get());
         if (context == null) {
             ChatCampException exception = new ChatCampException("Context is null", "GALLERY UPLOAD ERROR");
+            Log.e(TAG, "Context is null");
             sendAttachmentError(exception);
             return;
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN && ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             Utils.requestPermission(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                     PermissionsCode.GALLERY_ATTACHMENT_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE_MEDIA, objectWeakReference.get());
@@ -81,6 +83,8 @@ public class GalleryAttachmentSender extends AttachmentSender {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 if (objectWeakReference.get() != null) {
                     chooseMedia();
+                } else {
+                    Log.e(TAG, "Context is null");
                 }
             }
         }
@@ -103,20 +107,28 @@ public class GalleryAttachmentSender extends AttachmentSender {
                 if (uri == null) {
                     ChatCampException exception = new ChatCampException("Picked file is not valid", "GALLERY UPLOAD ERROR");
                     sendAttachmentError(exception);
+                    Log.e(TAG, "Picked URI is null");
                     return;
                 }
                 Context context = Utils.getContext(objectWeakReference.get());
                 if (context == null) {
                     ChatCampException exception = new ChatCampException("Context is null", "GALLERY UPLOAD ERROR");
                     sendAttachmentError(exception);
+                    Log.e(TAG, "Context is null");
                     return;
                 }
                 Intent intent = new Intent(context, MediaPreviewActivity.class);
                 intent.putExtra(MediaPreviewActivity.MEDIA_URI, uri.toString());
                 Utils.startActivityForResult(intent, ActivityRequestCode.GALLERY_ATTACHMENT_PREVIEW_FILE_RESULT_CODE, objectWeakReference.get());
             } else if (requestCode == ActivityRequestCode.GALLERY_ATTACHMENT_PREVIEW_FILE_RESULT_CODE) {
-                String uriMedia = dataFile.getExtras().getString(MediaPreviewActivity.MEDIA_URI);
-                uploadFile(Uri.parse(uriMedia));
+                if(dataFile.getExtras() != null) {
+                    String uriMedia = dataFile.getExtras().getString(MediaPreviewActivity.MEDIA_URI);
+                    uploadFile(Uri.parse(uriMedia));
+                } else {
+                    ChatCampException exception = new ChatCampException("File sent from Media Preview is null", "GALLERY UPLOAD ERROR");
+                    sendAttachmentError(exception);
+                    Log.e(TAG, "File sent from Media Preview is null.");
+                }
             }
         }
     }
@@ -126,6 +138,7 @@ public class GalleryAttachmentSender extends AttachmentSender {
         if (context == null) {
             ChatCampException exception = new ChatCampException("Context is null", "GALLERY UPLOAD ERROR");
             sendAttachmentError(exception);
+            Log.e(TAG, "Context is null.");
             return;
         }
         try {
@@ -165,8 +178,8 @@ public class GalleryAttachmentSender extends AttachmentSender {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Log.e("GalleryAttachmentSender", "File path is null");
-            ChatCampException exception = new ChatCampException("File path is null", "GALLERY UPLOAD ERROR");
+            Log.e(TAG, "An error occurred " + e.getMessage());
+            ChatCampException exception = new ChatCampException(e.getMessage(), "GALLERY UPLOAD ERROR");
             sendAttachmentError(exception);
         }
     }
@@ -177,6 +190,7 @@ public class GalleryAttachmentSender extends AttachmentSender {
         if (context == null) {
             ChatCampException exception = new ChatCampException("Context is null", "GALLERY UPLOAD ERROR");
             sendAttachmentError(exception);
+            Log.e(TAG, "Context is null.");
             return null;
         }
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -193,54 +207,23 @@ public class GalleryAttachmentSender extends AttachmentSender {
         }
         File file = FileUtils.getFile(directory, fileName, true);
         file.createNewFile();
-//        File image = File.createTempFile(
-//                imageFileName,  /* prefix */
-//                ".jpg",         /* suffix */
-//                storageDir      /* directory */
-//        );
         return file;
     }
 
-    public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
+    private Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
         int width = bm.getWidth();
         int height = bm.getHeight();
         float scaleWidth = ((float) newWidth) / width;
         float scaleHeight = ((float) newHeight) / height;
-        // CREATE A MATRIX FOR THE MANIPULATION
+        // create a matrix for the manipulation
         Matrix matrix = new Matrix();
-        // RESIZE THE BIT MAP
+        // resize the bit map
         matrix.postScale(scaleWidth, scaleHeight);
 
-        // "RECREATE" THE NEW BITMAP
+        // Recreate the new bitmap
         Bitmap resizedBitmap = Bitmap.createBitmap(
                 bm, 0, 0, width, height, matrix, false);
         bm.recycle();
         return resizedBitmap;
     }
-
-//    // TODO should do this in background
-//    private Bitmap decodeSampledBitmapFromFile(String path, int reqHeight,
-//                                               int reqWidth) {
-//
-//        final BitmapFactory.Options options = new BitmapFactory.Options();
-//        options.inJustDecodeBounds = true;
-//        BitmapFactory.decodeFile(bitmap, options);
-//
-//        final int height = options.outHeight;
-//        final int width = options.outWidth;
-//        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-//        int inSampleSize = 1;
-//
-//        if (height > reqHeight) {
-//            inSampleSize = Math.round((float) height / (float) reqHeight);
-//        }
-//        int expectedWidth = width / inSampleSize;
-//
-//        if (expectedWidth > reqWidth) {
-//            inSampleSize = Math.round((float) width / (float) reqWidth);
-//        }
-//        options.inSampleSize = inSampleSize;
-//        options.inJustDecodeBounds = false;
-//        return BitmapFactory.decodeFile(path, options);
-//    }
 }

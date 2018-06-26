@@ -690,6 +690,16 @@ public class MessagesListAdapter
         }
     }
 
+    @Override
+    public void onViewDetachedFromWindow(ViewHolder holder) {
+        if(holder instanceof MessageViewHolder) {
+            for (MessageFactory messageFactory : messageFactories) {
+                messageFactory.onViewDetachedFromWindow(((MessageViewHolder)holder).message.getId());
+            }
+        }
+        super.onViewDetachedFromWindow(holder);
+    }
+
     private static class MessageType {
         private boolean isMe;
         private MessageFactory messageFactory;

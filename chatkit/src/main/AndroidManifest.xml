@@ -26,7 +26,7 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name="com.chatcamp.uikit.conversationdetails.UserProfileActivity"
             android:theme="@style/AppTheme.NoActionBar"/>
-        <service android:name=".messages.DownloadVideoIntentService"></service>
+        <service android:name=".messages.DownloadVideoService"></service>
     </application>
 
 </manifest>

@@ -272,6 +272,11 @@ public class VoiceMessageFactory extends MessageFactory<VoiceMessageFactory.Voic
                                     FileUtils.downloadFile(context, imageUrl,
                                             Environment.DIRECTORY_MUSIC, new DownloadFileListener() {
                                                 @Override
+                                                public void downloadStart() {
+
+                                                }
+
+                                                @Override
                                                 public void downloadProgress(final int progress) {
                                                     handler.post(new Runnable() {
                                                         @Override

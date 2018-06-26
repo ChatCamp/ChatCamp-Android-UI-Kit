@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import com.chatcamp.uikit.messages.MessagesListAdapter;
 import com.chatcamp.uikit.messages.MessagesListStyle;
 
 import io.chatcamp.sdk.Message;
@@ -72,5 +73,8 @@ public abstract class MessageFactory<T extends MessageFactory.MessageHolder> {
 
     public void onViewVisibilityChange(int visibility) {
 
+    }
+
+    public void onViewDetachedFromWindow(String messageId) {
     }
 }

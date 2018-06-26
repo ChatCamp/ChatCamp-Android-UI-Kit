@@ -16,6 +16,7 @@ import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.support.annotation.NonNull;
+import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
@@ -291,6 +292,9 @@ public class FileUtils {
             if (file != null && file.exists()) {
                 return file;
             }
+            if(downloadFileListener != null) {
+                downloadFileListener.downloadStart();
+            }
 
             URL url = new URL(downloadFilePath);
             HttpURLConnection urlConnection = (HttpURLConnection) url
@@ -334,6 +338,7 @@ public class FileUtils {
 
         } catch (final Exception e) {
             e.printStackTrace();
+            return null;
         }
         return file;
     }
@@ -473,5 +478,21 @@ public class FileUtils {
                     fileExtension.toLowerCase());
         }
         return mimeType;
+    }
+
+    public static Uri getLocalFilePath(Context context,Directory directory, String url, boolean isSent ) {
+        Uri path = null;
+        try {
+            File serverFile = new File(url);
+            // remove the random number at the starting of the file name
+            String fileName = serverFile.getName();
+            fileName = fileName.substring(fileName.indexOf('_') + 1);
+            path = FileProvider.getUriForFile(context,
+                    context.getPackageName() + ".chatcamp.fileprovider", getFile(directory, fileName, isSent));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            return path;
+        }
     }
 }

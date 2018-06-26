@@ -205,6 +205,11 @@ public class FileMessageFactory<T> extends MessageFactory<FileMessageFactory.Doc
                         File file = FileUtils.downloadFile(context, message.getAttachment().getUrl(),
                                 Environment.DIRECTORY_DOWNLOADS, new DownloadFileListener() {
                                     @Override
+                                    public void downloadStart() {
+
+                                    }
+
+                                    @Override
                                     public void downloadProgress(final int progress) {
                                         handler.post(new Runnable() {
                                             @Override

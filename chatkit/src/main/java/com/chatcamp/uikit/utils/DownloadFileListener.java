@@ -5,6 +5,7 @@ package com.chatcamp.uikit.utils;
  */
 
 public interface DownloadFileListener {
+    void downloadStart();
     void downloadProgress(int progress);
     void downloadComplete();
 }

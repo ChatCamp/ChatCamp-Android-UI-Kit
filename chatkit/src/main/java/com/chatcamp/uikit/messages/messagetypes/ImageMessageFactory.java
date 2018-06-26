@@ -151,6 +151,11 @@ public class ImageMessageFactory extends MessageFactory<ImageMessageFactory.Imag
                                 FileUtils.downloadFile(context, imageUrl,
                                         Directory.PICTURES, messageIdHelperClassMap.get(message.getId()).isMe, new DownloadFileListener() {
                                             @Override
+                                            public void downloadStart() {
+
+                                            }
+
+                                            @Override
                                             public void downloadProgress(final int progress) {
                                                 handler.post(new Runnable() {
                                                     @Override

@@ -32,7 +32,7 @@ public abstract class AttachmentSender {
         void onUploadFailed(ChatCampException error);
     }
 
-    public AttachmentSender(@NonNull BaseChannel channel, @NonNull String title, @NonNull @DrawableRes int drawableRes) {
+    public AttachmentSender(@NonNull BaseChannel channel, @NonNull String title, @DrawableRes int drawableRes) {
         this.channel = channel;
         this.drawableRes = drawableRes;
         this.title = title;
@@ -65,14 +65,6 @@ public abstract class AttachmentSender {
                         if (uploadListener != null) {
                             uploadListener.onUploadSuccess();
                         }
-                        // delete the temp file created to downsize the image
-//                        if(contentType.contains("image")) {
-//                            try {
-//                                file.delete();
-//                            } catch (Exception e) {
-//                                e.printStackTrace();
-//                            }
-//                        }
                     }
 
                     @Override
