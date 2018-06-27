@@ -11,6 +11,7 @@ import android.support.v7.widget.SimpleItemAnimator;
 import android.util.AttributeSet;
 import android.util.Log;
 
+import com.chatcamp.uikit.channel.ChannelList;
 import com.chatcamp.uikit.commons.ImageLoader;
 import com.chatcamp.uikit.messages.messagetypes.MessageFactory;
 import com.chatcamp.uikit.messages.typing.TypingFactory;
@@ -25,6 +26,11 @@ public class MessagesList extends RecyclerView {
     private RecyclerScrollMoreListener recyclerScrollMoreListener;
     private BaseChannel channel;
     private MessagesListAdapter adapter;
+    private OnMessagesLoadedListener onMessagesLoadedListener;
+
+    public interface OnMessagesLoadedListener {
+        void onMessagesLoaded();
+    }
 
     public MessagesList(Context context) {
         super(context);
@@ -58,6 +64,11 @@ public class MessagesList extends RecyclerView {
     public void setChannel(BaseChannel channel) {
         this.channel = channel;
         adapter.setChannel(channel);
+    }
+
+    public void setOnMessagesLoadedListener(OnMessagesLoadedListener onMessagesLoadedListener) {
+        this.onMessagesLoadedListener = onMessagesLoadedListener;
+        adapter.setOnMesaageLoadedListener(onMessagesLoadedListener);
     }
 
     public void setAvatarImageLoader(ImageLoader imageLoader) {

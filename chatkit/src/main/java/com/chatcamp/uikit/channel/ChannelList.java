@@ -10,6 +10,7 @@ import android.util.AttributeSet;
 import android.view.ViewAnimationUtils;
 
 import com.chatcamp.uikit.commons.ImageLoader;
+import com.chatcamp.uikit.messages.RecyclerScrollMoreListener;
 
 import io.chatcamp.sdk.BaseChannel;
 import io.chatcamp.sdk.GroupChannelListQuery;
@@ -23,6 +24,12 @@ public class ChannelList extends RecyclerView {
     private ChannelAdapter adapter;
     private ChannelAdapter.ChannelClickedListener clickListener;
     private ChannelListStyle channelListStyle;
+    private RecyclerScrollMoreListener recyclerScrollMoreListener;
+    private OnChannelsLoadedListener onChannelsLoadedListener;
+
+    public interface OnChannelsLoadedListener {
+        void onChannelsLoaded();
+    }
 
 
     public ChannelList(Context context) {
@@ -54,6 +61,11 @@ public class ChannelList extends RecyclerView {
         adapter.setChannelClickedListener(channelClickListener);
     }
 
+    public void setOnChannelsLoadedListener(OnChannelsLoadedListener listener) {
+        onChannelsLoadedListener = listener;
+        adapter.setOnChannelsLoadedListener(onChannelsLoadedListener);
+    }
+
     public void setAvatarImageLoader(ImageLoader imageLoader) {
         if(adapter != null) {
             adapter.setAvatarImageLoader(imageLoader);
@@ -76,6 +88,8 @@ public class ChannelList extends RecyclerView {
         setItemAnimator(itemAnimator);
         setLayoutManager(layoutManager);
         adapter.setStyle(channelListStyle);
+        recyclerScrollMoreListener = new RecyclerScrollMoreListener(layoutManager, adapter);
+        addOnScrollListener(recyclerScrollMoreListener);
         super.setAdapter(adapter);
 
     }

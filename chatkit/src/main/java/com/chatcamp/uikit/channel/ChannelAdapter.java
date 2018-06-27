@@ -9,6 +9,7 @@ import android.os.Build;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +20,7 @@ import android.widget.TextView;
 import com.chatcamp.uikit.R;
 import com.chatcamp.uikit.commons.ImageLoader;
 import com.chatcamp.uikit.database.ChatCampDatabaseHelper;
+import com.chatcamp.uikit.messages.RecyclerScrollMoreListener;
 import com.chatcamp.uikit.utils.DefaultTimeFormat;
 import com.chatcamp.uikit.utils.TimeFormat;
 import com.squareup.picasso.Callback;
@@ -46,9 +48,14 @@ import static android.view.View.resolveSize;
  * Created by shubhamdhabhai on 18/05/18.
  */
 
-public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelViewHolder> {
+public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelViewHolder> implements RecyclerScrollMoreListener.OnLoadMoreListener {
 
     private static final String CHANNEL_LISTENER = "channel_list_channel_listener";
+    private ChannelComparator comparator;
+    private GroupChannelListQuery groupChannelListQuery;
+    private boolean loadingFirstTime = true;
+    private OpenChannelListQuery openChannelListQuery;
+    private ChannelList.OnChannelsLoadedListener onChannelsLoadedListener;
 
     public interface ChannelClickedListener {
         void onClick(BaseChannel baseChannel);
@@ -161,38 +168,64 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
                                ChannelComparator comparator) {
         this.participantState = participantState;
         this.channelType = channelType;
+        this.comparator = comparator;
+        loadingFirstTime = true;
+        loadChannels();
+    }
 
+    private void loadChannels() {
         if (comparator == null) {
             comparator = new LastMessageChannelComparator();
         }
         if (channelType == BaseChannel.ChannelType.OPEN) {
-            OpenChannelListQuery openChannelListQuery = OpenChannel.createOpenChannelListQuery();
+            if(openChannelListQuery == null || loadingFirstTime) {
+                openChannelListQuery = OpenChannel.createOpenChannelListQuery();
+            }
             openChannelListQuery.get(new OpenChannelListQuery.ResultHandler() {
                 @Override
                 public void onResult(List<OpenChannel> openChannelList, ChatCampException e) {
-                    dataset.clear();
+//                    dataset.clear();
+                    if(onChannelsLoadedListener != null) {
+                        onChannelsLoadedListener.onChannelsLoaded();
+                    }
                     dataset.addAll(openChannelList);
                     notifyDataSetChanged();
                 }
             });
         } else if (channelType == BaseChannel.ChannelType.GROUP) {
-            final List<GroupChannel> groupChannels = chatCampDatabaseHelper.getGroupChannels(participantState);
-            Collections.sort(groupChannels, comparator);
-            dataset.clear();
-            dataset.addAll(groupChannels);
-            notifyDataSetChanged();
-            GroupChannelListQuery groupChannelListQuery = GroupChannel.createGroupChannelListQuery();
-            groupChannelListQuery.setParticipantState(participantState);
-            final ChannelComparator finalComparator = comparator;
+            if(groupChannelListQuery == null || loadingFirstTime) {
+                Log.e("Group Channel", "Loading for the first time from database");
+                final List<GroupChannel> groupChannels = chatCampDatabaseHelper.getGroupChannels(participantState);
+                if(groupChannels.size() > 0 && onChannelsLoadedListener != null) {
+                    onChannelsLoadedListener.onChannelsLoaded();
+                }
+                Collections.sort(groupChannels, comparator);
+                dataset.clear();
+                dataset.addAll(groupChannels);
+                groupChannelListQuery = GroupChannel.createGroupChannelListQuery();
+                groupChannelListQuery.setParticipantState(participantState);
+                notifyDataSetChanged();
+            }
+            Log.e("Group Channel", "querying group from api");
             groupChannelListQuery.get(new GroupChannelListQuery.ResultHandler() {
                 @Override
                 public void onResult(List<GroupChannel> groupChannelList, ChatCampException e) {
-                    dataset.clear();
-                    if (finalComparator != null) {
-                        Collections.sort(groupChannelList, finalComparator);
+                    if(loadingFirstTime) {
+                        Log.e("Group Channel", "result from first api call");
+                        if(dataset.size() == 0 && onChannelsLoadedListener != null) {
+                            onChannelsLoadedListener.onChannelsLoaded();
+                        }
+                        dataset.clear();
+                        loadingFirstTime = false;
+                        chatCampDatabaseHelper.addGroupChannels(groupChannelList, participantState);
+                    } else {
+                        Log.e("Group Channel", "result from subsequent api call");
+                    }
+                    if (comparator != null) {
+                        Collections.sort(groupChannelList, comparator);
                     }
                     dataset.addAll(groupChannelList);
-                    chatCampDatabaseHelper.addGroupChannels(groupChannelList, participantState);
+
                     notifyDataSetChanged();
                 }
             });
@@ -201,6 +234,10 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
 
     public void setStyle(ChannelListStyle channelListStyle) {
         this.channelListStyle = channelListStyle;
+    }
+
+    public void setOnChannelsLoadedListener(ChannelList.OnChannelsLoadedListener listener) {
+        this.onChannelsLoadedListener = listener;
     }
 
     public void setAvatarImageLoader(ImageLoader imageLoader) {
@@ -365,6 +402,11 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
                 channelClickedListener.onClick((BaseChannel) view.getTag()); // call the onClick in the OnItemClickListener
             }
         }
+    }
+
+    @Override
+    public void onLoadMore(int page, int total) {
+        loadChannels();
     }
 
     public interface ChannelComparator extends Comparator<GroupChannel> {
