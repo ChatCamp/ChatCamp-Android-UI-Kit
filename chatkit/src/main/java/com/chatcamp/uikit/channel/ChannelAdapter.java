@@ -180,6 +180,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
         if (channelType == BaseChannel.ChannelType.OPEN) {
             if(openChannelListQuery == null || loadingFirstTime) {
                 openChannelListQuery = OpenChannel.createOpenChannelListQuery();
+                loadingFirstTime = false;
             }
             openChannelListQuery.get(new OpenChannelListQuery.ResultHandler() {
                 @Override

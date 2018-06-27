@@ -7,7 +7,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.util.AttributeSet;
-import android.view.ViewAnimationUtils;
 
 import com.chatcamp.uikit.commons.ImageLoader;
 import com.chatcamp.uikit.messages.RecyclerScrollMoreListener;
@@ -53,6 +52,9 @@ public class ChannelList extends RecyclerView {
     }
 
     public void setChannelType(BaseChannel.ChannelType channelType, GroupChannelListQuery.ParticipantState participantState, ChannelAdapter.ChannelComparator comparator) {
+        if(recyclerScrollMoreListener != null) {
+            recyclerScrollMoreListener.resetLoading();
+        }
         adapter.setChannelType(channelType, participantState, comparator);
     }
 
