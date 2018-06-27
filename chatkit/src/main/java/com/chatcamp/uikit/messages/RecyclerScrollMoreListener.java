@@ -73,6 +73,12 @@ public class RecyclerScrollMoreListener
         }
     }
 
+    public void resetLoading() {
+        loading = true;
+        currentPage = 0;
+        previousTotalItemCount = 0;
+    }
+
     public interface OnLoadMoreListener {
         void onLoadMore(int page, int total);
     }
