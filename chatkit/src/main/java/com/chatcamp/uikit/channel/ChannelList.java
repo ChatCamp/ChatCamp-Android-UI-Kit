@@ -92,6 +92,7 @@ public class ChannelList extends RecyclerView {
         adapter.setStyle(channelListStyle);
         recyclerScrollMoreListener = new RecyclerScrollMoreListener(layoutManager, adapter);
         addOnScrollListener(recyclerScrollMoreListener);
+        adapter.setRecyclerScrollMoreListener(recyclerScrollMoreListener);
         super.setAdapter(adapter);
 
     }

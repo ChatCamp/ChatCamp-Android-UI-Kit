@@ -56,6 +56,11 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
     private boolean loadingFirstTime = true;
     private OpenChannelListQuery openChannelListQuery;
     private ChannelList.OnChannelsLoadedListener onChannelsLoadedListener;
+    private RecyclerScrollMoreListener recyclerScrollMoreListener;
+
+    public void setRecyclerScrollMoreListener(RecyclerScrollMoreListener recyclerScrollMoreListener) {
+        this.recyclerScrollMoreListener = recyclerScrollMoreListener;
+    }
 
     public interface ChannelClickedListener {
         void onClick(BaseChannel baseChannel);
@@ -170,6 +175,9 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
         this.channelType = channelType;
         this.comparator = comparator;
         loadingFirstTime = true;
+        if(recyclerScrollMoreListener != null) {
+            recyclerScrollMoreListener.stopLoading();
+        }
         loadChannels();
     }
 
@@ -181,6 +189,9 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
             if(openChannelListQuery == null || loadingFirstTime) {
                 openChannelListQuery = OpenChannel.createOpenChannelListQuery();
                 loadingFirstTime = false;
+                if(recyclerScrollMoreListener != null) {
+                    recyclerScrollMoreListener.resetLoading();
+                }
             }
             openChannelListQuery.get(new OpenChannelListQuery.ResultHandler() {
                 @Override
@@ -212,6 +223,9 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
                 @Override
                 public void onResult(List<GroupChannel> groupChannelList, ChatCampException e) {
                     if(loadingFirstTime) {
+                        if(recyclerScrollMoreListener != null) {
+                            recyclerScrollMoreListener.resetLoading();
+                        }
                         Log.e("Group Channel", "result from first api call");
                         if(dataset.size() == 0 && onChannelsLoadedListener != null) {
                             onChannelsLoadedListener.onChannelsLoaded();
