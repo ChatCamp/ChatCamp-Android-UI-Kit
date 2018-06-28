@@ -86,6 +86,7 @@ public class MessagesListAdapter
 
     private Context context;
     private ImageLoader avatarImageLoader;
+    private MessagesList.OnMessagesLoadedListener onMessagesLoadedListener;
 
     public MessagesListAdapter(Context context) {
         items = new ArrayList<>();
@@ -166,6 +167,9 @@ public class MessagesListAdapter
         if (previousMessageListQuery == null) {
             items = databaseHelper.getMessages(channel.getId(), channel.isGroupChannel()
                     ? BaseChannel.ChannelType.GROUP : BaseChannel.ChannelType.OPEN);
+            if(items.size() > 0 && onMessagesLoadedListener != null) {
+                onMessagesLoadedListener.onMessagesLoaded();
+            }
             previousMessageListQuery = channel.createPreviousMessageListQuery();
             notifyDataSetChanged();
         }
@@ -180,6 +184,9 @@ public class MessagesListAdapter
                     }
                 }
                 if (loadingFirstTime) {
+                    if(items.size() == 0 && onMessagesLoadedListener != null) {
+                        onMessagesLoadedListener.onMessagesLoaded();
+                    }
                     items.clear();
                     items.addAll(list);
                     databaseHelper.addMessages(list, channel.getId(), channel.isGroupChannel()
@@ -635,6 +642,10 @@ public class MessagesListAdapter
         Date d2 = new Date();
         d2.setTime(t2 * 1000);
         return (d1.getYear() != d2.getYear()) || (d1.getMonth() != d2.getMonth()) || (d1.getDay() != d2.getDay());
+    }
+
+    public void setOnMesaageLoadedListener(MessagesList.OnMessagesLoadedListener onMessagesLoadedListener) {
+        this.onMessagesLoadedListener = onMessagesLoadedListener;
     }
 
     private static class Cluster {

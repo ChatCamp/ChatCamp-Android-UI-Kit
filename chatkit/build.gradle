@@ -23,7 +23,7 @@ repositories {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'io.chatcamp.sdk:chatcamp-android-sdk:0.1.30'
+    compile 'io.chatcamp.sdk:chatcamp-android-sdk:0.1.31'
     compile 'com.android.support:appcompat-v7:26.1.0'
     compile 'com.android.support:design:26.1.0'
     compile 'com.wang.avi:library:2.1.3'

@@ -12,6 +12,7 @@ public class RecyclerScrollMoreListener
     private int currentPage = 0;
     private int previousTotalItemCount = 0;
     private boolean loading = true;
+    private boolean isLoadable = true;
 
     private RecyclerView.LayoutManager mLayoutManager;
 
@@ -34,6 +35,9 @@ public class RecyclerScrollMoreListener
 
     @Override
     public void onScrolled(RecyclerView view, int dx, int dy) {
+        if(!isLoadable) {
+            return;
+        }
         if (loadMoreListener != null) {
             int lastVisibleItemPosition = 0;
             int totalItemCount = mLayoutManager.getItemCount();
@@ -71,6 +75,17 @@ public class RecyclerScrollMoreListener
                 loading = true;
             }
         }
+    }
+
+    public void resetLoading() {
+        loading = true;
+        currentPage = 0;
+        previousTotalItemCount = 0;
+        isLoadable = true;
+    }
+
+    public void stopLoading() {
+        isLoadable = false;
     }
 
     public interface OnLoadMoreListener {

@@ -7,9 +7,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.util.AttributeSet;
-import android.view.ViewAnimationUtils;
 
 import com.chatcamp.uikit.commons.ImageLoader;
+import com.chatcamp.uikit.messages.RecyclerScrollMoreListener;
 
 import io.chatcamp.sdk.BaseChannel;
 import io.chatcamp.sdk.GroupChannelListQuery;
@@ -23,6 +23,12 @@ public class ChannelList extends RecyclerView {
     private ChannelAdapter adapter;
     private ChannelAdapter.ChannelClickedListener clickListener;
     private ChannelListStyle channelListStyle;
+    private RecyclerScrollMoreListener recyclerScrollMoreListener;
+    private OnChannelsLoadedListener onChannelsLoadedListener;
+
+    public interface OnChannelsLoadedListener {
+        void onChannelsLoaded();
+    }
 
 
     public ChannelList(Context context) {
@@ -46,12 +52,20 @@ public class ChannelList extends RecyclerView {
     }
 
     public void setChannelType(BaseChannel.ChannelType channelType, GroupChannelListQuery.ParticipantState participantState, ChannelAdapter.ChannelComparator comparator) {
+        if(recyclerScrollMoreListener != null) {
+            recyclerScrollMoreListener.resetLoading();
+        }
         adapter.setChannelType(channelType, participantState, comparator);
     }
 
     public void setChannelClickListener(ChannelAdapter.ChannelClickedListener channelClickListener) {
         clickListener = channelClickListener;
         adapter.setChannelClickedListener(channelClickListener);
+    }
+
+    public void setOnChannelsLoadedListener(OnChannelsLoadedListener listener) {
+        onChannelsLoadedListener = listener;
+        adapter.setOnChannelsLoadedListener(onChannelsLoadedListener);
     }
 
     public void setAvatarImageLoader(ImageLoader imageLoader) {
@@ -76,6 +90,9 @@ public class ChannelList extends RecyclerView {
         setItemAnimator(itemAnimator);
         setLayoutManager(layoutManager);
         adapter.setStyle(channelListStyle);
+        recyclerScrollMoreListener = new RecyclerScrollMoreListener(layoutManager, adapter);
+        addOnScrollListener(recyclerScrollMoreListener);
+        adapter.setRecyclerScrollMoreListener(recyclerScrollMoreListener);
         super.setAdapter(adapter);
 
     }
