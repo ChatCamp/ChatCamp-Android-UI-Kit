@@ -134,6 +134,7 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
         messageIdHelperClassMap.put(message.getId(), helperClass);
         messageHolder.view.setTag(message);
         messageHolder.cancelDownloadIv.setTag(message.getId());
+        messageHolder.progressBar.setTag(message.getId());
         messageHolder.videoName.setText(message.getAttachment().getName());
         Drawable backgroundDrawable = messageHolder.view.getBackground().mutate();
         boolean isFirstMessage = messageSpecs.isFirstMessage;
@@ -155,6 +156,22 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
             public void onClick(View v) {
                 if (v.getTag() != null && v.getTag() instanceof Message) {
                     onVideoClick((Message) v.getTag());
+                    Log.e(TAG, "view clicked");
+                }
+            }
+        });
+        messageHolder.progressBar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (v.getTag() != null && v.getTag() instanceof String) {
+                    Log.e(TAG, "cancel clicked");
+                    String messageId = (String) v.getTag();
+                    Intent progressIntent = new Intent(DownloadVideoService.CancelDownloadBroadcastReceiver.ACTION);
+                    progressIntent.putExtra(DownloadVideoService.CancelDownloadBroadcastReceiver.MESSAGE_ID, messageId);
+                    Context ctx = Utils.getContext(objectWeakReference.get());
+                    if (ctx != null) {
+                        ctx.sendBroadcast(progressIntent);
+                    }
                 }
             }
         });
@@ -163,12 +180,13 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
             @Override
             public void onClick(View v) {
                 if (v.getTag() != null && v.getTag() instanceof String) {
+                    Log.e(TAG, "cancel clicked");
                     String messageId = (String) v.getTag();
                     Intent progressIntent = new Intent(DownloadVideoService.CancelDownloadBroadcastReceiver.ACTION);
                     progressIntent.putExtra(DownloadVideoService.CancelDownloadBroadcastReceiver.MESSAGE_ID, messageId);
                     Context ctx = Utils.getContext(objectWeakReference.get());
                     if (ctx != null) {
-                       // ctx.sendBroadcast(progressIntent);
+                        ctx.sendBroadcast(progressIntent);
                     }
                 }
             }
@@ -303,72 +321,82 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            String messageId = intent.getStringExtra(MESSAGE_ID);
-            if (!TextUtils.isEmpty(messageId)) {
-                if (intent.hasExtra(STATUS) && intent.getStringExtra(STATUS).equals(START)) {
-                    // download has started
-                    if (messageIdHelperClassMap
-                            .get(messageId).progressBar.getVisibility() != View.VISIBLE) {
-                        messageIdHelperClassMap.get(messageId).progressBar.setVisibility(View.VISIBLE);
-                        messageIdHelperClassMap.get(messageId).cancelDownloadIcon.setVisibility(View.VISIBLE);
-                    }
-                } else if (intent.hasExtra(STATUS) && intent.getStringExtra(STATUS).equals(VideoMessageFactory.PROGRESS)) {
-                    if (!messageIds.contains(messageId)) {
-                        messageIds.add(messageId);
-                        Log.e(TAG, "message" + message.getId() + "added to messageIds in getting progress");
-                    }
-                    // Download is still in progress
-                    if (messageIdHelperClassMap.get(messageId) != null) {
+            if (intent.getAction() != null && intent.getAction().equals(ACTION)) {
+                String messageId = intent.getStringExtra(MESSAGE_ID);
+                if (!TextUtils.isEmpty(messageId)) {
+                    if (intent.hasExtra(STATUS) && intent.getStringExtra(STATUS).equals(START)) {
+                        // download has started
+                        if (!messageIds.contains(messageId)) {
+                            messageIds.add(messageId);
+                            Log.e(TAG, "message" + messageId + "added to messageIds in getting progress");
+                        }
                         if (messageIdHelperClassMap
                                 .get(messageId).progressBar.getVisibility() != View.VISIBLE) {
                             messageIdHelperClassMap.get(messageId).progressBar.setVisibility(View.VISIBLE);
                             messageIdHelperClassMap.get(messageId).cancelDownloadIcon.setVisibility(View.VISIBLE);
                         }
-                        messageIdHelperClassMap.get(messageId).progressBar.setProgress(intent.getIntExtra(PROGRESS, 0));
-                    }
-                } else if (intent.hasExtra(STATUS) && intent.getStringExtra(STATUS).equals(COMPLETE)) {
-                    if (intent.hasExtra(VIDEO_URI)) {
-                        //Download is complete and we have got the video url
-                        if (messageIdHelperClassMap.get(messageId) != null && messageIdHelperClassMap
-                                .get(messageId).progressBar.getVisibility() == View.VISIBLE) {
-                            messageIdHelperClassMap.get(messageId).progressBar.setVisibility(View.INVISIBLE);
-                            messageIdHelperClassMap.get(messageId).cancelDownloadIcon.setVisibility(View.INVISIBLE);
+                    } else if (intent.hasExtra(STATUS) && intent.getStringExtra(STATUS).equals(VideoMessageFactory.PROGRESS)) {
+                        if (!messageIds.contains(messageId)) {
+//                            messageIds.add(messageId);
+                            Log.e(TAG, "message" + messageId + "added to messageIds in getting progress");
+                            return;
                         }
-                        messageIds.remove(messageId);
-                        Log.e(TAG, "message" + messageId + "removed from messageIds in getting progress");
-                        if (messageIds.size() == 0) {
-                            Intent showVideoIntent = new Intent(context, ShowVideoActivity.class);
-                            showVideoIntent.putExtra(ShowVideoActivity.VIDEO_URL, intent.getStringExtra(VIDEO_URI));
-                            Utils.startActivity(showVideoIntent, Utils.getContext(objectWeakReference.get()));
-                        }
-                    } else {
-                        // Download is complete but we have still not got the video url
+                        // Download is still in progress
                         if (messageIdHelperClassMap.get(messageId) != null) {
                             if (messageIdHelperClassMap
                                     .get(messageId).progressBar.getVisibility() != View.VISIBLE) {
                                 messageIdHelperClassMap.get(messageId).progressBar.setVisibility(View.VISIBLE);
                                 messageIdHelperClassMap.get(messageId).cancelDownloadIcon.setVisibility(View.VISIBLE);
                             }
-                            messageIdHelperClassMap.get(messageId).progressBar.setProgress(intent.getIntExtra(PROGRESS, 100));
+                            messageIdHelperClassMap.get(messageId).progressBar.setProgress(intent.getIntExtra(PROGRESS, 0));
                         }
-                    }
-                } else if (intent.hasExtra(STATUS) && intent.getStringExtra(STATUS).equals(COMPLETE)) {
-                    // Download has been stopped
-                    if (messageIdHelperClassMap.get(messageId) != null && messageIdHelperClassMap
-                            .get(messageId).progressBar.getVisibility() == View.VISIBLE) {
-                        messageIdHelperClassMap.get(messageId).progressBar.setVisibility(View.INVISIBLE);
-                        messageIdHelperClassMap.get(messageId).cancelDownloadIcon.setVisibility(View.INVISIBLE);
-                        messageIdHelperClassMap.get(messageId).downloadIcon.setVisibility(View.VISIBLE);
+                    } else if (intent.hasExtra(STATUS) && intent.getStringExtra(STATUS).equals(COMPLETE)) {
+                        if (intent.hasExtra(VIDEO_URI)) {
+                            //Download is complete and we have got the video url
+                            if (messageIdHelperClassMap.get(messageId) != null && messageIdHelperClassMap
+                                    .get(messageId).progressBar.getVisibility() == View.VISIBLE) {
+                                messageIdHelperClassMap.get(messageId).progressBar.setVisibility(View.INVISIBLE);
+                                messageIdHelperClassMap.get(messageId).cancelDownloadIcon.setVisibility(View.INVISIBLE);
+                            }
+                            messageIds.remove(messageId);
+                            Log.e(TAG, "message" + messageId + "removed from messageIds in getting progress");
+                            if (messageIds.size() == 0) {
+                                Intent showVideoIntent = new Intent(context, ShowVideoActivity.class);
+                                showVideoIntent.putExtra(ShowVideoActivity.VIDEO_URL, intent.getStringExtra(VIDEO_URI));
+                                Utils.startActivity(showVideoIntent, Utils.getContext(objectWeakReference.get()));
+                            }
+                        } else {
+                            // Download is complete but we have still not got the video url
+                            if (messageIdHelperClassMap.get(messageId) != null) {
+                                if (messageIdHelperClassMap
+                                        .get(messageId).progressBar.getVisibility() != View.VISIBLE) {
+                                    messageIdHelperClassMap.get(messageId).progressBar.setVisibility(View.VISIBLE);
+                                    messageIdHelperClassMap.get(messageId).cancelDownloadIcon.setVisibility(View.VISIBLE);
+                                }
+                                messageIdHelperClassMap.get(messageId).progressBar.setProgress(intent.getIntExtra(PROGRESS, 100));
+                            }
+                        }
+                    } else if (intent.hasExtra(STATUS) && intent.getStringExtra(STATUS).equals(STOP)) {
+                        // Download has been stopped
+                        Log.e(TAG, "message" + messageId + "download stopped");
+                        if (messageIdHelperClassMap.get(messageId) != null && messageIdHelperClassMap
+                                .get(messageId).progressBar.getVisibility() == View.VISIBLE) {
+                            messageIdHelperClassMap.get(messageId).progressBar.setVisibility(View.INVISIBLE);
+                            messageIdHelperClassMap.get(messageId).progressBar.setProgress(0);
+                            messageIdHelperClassMap.get(messageId).cancelDownloadIcon.setVisibility(View.INVISIBLE);
+                            messageIdHelperClassMap.get(messageId).downloadIcon.setVisibility(View.VISIBLE);
+                        }
+                        messageIds.remove(messageId);
+                    } else {
+                        Log.e(TAG, "status sent from the downloadService is not correct, this should never be the case. " +
+                                "Please contact developer for this");
                     }
                 } else {
-                    Log.e(TAG, "status sent from the downloadService is not correct, this should never be the case. " +
-                            "Please contact developer for this");
+                    Log.e(TAG, "message set in the DownloadVideoService is empty, " +
+                            "this should never be the case, Please contact developer for this");
                 }
-            } else {
-                Log.e(TAG, "message set in the DownloadVideoService is empty, " +
-                        "this should never be the case, Please contact developer for this");
-            }
 
+            }
         }
     }
 }

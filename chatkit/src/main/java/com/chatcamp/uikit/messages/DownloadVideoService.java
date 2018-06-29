@@ -43,7 +43,7 @@ public class DownloadVideoService extends Service {
         super.onCreate();
         messageIdFutureMap = new ConcurrentHashMap<>();
         threadExecutor = Executors.newCachedThreadPool();
-        IntentFilter intentFilter = new IntentFilter(VideoMessageFactory.DownloadResultReceiver.ACTION);
+        IntentFilter intentFilter = new IntentFilter(CancelDownloadBroadcastReceiver.ACTION);
         registerReceiver(cancelDownloadBroadcastReceiver, intentFilter);
     }
 
@@ -87,6 +87,7 @@ public class DownloadVideoService extends Service {
         private boolean isMe;
         private String messageId;
         private Context context;
+        private int progress;
 
         public DownloadVideoRunnable(Context context, String videoUrl, boolean isMe, String messageId) {
             this.videoUrl = videoUrl;
@@ -117,11 +118,14 @@ public class DownloadVideoService extends Service {
                                     @Override
                                     public void downloadProgress(final int progress) {
                                         Log.d("download", "downloading" + progress);
-                                        Intent progressIntent = new Intent(VideoMessageFactory.DownloadResultReceiver.ACTION);
-                                        progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.PROGRESS, progress);
-                                        progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.STATUS, VideoMessageFactory.PROGRESS);
-                                        progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.MESSAGE_ID, messageId);
-                                        sendBroadcast(progressIntent);
+                                        if(DownloadVideoRunnable.this.progress != progress) {
+                                            DownloadVideoRunnable.this.progress = progress;
+                                            Intent progressIntent = new Intent(VideoMessageFactory.DownloadResultReceiver.ACTION);
+                                            progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.PROGRESS, progress);
+                                            progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.STATUS, VideoMessageFactory.PROGRESS);
+                                            progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.MESSAGE_ID, messageId);
+                                            sendBroadcast(progressIntent);
+                                        }
                                     }
 
                                     @Override
@@ -168,15 +172,17 @@ public class DownloadVideoService extends Service {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            String messageId = intent.getStringExtra(MESSAGE_ID);
-            if (!TextUtils.isEmpty(messageId)) {
-                Future future = messageIdFutureMap.get(messageId);
-                if (future != null) {
-                    future.cancel(true);
-                    Intent progressIntent = new Intent(CancelDownloadBroadcastReceiver.ACTION);
-                    progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.STATUS, VideoMessageFactory.STOP);
-                    progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.MESSAGE_ID, messageId);
-                    sendBroadcast(progressIntent);
+            if(intent.getAction() != null && intent.getAction().equals(ACTION)) {
+                String messageId = intent.getStringExtra(MESSAGE_ID);
+                if (!TextUtils.isEmpty(messageId)) {
+                    Future future = messageIdFutureMap.get(messageId);
+                    if (future != null) {
+                        future.cancel(true);
+                        Intent progressIntent = new Intent(VideoMessageFactory.DownloadResultReceiver.ACTION);
+                        progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.STATUS, VideoMessageFactory.STOP);
+                        progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.MESSAGE_ID, messageId);
+                        sendBroadcast(progressIntent);
+                    }
                 }
             }
         }
