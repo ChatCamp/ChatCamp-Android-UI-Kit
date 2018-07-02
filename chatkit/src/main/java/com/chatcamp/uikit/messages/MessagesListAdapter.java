@@ -147,7 +147,6 @@ public class MessagesListAdapter
         if(visibility == VISIBLE) {
             addChannelListener();
         } else {
-            removeChannelListener();
             //TODO find a more elegant solution
             for(MessageFactory messageFactory : messageFactories) {
                 if(messageFactory instanceof VoiceMessageFactory) {
@@ -645,6 +644,10 @@ public class MessagesListAdapter
 
     public void setOnMesaageLoadedListener(MessagesList.OnMessagesLoadedListener onMessagesLoadedListener) {
         this.onMessagesLoadedListener = onMessagesLoadedListener;
+    }
+
+    public void onDetachedFromWindow() {
+        removeChannelListener();
     }
 
     private static class Cluster {
