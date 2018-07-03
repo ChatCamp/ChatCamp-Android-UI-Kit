@@ -11,6 +11,8 @@ import android.util.AttributeSet;
 import com.chatcamp.uikit.commons.ImageLoader;
 import com.chatcamp.uikit.messages.RecyclerScrollMoreListener;
 
+import java.util.List;
+
 import io.chatcamp.sdk.BaseChannel;
 import io.chatcamp.sdk.GroupChannelListQuery;
 
@@ -52,10 +54,15 @@ public class ChannelList extends RecyclerView {
     }
 
     public void setChannelType(BaseChannel.ChannelType channelType, GroupChannelListQuery.ParticipantState participantState, ChannelAdapter.ChannelComparator comparator) {
+        setChannelType(channelType, participantState, null, comparator);
+    }
+
+    public void setChannelType(BaseChannel.ChannelType channelType, GroupChannelListQuery.ParticipantState participantState,
+                               List<String> customFilter, ChannelAdapter.ChannelComparator comparator) {
         if(recyclerScrollMoreListener != null) {
             recyclerScrollMoreListener.resetLoading();
         }
-        adapter.setChannelType(channelType, participantState, comparator);
+        adapter.setChannelType(channelType, participantState, customFilter, comparator);
     }
 
     public void setChannelClickListener(ChannelAdapter.ChannelClickedListener channelClickListener) {
