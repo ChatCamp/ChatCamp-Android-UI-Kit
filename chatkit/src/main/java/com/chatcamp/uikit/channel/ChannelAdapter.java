@@ -336,7 +336,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
             itemView.setOnClickListener(this);
             if (baseChannel instanceof GroupChannel && ((GroupChannel) baseChannel).getLastMessage() != null) {
                 GroupChannel groupChannel = (GroupChannel) baseChannel;
-                timeFormat.setTime(timeTv, groupChannel.getLastMessage().getInsertedAt());
+                timeFormat.setTime(timeTv, groupChannel.getLastMessage().getInsertedAt() * 1000);
                 if (groupChannel.getLastMessage().getType().equalsIgnoreCase("text")) {
                     lastMessageTv.setText(groupChannel.getLastMessage().getText());
                 } else {
@@ -352,10 +352,8 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
             } else {
                 unreadMessageTv.setVisibility(View.GONE);
             }
-            //TODO changing the logic for now and removing the condition of isDIstinct, will look into this later
             if (baseChannel instanceof GroupChannel
-                    && ((GroupChannel) baseChannel).getParticipantsCount() <= 2
-                    /*&& ((GroupChannel) baseChannel).isDistinct()*/) {
+                    && ((GroupChannel) baseChannel).getParticipantsCount() <= 2) {
                 GroupChannel groupChannel = null;// chatCampDatabaseHelper.getGroupChannel(baseChannel.getId());
                 if (groupChannel != null && groupChannel.getParticipants() != null && groupChannel.getParticipants().size() > 0) {
                     List<Participant> participants = groupChannel.getParticipants();
