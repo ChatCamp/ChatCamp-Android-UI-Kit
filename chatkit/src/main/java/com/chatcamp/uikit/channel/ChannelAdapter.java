@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.widget.RecyclerView;
@@ -42,7 +41,6 @@ import io.chatcamp.sdk.OpenChannelListQuery;
 import io.chatcamp.sdk.Participant;
 
 import static android.view.View.VISIBLE;
-import static android.view.View.resolveSize;
 
 /**
  * Created by shubhamdhabhai on 18/05/18.
@@ -96,7 +94,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
     }
 
     public void onWindowVisibilityChanged(int visibility) {
-        if(visibility == VISIBLE) {
+        if (visibility == VISIBLE) {
             addChannelListener();
         } else {
             removeChannelListener();
@@ -118,14 +116,14 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
 
             @Override
             public void onGroupChannelUpdated(GroupChannel groupChannel) {
-                if(channelType == null) {
+                if (channelType == null) {
                     return;
                 }
                 if (channelType == BaseChannel.ChannelType.GROUP) {
                     for (int i = 0; i < dataset.size(); ++i) {
                         if (dataset.get(i).getId().equals(groupChannel.getId())) {
                             dataset.set(i, groupChannel);
-                           // chatCampDatabaseHelper.addGroupChannel(groupChannel);
+                            // chatCampDatabaseHelper.addGroupChannel(groupChannel);
                             notifyItemChanged(i);
                         }
                     }
@@ -173,7 +171,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
         this.comparator = comparator;
         this.customFilter = customFilter;
         loadingFirstTime = true;
-        if(recyclerScrollMoreListener != null) {
+        if (recyclerScrollMoreListener != null) {
             recyclerScrollMoreListener.stopLoading();
         }
         loadChannels();
@@ -184,10 +182,10 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
             comparator = new LastMessageChannelComparator();
         }
         if (channelType == BaseChannel.ChannelType.OPEN) {
-            if(openChannelListQuery == null || loadingFirstTime) {
+            if (openChannelListQuery == null || loadingFirstTime) {
                 openChannelListQuery = OpenChannel.createOpenChannelListQuery();
                 loadingFirstTime = false;
-                if(recyclerScrollMoreListener != null) {
+                if (recyclerScrollMoreListener != null) {
                     recyclerScrollMoreListener.resetLoading();
                 }
             }
@@ -195,7 +193,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
                 @Override
                 public void onResult(List<OpenChannel> openChannelList, ChatCampException e) {
 //                    dataset.clear();
-                    if(onChannelsLoadedListener != null) {
+                    if (onChannelsLoadedListener != null) {
                         onChannelsLoadedListener.onChannelsLoaded();
                     }
                     dataset.addAll(openChannelList);
@@ -203,9 +201,9 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
                 }
             });
         } else if (channelType == BaseChannel.ChannelType.GROUP) {
-            if(groupChannelListQuery == null || loadingFirstTime) {
+            if (groupChannelListQuery == null || loadingFirstTime) {
                 Log.e("Group Channel", "Loading for the first time from database");
-               // final List<GroupChannel> groupChannels = chatCampDatabaseHelper.getGroupChannels(participantState);
+                // final List<GroupChannel> groupChannels = chatCampDatabaseHelper.getGroupChannels(participantState);
 //                if(groupChannels.size() > 0 && onChannelsLoadedListener != null) {
 //                    onChannelsLoadedListener.onChannelsLoaded();
 //                }
@@ -214,7 +212,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
 //                dataset.addAll(groupChannels);
                 groupChannelListQuery = GroupChannel.createGroupChannelListQuery();
                 groupChannelListQuery.setParticipantState(participantState);
-                if(customFilter != null) {
+                if (customFilter != null) {
                     groupChannelListQuery.setCustomFilter(customFilter);
                 }
                 //notifyDataSetChanged();
@@ -223,12 +221,12 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
             groupChannelListQuery.get(new GroupChannelListQuery.ResultHandler() {
                 @Override
                 public void onResult(List<GroupChannel> groupChannelList, ChatCampException e) {
-                    if(loadingFirstTime) {
-                        if(recyclerScrollMoreListener != null) {
+                    if (loadingFirstTime) {
+                        if (recyclerScrollMoreListener != null) {
                             recyclerScrollMoreListener.resetLoading();
                         }
                         Log.e("Group Channel", "result from first api call");
-                        if(dataset.size() == 0 && onChannelsLoadedListener != null) {
+                        if (dataset.size() == 0 && onChannelsLoadedListener != null) {
                             onChannelsLoadedListener.onChannelsLoaded();
                         }
                         dataset.clear();
@@ -288,11 +286,9 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
 
         Drawable unreadMessageTextBackground = unreadMessageText.getBackground();
         unreadMessageTextBackground.mutate().setColorFilter(channelListStyle.getUnreadMessageCountBackgroundColor(), PorterDuff.Mode.SRC_IN);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            unreadMessageText.setBackground(unreadMessageTextBackground);
-        } else {
-            unreadMessageText.setBackgroundDrawable(unreadMessageTextBackground);
-        }
+
+        unreadMessageText.setBackground(unreadMessageTextBackground);
+
         //unreadMessageText.setBackgroundColor(channelListStyle.getUnreadMessageCountBackgroundColor());
         unreadMessageText.setTextSize(TypedValue.COMPLEX_UNIT_PX, channelListStyle.getUnreadMessageCountTextSize());
         unreadMessageText.setTextColor(channelListStyle.getUnreadMessageCountTextColor());
@@ -353,8 +349,8 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
                 unreadMessageTv.setVisibility(View.GONE);
             }
             if (baseChannel instanceof GroupChannel
-                    && ((GroupChannel) baseChannel).getParticipantsCount() <= 2) {
-                GroupChannel groupChannel = null;// chatCampDatabaseHelper.getGroupChannel(baseChannel.getId());
+                    && ((GroupChannel) baseChannel).getParticipantsCount() == 2) {
+                GroupChannel groupChannel = (GroupChannel)baseChannel;// chatCampDatabaseHelper.getGroupChannel(baseChannel.getId());
                 if (groupChannel != null && groupChannel.getParticipants() != null && groupChannel.getParticipants().size() > 0) {
                     List<Participant> participants = groupChannel.getParticipants();
                     for (Participant participant : participants) {
@@ -362,21 +358,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
                             populateTitle(participant.getAvatarUrl(), participant.getDisplayName());
                         }
                     }
-                } else {
-                    GroupChannel.get(baseChannel.getId(), new GroupChannel.GetListener() {
-                        @Override
-                        public void onResult(GroupChannel groupChannel, ChatCampException e) {
-                           // chatCampDatabaseHelper.addGroupChannel(groupChannel);
-                            List<Participant> participants = groupChannel.getParticipants();
-                            for (Participant participant : participants) {
-                                if (!participant.getId().equals(ChatCamp.getCurrentUser().getId())) {
-                                    populateTitle(participant.getAvatarUrl(), participant.getDisplayName());
-                                }
-                            }
-                        }
-                    });
                 }
-
             } else {
                 populateTitle(baseChannel.getAvatarUrl(), baseChannel.getName());
             }
