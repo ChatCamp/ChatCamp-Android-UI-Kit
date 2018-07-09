@@ -203,25 +203,32 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
         } else if (channelType == BaseChannel.ChannelType.GROUP) {
             if (groupChannelListQuery == null || loadingFirstTime) {
                 Log.e("Group Channel", "Loading for the first time from database");
-                final List<GroupChannel> groupChannels = chatCampDatabaseHelper.getGroupChannels(participantState, customFilter);
-                if (groupChannels.size() > 0 && onChannelsLoadedListener != null) {
-                    onChannelsLoadedListener.onChannelsLoaded();
-                }
-                Collections.sort(groupChannels, comparator);
-                dataset.clear();
-                dataset.addAll(groupChannels);
+                chatCampDatabaseHelper.getGroupChannels(participantState, customFilter, new ChatCampDatabaseHelper.GetGroupChannelsListener() {
+                    @Override
+                    public void onGetGroupChannels(List<GroupChannel> groupChannels) {
+                        if(loadingFirstTime) {
+                            if (groupChannels.size() > 0 && onChannelsLoadedListener != null) {
+                                onChannelsLoadedListener.onChannelsLoaded();
+                            }
+                            Collections.sort(groupChannels, comparator);
+                            dataset.clear();
+                            dataset.addAll(groupChannels);
+                            notifyDataSetChanged();
+                        }
+                    }
+                });
                 groupChannelListQuery = GroupChannel.createGroupChannelListQuery();
                 groupChannelListQuery.setParticipantState(participantState);
                 if (customFilter != null) {
                     groupChannelListQuery.setCustomFilter(customFilter);
                 }
-                notifyDataSetChanged();
             }
             Log.e("Group Channel", "querying group from api");
             groupChannelListQuery.get(new GroupChannelListQuery.ResultHandler() {
                 @Override
                 public void onResult(List<GroupChannel> groupChannelList, ChatCampException e) {
                     if (loadingFirstTime) {
+                        loadingFirstTime = false;
                         if (recyclerScrollMoreListener != null) {
                             recyclerScrollMoreListener.resetLoading();
                         }
@@ -230,7 +237,6 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
                             onChannelsLoadedListener.onChannelsLoaded();
                         }
                         dataset.clear();
-                        loadingFirstTime = false;
                         chatCampDatabaseHelper.addGroupChannels(groupChannelList, participantState, customFilter);
                     } else {
                         Log.e("Group Channel", "result from subsequent api call");
