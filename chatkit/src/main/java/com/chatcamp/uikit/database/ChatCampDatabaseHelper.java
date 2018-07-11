@@ -5,10 +5,16 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.AsyncTask;
 import android.provider.BaseColumns;
+import android.text.TextUtils;
+
+import org.json.JSONArray;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import io.chatcamp.sdk.BaseChannel;
 import io.chatcamp.sdk.GroupChannel;
@@ -45,6 +51,7 @@ public class ChatCampDatabaseHelper extends SQLiteOpenHelper {
                 + ChatCampDatabaseContract.GroupEntry._ID + " INTEGER PRIMARY KEY,"
                 + ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP + " TEXT,"
                 + ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP_ID + " TEXT,"
+                + ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_CUSTOM_FILTERS + " TEXT,"
                 + ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_PARTICIPANT_STATE + " TEXT" + ")";
         sqLiteDatabase.execSQL(CREATE_GROUP_CHANNEL_TABLE);
     }
@@ -60,7 +67,13 @@ public class ChatCampDatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void addMessages(List<Message> messages, String channelId, BaseChannel.ChannelType channelType) {
-        SQLiteDatabase sqliteDatabase = this.getWritableDatabase();
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        new AddMessagesAsyncTask(messages, channelId, channelType, sqLiteDatabase).execute();
+    }
+
+    private static void addMessagesLocal(List<Message> messages, String channelId, BaseChannel.ChannelType channelType, SQLiteDatabase sqliteDatabase) {
+
+        // delete all the messages of that particular group id and channel type and add the new messages.
         sqliteDatabase.delete(ChatCampDatabaseContract.MessageEntry.TABLE_NAME,
                 ChatCampDatabaseContract.MessageEntry.COLUMN_NAME_CHANNEL_ID + " =? AND "
                         + ChatCampDatabaseContract.MessageEntry.COLUMN_NAME_CHANNEL_TYPE + "=?",
@@ -83,6 +96,11 @@ public class ChatCampDatabaseHelper extends SQLiteOpenHelper {
 
     public void addMessage(Message message, String channelId, BaseChannel.ChannelType channelType) {
         SQLiteDatabase sqliteDatabase = this.getWritableDatabase();
+        new AddMessageAsyncTask(message, channelId, channelType, sqliteDatabase).execute();
+    }
+
+    private static void addMessageLocal(Message message, String channelId, BaseChannel.ChannelType channelType, SQLiteDatabase sqliteDatabase) {
+        // delete all the messages except top 19
         sqliteDatabase.execSQL("DELETE FROM " + ChatCampDatabaseContract.MessageEntry.TABLE_NAME
                 + " WHERE " + ChatCampDatabaseContract.MessageEntry.COLUMN_NAME_CHANNEL_ID
                 + " = '" + channelId + "' AND "
@@ -99,6 +117,7 @@ public class ChatCampDatabaseHelper extends SQLiteOpenHelper {
                 + ChatCampDatabaseContract.MessageEntry.COLUMN_NAME_TIME_STAMP +
                 "  DESC LIMIT 19)");
 
+        // add the message
         ContentValues values = new ContentValues();
         values.put(ChatCampDatabaseContract.MessageEntry.COLUMN_NAME_MESSAGE, message.serialize()); // serialized message
         values.put(ChatCampDatabaseContract.MessageEntry.COLUMN_NAME_CHANNEL_ID, channelId); // Group ID
@@ -107,8 +126,12 @@ public class ChatCampDatabaseHelper extends SQLiteOpenHelper {
         sqliteDatabase.insert(ChatCampDatabaseContract.MessageEntry.TABLE_NAME, null, values);
     }
 
-    public List<Message> getMessages(String channelId, BaseChannel.ChannelType channelType) {
-        SQLiteDatabase db = this.getReadableDatabase();
+    public void getMessages(String channelId, BaseChannel.ChannelType channelType, GetMessagesListener getMessagesListener) {
+        SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+        new GetMessagesAsyncTask(channelId, channelType, sqLiteDatabase, getMessagesListener).execute();
+    }
+
+    private static List<Message> getMessagesLocal(String channelId, BaseChannel.ChannelType channelType, SQLiteDatabase sqLiteDatabase) {
 
 // Define a projection that specifies which columns from the database
 // you will actually use after this query.
@@ -123,7 +146,7 @@ public class ChatCampDatabaseHelper extends SQLiteOpenHelper {
         String sortOrder =
                 ChatCampDatabaseContract.MessageEntry.COLUMN_NAME_TIME_STAMP + " DESC";
 
-        Cursor cursor = db.query(
+        Cursor cursor = sqLiteDatabase.query(
                 ChatCampDatabaseContract.MessageEntry.TABLE_NAME,   // The table to query
                 projection,             // The array of columns to return (pass null to get all)
                 selection,              // The columns for the WHERE clause
@@ -143,46 +166,71 @@ public class ChatCampDatabaseHelper extends SQLiteOpenHelper {
         return messages;
     }
 
+    public void addGroupChannels(List<GroupChannel> groupChannels,
+                                 GroupChannelListQuery.ParticipantState participantState,
+                                 List<String> queryCustomFilter) {
+        SQLiteDatabase sqliteDatabase = this.getWritableDatabase();
+        new AddGroupChannelsAsyncTask(groupChannels, participantState, queryCustomFilter, sqliteDatabase).execute();
+    }
+
 
     // group channels
-    public void addGroupChannels(List<GroupChannel> groupChannels, GroupChannelListQuery.ParticipantState participantState) {
-
-        SQLiteDatabase sqliteDatabase = this.getWritableDatabase();
+    private static void addGroupChannelsLocal(List<GroupChannel> groupChannels,
+                                              GroupChannelListQuery.ParticipantState participantState,
+                                              List<String> queryCustomFilter, SQLiteDatabase sqliteDatabase) {
         StringBuilder inQuery = new StringBuilder();
 
-        inQuery.append("(");
-        boolean first = true;
-
-        //TODO delete only items of that particular participant state
-
-        for (GroupChannel groupChannel : groupChannels) {
-            if (first) {
-                first = false;
-                inQuery.append("'").append(groupChannel.getId()).append("'");
-            } else {
-                inQuery.append(", '").append(groupChannel.getId()).append("'");
+        // if there is no filter used then we delete all the groups which are not part of the groups
+        // that we got from api of that state.
+        if (queryCustomFilter == null) {
+            inQuery.append("(");
+            boolean first = true;
+            for (GroupChannel groupChannel : groupChannels) {
+                if (first) {
+                    first = false;
+                    inQuery.append("'").append(groupChannel.getId()).append("'");
+                } else {
+                    inQuery.append(", '").append(groupChannel.getId()).append("'");
+                }
+            }
+            inQuery.append(")");
+            if (!TextUtils.isEmpty(inQuery.toString())) {
+                sqliteDatabase.execSQL("DELETE FROM " + ChatCampDatabaseContract.GroupEntry.TABLE_NAME
+                        + " WHERE " + ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_PARTICIPANT_STATE
+                        + " = '" + participantState.name() + "' AND "
+                        + ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP_ID + " NOT IN "
+                        + inQuery);
+            }
+        } else {
+            // if there is any custom filter then we get all the groups of that state and that
+            // filter from database and delete the one that we did not get from api
+            List<GroupChannel> savedGroupChannel = getGroupChannelsLocal(participantState, queryCustomFilter, sqliteDatabase);
+            if (savedGroupChannel != null && savedGroupChannel.size() > 0) {
+                inQuery.append("(");
+                boolean first = true;
+                for (GroupChannel groupChannel : savedGroupChannel) {
+                    for (GroupChannel queryChannel : groupChannels) {
+                        if (queryChannel.getId().equals(groupChannel.getId())) {
+                            return;
+                        }
+                    }
+                    if (first) {
+                        first = false;
+                        inQuery.append("'").append(groupChannel.getId()).append("'");
+                    } else {
+                        inQuery.append(", '").append(groupChannel.getId()).append("'");
+                    }
+                }
+                inQuery.append(")");
+            }
+            if (!TextUtils.isEmpty(inQuery.toString())) {
+                sqliteDatabase.execSQL("DELETE FROM " + ChatCampDatabaseContract.GroupEntry.TABLE_NAME
+                        + " WHERE " + ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_PARTICIPANT_STATE
+                        + " = '" + participantState.name() + "' AND "
+                        + ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP_ID + " ="
+                        + inQuery);
             }
         }
-        inQuery.append(")");
-
-        sqliteDatabase.execSQL("DELETE FROM " + ChatCampDatabaseContract.GroupEntry.TABLE_NAME
-                + " WHERE " + ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_PARTICIPANT_STATE
-                + " = '" + participantState.name() + "' AND "
-                + ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP_ID + " NOT IN "
-                + inQuery);
-
-
-//        for (GroupChannel groupChannel : groupChannels) {
-//            if (first) {
-//                first = false;
-//                inQuery.append("'").append(groupChannel.getId()).append("'");
-//            } else {
-//                inQuery.append(", '").append(groupChannel.getId()).append("'");
-//            }
-//        }
-//        inQuery.append(")");
-//        sqliteDatabase.delete(ChatCampDatabaseContract.GroupEntry.TABLE_NAME, ChatCampDatabaseContract.GroupEntry._ID + " NOT IN " + inQuery.toString(), null);
-
         for (int i = 0; i < groupChannels.size(); ++i) {
             Cursor cursor = sqliteDatabase.rawQuery("SELECT *    FROM " + ChatCampDatabaseContract.GroupEntry.TABLE_NAME
                             + " WHERE " + ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP_ID + " = " + "'" + groupChannels.get(i).getId()
@@ -191,14 +239,20 @@ public class ChatCampDatabaseHelper extends SQLiteOpenHelper {
                     null);
 
             if (cursor.getCount() == 0) {
+                // no group match with the id and participant state.
                 ContentValues values = new ContentValues();
                 values.put(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP_ID, groupChannels.get(i).getId());
                 values.put(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP,
                         groupChannels.get(i).serialize()); // serialized group channel
                 values.put(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_PARTICIPANT_STATE, participantState.name());
+                List<String> customFilters = groupChannels.get(i).getCustomFilter();
+                if (customFilters != null) {
+                    values.put(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_CUSTOM_FILTERS, customFilters.toString());
+                }
                 sqliteDatabase.insert(ChatCampDatabaseContract.GroupEntry.TABLE_NAME,
                         null, values);
             } else {
+                // a group already exists with this id and participant state
                 if (cursor.moveToFirst()) {
                     GroupChannel groupChannel = GroupChannel.createfromSerializedData(cursor.
                             getString(cursor.getColumnIndexOrThrow(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP)));
@@ -206,6 +260,10 @@ public class ChatCampDatabaseHelper extends SQLiteOpenHelper {
                         ContentValues values = new ContentValues();
                         values.put(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP,
                                 groupChannels.get(i).serialize());
+                        List<String> customFilters = groupChannels.get(i).getCustomFilter();
+                        if (customFilters != null) {
+                            values.put(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_CUSTOM_FILTERS, customFilters.toString());
+                        }
                         sqliteDatabase.update(ChatCampDatabaseContract.GroupEntry.TABLE_NAME, values,
                                 ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP_ID + "=?", new String[]{groupChannel.getId()});
                     }
@@ -217,34 +275,57 @@ public class ChatCampDatabaseHelper extends SQLiteOpenHelper {
 
     public void addGroupChannel(GroupChannel groupChannel) {
         SQLiteDatabase sqliteDatabase = this.getWritableDatabase();
+        new AddGroupChannelAsyncTask(groupChannel, sqliteDatabase).execute();
+    }
+
+    private static void addGroupChannelLocal(GroupChannel groupChannel, SQLiteDatabase sqliteDatabase) {
+        // Check if the group already exist
         Cursor cursor = sqliteDatabase.rawQuery("SELECT *    FROM " + ChatCampDatabaseContract.GroupEntry.TABLE_NAME
                 + " WHERE " + ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP_ID + " = " + "'" + groupChannel.getId() + "'", null);
 
+        List<String> customFilters = groupChannel.getCustomFilter();
         if (cursor.getCount() >= 1) {
+            // the group already exists so just update it
             ContentValues values = new ContentValues();
             values.put(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP,
                     groupChannel.serialize());
+            if (customFilters != null) {
+                values.put(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_CUSTOM_FILTERS, customFilters.toString());
+            }
             sqliteDatabase.update(ChatCampDatabaseContract.GroupEntry.TABLE_NAME, values,
                     ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP_ID + "=?", new String[]{groupChannel.getId()});
         } else {
+            // the group doesnot exists so create a new group
             ContentValues values = new ContentValues();
             values.put(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP_ID, groupChannel.getId());
             values.put(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP,
                     groupChannel.serialize()); // serialized group channel
+            if (customFilters != null) {
+                values.put(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_CUSTOM_FILTERS, customFilters.toString());
+            }
             sqliteDatabase.insert(ChatCampDatabaseContract.GroupEntry.TABLE_NAME,
                     null, values);
         }
         cursor.close();
     }
 
-    public List<GroupChannel> getGroupChannels(GroupChannelListQuery.ParticipantState participantState) {
+    public void getGroupChannels(GroupChannelListQuery.ParticipantState participantState,
+                                 List<String> customFilters, GetGroupChannelsListener getGroupChannelsListener) {
+        SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+        new GetGroupChannelsAsyncTask(participantState, customFilters, sqLiteDatabase, getGroupChannelsListener).execute();
+
+    }
+
+    private static List<GroupChannel> getGroupChannelsLocal(GroupChannelListQuery.ParticipantState participantState,
+                                               List<String> customFilters, SQLiteDatabase sqLiteDatabase) {
         ArrayList<GroupChannel> list = new ArrayList<>();
 
-        SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+
         String[] projection = {
                 BaseColumns._ID,
                 ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP,
-                ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_PARTICIPANT_STATE
+                ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_PARTICIPANT_STATE,
+                ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_CUSTOM_FILTERS
         };
         String selection = ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_PARTICIPANT_STATE
                 + " = ?";
@@ -265,9 +346,26 @@ public class ChatCampDatabaseHelper extends SQLiteOpenHelper {
                 // looping through all rows and adding to list
                 if (cursor.moveToFirst()) {
                     do {
-                        GroupChannel groupChannel = GroupChannel.createfromSerializedData(cursor.
-                                getString(cursor.getColumnIndexOrThrow(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP)));
-                        list.add(groupChannel);
+                        String customFilterString = cursor.getString(cursor.getColumnIndexOrThrow(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_CUSTOM_FILTERS));
+                        if (!TextUtils.isEmpty(customFilterString) && customFilters != null && customFilters.size() > 0) {
+                            // the custom filter passed in the function has some value and custom filter saved in the database has some value
+                            List<String> groupFilters = new ArrayList<>();
+                            JSONArray sellerArray = new JSONArray(customFilterString);
+                            for (int i = 0; i < sellerArray.length(); ++i) {
+                                groupFilters.add((String) sellerArray.get(i));
+                            }
+                            Set<String> incomingFiltersSet = new HashSet<>(customFilters);
+                            Set<String> groupFiltersSet = new HashSet<>(groupFilters);
+                            if (groupFiltersSet.containsAll(incomingFiltersSet)) {
+                                GroupChannel groupChannel = GroupChannel.createfromSerializedData(cursor.
+                                        getString(cursor.getColumnIndexOrThrow(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP)));
+                                list.add(groupChannel);
+                            }
+                        } else {
+                            GroupChannel groupChannel = GroupChannel.createfromSerializedData(cursor.
+                                    getString(cursor.getColumnIndexOrThrow(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP)));
+                            list.add(groupChannel);
+                        }
                     } while (cursor.moveToNext());
                 }
             } finally {
@@ -285,18 +383,199 @@ public class ChatCampDatabaseHelper extends SQLiteOpenHelper {
         return list;
     }
 
-    public GroupChannel getGroupChannel(String groupChannelId) {
+    public void getGroupChannel(String groupChannelId, GetGroupChannelListener getGroupChannelListener) {
         SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+        new GetGroupChannelAsyncTask(groupChannelId, sqLiteDatabase, getGroupChannelListener).execute();
+    }
+
+    private static GroupChannel getGroupChannelLocal(String groupChannelId, SQLiteDatabase sqLiteDatabase) {
+
         Cursor cursor = sqLiteDatabase.rawQuery("SELECT *    FROM " + ChatCampDatabaseContract.GroupEntry.TABLE_NAME
                 + " WHERE " + ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP_ID + " = " + "'" + groupChannelId + "'", null);
         GroupChannel groupChannel = null;
-        if (cursor.moveToFirst()) {
-            groupChannel = GroupChannel.createfromSerializedData(cursor.getString(cursor
-                    .getColumnIndexOrThrow(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP)));
+        try {
+            if (cursor.moveToFirst()) {
+                groupChannel = GroupChannel.createfromSerializedData(cursor.
+                        getString(cursor.getColumnIndexOrThrow(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP)));
+            }
+            cursor.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        cursor.close();
         return groupChannel;
     }
 
+    public interface GetMessagesListener {
+        void onGetMessages(List<Message> messages);
+    }
 
+    public interface GetGroupChannelsListener {
+        void onGetGroupChannels(List<GroupChannel> groupChannels);
+    }
+
+    public interface GetGroupChannelListener {
+        void onGetGroupChannel(GroupChannel groupChannel);
+    }
+
+    public static class AddMessagesAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        private final List<Message> messages;
+        private final String channelId;
+        private final BaseChannel.ChannelType channelType;
+        private final SQLiteDatabase sqLiteDatabase;
+
+        public AddMessagesAsyncTask(List<Message> messages, String channelId, BaseChannel.ChannelType channelType, SQLiteDatabase sqLiteDatabase) {
+            this.messages = messages;
+            this.channelId = channelId;
+            this.channelType = channelType;
+            this.sqLiteDatabase = sqLiteDatabase;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            addMessagesLocal(messages, channelId, channelType, sqLiteDatabase);
+            return null;
+        }
+    }
+
+    public static class AddMessageAsyncTask extends AsyncTask<Void, Void, Void> {
+        private final Message message;
+        private final String channelId;
+        private final BaseChannel.ChannelType channelType;
+        private final SQLiteDatabase sqLiteDatabase;
+
+        public AddMessageAsyncTask(Message message, String channelId, BaseChannel.ChannelType channelType, SQLiteDatabase sqLiteDatabase) {
+            this.message = message;
+            this.channelId = channelId;
+            this.channelType = channelType;
+            this.sqLiteDatabase = sqLiteDatabase;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            addMessageLocal(message, channelId, channelType, sqLiteDatabase);
+            return null;
+        }
+    }
+
+    public static class GetMessagesAsyncTask extends AsyncTask<Void, Void, List<Message>> {
+        private String channelId;
+        private BaseChannel.ChannelType channelType;
+        private SQLiteDatabase sqLiteDatabase;
+        private GetMessagesListener getMessagesListener;
+
+        public GetMessagesAsyncTask(String channelId, BaseChannel.ChannelType channelType, SQLiteDatabase sqLiteDatabase, GetMessagesListener getMessagesListener) {
+            this.channelId = channelId;
+            this.channelType = channelType;
+            this.sqLiteDatabase = sqLiteDatabase;
+            this.getMessagesListener = getMessagesListener;
+        }
+
+        @Override
+        protected List<Message> doInBackground(Void... voids) {
+            return getMessagesLocal(channelId, channelType, sqLiteDatabase);
+        }
+
+        @Override
+        protected void onPostExecute(List<Message> messages) {
+            if(getMessagesListener != null) {
+                getMessagesListener.onGetMessages(messages);
+            }
+        }
+    }
+
+    public static class AddGroupChannelsAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        private List<GroupChannel> groupChannels;
+        private GroupChannelListQuery.ParticipantState participantState;
+        private List<String> queryCustomFilter;
+        private SQLiteDatabase sqliteDatabase;
+
+        public AddGroupChannelsAsyncTask(List<GroupChannel> groupChannels,
+                                         GroupChannelListQuery.ParticipantState participantState,
+                                         List<String> queryCustomFilter, SQLiteDatabase sqliteDatabase) {
+            this.groupChannels = groupChannels;
+            this.participantState = participantState;
+            this.queryCustomFilter = queryCustomFilter;
+            this.sqliteDatabase = sqliteDatabase;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            addGroupChannelsLocal(groupChannels, participantState, queryCustomFilter, sqliteDatabase);
+            return null;
+        }
+    }
+
+    public static class AddGroupChannelAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        private GroupChannel groupChannel;
+        private SQLiteDatabase sqliteDatabase;
+
+        public AddGroupChannelAsyncTask(GroupChannel groupChannel, SQLiteDatabase sqliteDatabase) {
+            this.groupChannel = groupChannel;
+            this.sqliteDatabase = sqliteDatabase;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            addGroupChannelLocal(groupChannel, sqliteDatabase);
+            return null;
+        }
+    }
+
+    public static class GetGroupChannelsAsyncTask extends AsyncTask<Void, Void, List<GroupChannel>> {
+        private GroupChannelListQuery.ParticipantState participantState;
+        private List<String> customFilters;
+        private SQLiteDatabase sqLiteDatabase;
+        private GetGroupChannelsListener getGroupChannelsListener;
+
+        public GetGroupChannelsAsyncTask(GroupChannelListQuery.ParticipantState participantState,
+                                         List<String> customFilters, SQLiteDatabase sqLiteDatabase,
+                                         GetGroupChannelsListener getGroupChannelsListener) {
+            this.participantState = participantState;
+            this.customFilters = customFilters;
+            this.sqLiteDatabase = sqLiteDatabase;
+            this.getGroupChannelsListener = getGroupChannelsListener;
+        }
+
+        @Override
+        protected List<GroupChannel> doInBackground(Void... voids) {
+            return getGroupChannelsLocal(participantState, customFilters, sqLiteDatabase);
+        }
+
+        @Override
+        protected void onPostExecute(List<GroupChannel> groupChannels) {
+            if(getGroupChannelsListener != null) {
+                getGroupChannelsListener.onGetGroupChannels(groupChannels);
+            }
+        }
+    }
+
+    public static class GetGroupChannelAsyncTask extends AsyncTask<Void, Void, GroupChannel> {
+
+        private String groupChannelId;
+        private SQLiteDatabase sqLiteDatabase;
+        private GetGroupChannelListener getGroupChannelListener;
+
+        public GetGroupChannelAsyncTask(String groupChannelId, SQLiteDatabase sqLiteDatabase,
+                                        GetGroupChannelListener getGroupChannelListener) {
+            this.groupChannelId = groupChannelId;
+            this.sqLiteDatabase = sqLiteDatabase;
+            this.getGroupChannelListener = getGroupChannelListener;
+        }
+
+        @Override
+        protected GroupChannel doInBackground(Void... voids) {
+
+            return getGroupChannelLocal(groupChannelId, sqLiteDatabase);
+        }
+
+        @Override
+        protected void onPostExecute(GroupChannel groupChannel) {
+            if(getGroupChannelListener != null) {
+                getGroupChannelListener.onGetGroupChannel(groupChannel);
+            }
+        }
+    }
 }
