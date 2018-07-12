@@ -134,4 +134,12 @@ public class MessagesList extends RecyclerView {
         super.onWindowVisibilityChanged(visibility);
         adapter.onWindowVisibilityChanged(visibility);
     }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if(adapter != null) {
+            adapter.onDetachedFromWindow();
+        }
+    }
 }

@@ -147,14 +147,6 @@ public class MessagesListAdapter
         }
         if (visibility == VISIBLE) {
             addChannelListener();
-            //TODO find a way to load messages when app is in background and some messages are
-            // received and app comes to foreground
-            // May be call load messages and check the last message id.
-//            if (channel != null) {
-//                loadMessages();
-//            }
-        } else {
-            removeChannelListener();
         }
     }
 
@@ -164,14 +156,21 @@ public class MessagesListAdapter
 
     //TODO We can create a layout for showing loading indicator for pagination.
     private void loadMessages() {
-        if (previousMessageListQuery == null) {
-            items = databaseHelper.getMessages(channel.getId(), channel.isGroupChannel()
-                    ? BaseChannel.ChannelType.GROUP : BaseChannel.ChannelType.OPEN);
-            if(items.size() > 0 && onMessagesLoadedListener != null) {
-                onMessagesLoadedListener.onMessagesLoaded();
-            }
+        if (previousMessageListQuery == null || loadingFirstTime) {
+            databaseHelper.getMessages(channel.getId(), channel.isGroupChannel()
+                    ? BaseChannel.ChannelType.GROUP : BaseChannel.ChannelType.OPEN, new ChatCampDatabaseHelper.GetMessagesListener() {
+                @Override
+                public void onGetMessages(List<Message> messages) {
+                    if (loadingFirstTime) {
+                        items.addAll(messages);
+                        if (items.size() > 0 && onMessagesLoadedListener != null) {
+                            onMessagesLoadedListener.onMessagesLoaded();
+                        }
+                        notifyDataSetChanged();
+                    }
+                }
+            });
             previousMessageListQuery = channel.createPreviousMessageListQuery();
-            notifyDataSetChanged();
         }
         previousMessageListQuery.load(20, true, new PreviousMessageListQuery.ResultListener() {
             @Override
@@ -184,14 +183,14 @@ public class MessagesListAdapter
                     }
                 }
                 if (loadingFirstTime) {
-                    if(items.size() == 0 && onMessagesLoadedListener != null) {
+                    loadingFirstTime = false;
+                    if (items.size() == 0 && onMessagesLoadedListener != null) {
                         onMessagesLoadedListener.onMessagesLoaded();
                     }
                     items.clear();
                     items.addAll(list);
                     databaseHelper.addMessages(list, channel.getId(), channel.isGroupChannel()
                             ? BaseChannel.ChannelType.GROUP : BaseChannel.ChannelType.OPEN);
-                    loadingFirstTime = false;
                 } else {
                     items.addAll(list);
                 }
@@ -646,6 +645,10 @@ public class MessagesListAdapter
 
     public void setOnMesaageLoadedListener(MessagesList.OnMessagesLoadedListener onMessagesLoadedListener) {
         this.onMessagesLoadedListener = onMessagesLoadedListener;
+    }
+
+    public void onDetachedFromWindow() {
+        removeChannelListener();
     }
 
     private static class Cluster {

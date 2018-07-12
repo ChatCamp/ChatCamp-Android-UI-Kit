@@ -100,7 +100,7 @@ public class HeaderView extends LinearLayout {
         boolean isOneToOneConversation = false;
         if (channel instanceof GroupChannel) {
             GroupChannel groupChannel = (GroupChannel) channel;
-            if (groupChannel.getParticipants().size() <= 2 && groupChannel.isDistinct()) {
+            if (groupChannel.getParticipants().size() <= 2) {
                 isOneToOneConversation = true;
             }
             if (isOneToOneConversation) {

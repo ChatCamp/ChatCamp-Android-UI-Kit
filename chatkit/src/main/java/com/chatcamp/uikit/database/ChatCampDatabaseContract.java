@@ -9,7 +9,7 @@ import android.provider.BaseColumns;
 public class ChatCampDatabaseContract {
 
     public static final String DATABASE_NAME = "chatcamp_database";
-    public static final int DATABASE_VERSION = 2;
+    public static final int DATABASE_VERSION = 3;
 
     public static class MessageEntry implements BaseColumns {
         public static final String TABLE_NAME = "table_message";
@@ -25,5 +25,6 @@ public class ChatCampDatabaseContract {
         public static final String COLUMN_NAME_GROUP = "groupChannel";
         public static final String COLUMN_NAME_GROUP_ID = "groupChannel_id";
         public static final String COLUMN_NAME_PARTICIPANT_STATE = "participant_state";
+        public static final String COLUMN_NAME_CUSTOM_FILTERS = "custom_filters";
     }
 }
