@@ -17,6 +17,7 @@ import com.chatcamp.uikit.utils.Directory;
 import com.chatcamp.uikit.utils.DownloadFileListener;
 import com.chatcamp.uikit.utils.FileUtils;
 
+import java.io.File;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -98,52 +99,58 @@ public class DownloadVideoService extends Service {
 
         @Override
         public void run() {
-//            String videoUrl = intent.getStringExtra(VIDEO_URL);
-//            boolean isMe = intent.getBooleanExtra(IS_ME, false);
-//            final String messageId = intent.getStringExtra(MESSAGE_ID);
-
             try {
-                Uri path = FileProvider.getUriForFile(context,
-                        getPackageName() + ".chatcamp.fileprovider",
-                        FileUtils.downloadFile(context, videoUrl,
-                                Directory.VIDEOS, isMe, new DownloadFileListener() {
-                                    @Override
-                                    public void downloadStart() {
-                                        Intent progressIntent = new Intent(VideoMessageFactory.DownloadResultReceiver.ACTION);
-                                        progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.STATUS, VideoMessageFactory.START);
-                                        progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.MESSAGE_ID, messageId);
-                                        sendBroadcast(progressIntent);
-                                    }
+                File file = FileUtils.downloadFile(context, videoUrl,
+                        Directory.VIDEOS, isMe, new DownloadFileListener() {
+                            @Override
+                            public void downloadStart() {
+                                Intent progressIntent = new Intent(VideoMessageFactory.DownloadResultReceiver.ACTION);
+                                progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.STATUS, VideoMessageFactory.START);
+                                progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.MESSAGE_ID, messageId);
+                                sendBroadcast(progressIntent);
+                            }
 
-                                    @Override
-                                    public void downloadProgress(final int progress) {
-                                        Log.d("download", "downloading" + progress);
-                                        if(DownloadVideoRunnable.this.progress != progress) {
-                                            DownloadVideoRunnable.this.progress = progress;
-                                            Intent progressIntent = new Intent(VideoMessageFactory.DownloadResultReceiver.ACTION);
-                                            progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.PROGRESS, progress);
-                                            progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.STATUS, VideoMessageFactory.PROGRESS);
-                                            progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.MESSAGE_ID, messageId);
-                                            sendBroadcast(progressIntent);
-                                        }
-                                    }
+                            @Override
+                            public void downloadProgress(final int progress) throws InterruptedException {
+                                if (Thread.interrupted()) {
+                                    Log.e(TAG, "thread interrupted");
+                                }
+                                if (messageIdFutureMap.get(messageId).isCancelled()) {
+                                    messageIdFutureMap.remove(messageId);
+                                    Log.e(TAG, "thread canceled");
+                                    throw new InterruptedException();
+                                }
+                                // Log.e("download", "downloading" + progress +  "message Id :  " +messageId);
+                                if (DownloadVideoRunnable.this.progress != progress) {
+                                    DownloadVideoRunnable.this.progress = progress;
+                                    Intent progressIntent = new Intent(VideoMessageFactory.DownloadResultReceiver.ACTION);
+                                    progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.PROGRESS, progress);
+                                    progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.STATUS, VideoMessageFactory.PROGRESS);
+                                    progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.MESSAGE_ID, messageId);
+                                    sendBroadcast(progressIntent);
+                                }
+                            }
 
-                                    @Override
-                                    public void downloadComplete() {
-                                        Intent progressIntent = new Intent(VideoMessageFactory.DownloadResultReceiver.ACTION);
-                                        progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.PROGRESS, 100);
-                                        progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.STATUS, VideoMessageFactory.COMPLETE);
-                                        progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.MESSAGE_ID, messageId);
-                                        sendBroadcast(progressIntent);
-                                    }
-                                }));
-                if(path != null) {
-                    Intent progressIntent = new Intent(VideoMessageFactory.DownloadResultReceiver.ACTION);
-                    progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.PROGRESS, 100);
-                    progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.STATUS, VideoMessageFactory.COMPLETE);
-                    progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.MESSAGE_ID, messageId);
-                    progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.VIDEO_URI, path.toString());
-                    sendBroadcast(progressIntent);
+                            @Override
+                            public void downloadComplete() {
+                                Intent progressIntent = new Intent(VideoMessageFactory.DownloadResultReceiver.ACTION);
+                                progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.PROGRESS, 100);
+                                progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.STATUS, VideoMessageFactory.COMPLETE);
+                                progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.MESSAGE_ID, messageId);
+                                sendBroadcast(progressIntent);
+                            }
+                        });
+                if (file != null) {
+                    Uri path = FileProvider.getUriForFile(context,
+                            getPackageName() + ".chatcamp.fileprovider", file);
+                    if (path != null) {
+                        Intent progressIntent = new Intent(VideoMessageFactory.DownloadResultReceiver.ACTION);
+                        progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.PROGRESS, 100);
+                        progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.STATUS, VideoMessageFactory.COMPLETE);
+                        progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.MESSAGE_ID, messageId);
+                        progressIntent.putExtra(VideoMessageFactory.DownloadResultReceiver.VIDEO_URI, path.toString());
+                        sendBroadcast(progressIntent);
+                    }
                 }
             } catch (Exception e) {
                 Log.e(TAG, e.toString());
@@ -172,7 +179,7 @@ public class DownloadVideoService extends Service {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(intent.getAction() != null && intent.getAction().equals(ACTION)) {
+            if (intent.getAction() != null && intent.getAction().equals(ACTION)) {
                 String messageId = intent.getStringExtra(MESSAGE_ID);
                 if (!TextUtils.isEmpty(messageId)) {
                     Future future = messageIdFutureMap.get(messageId);

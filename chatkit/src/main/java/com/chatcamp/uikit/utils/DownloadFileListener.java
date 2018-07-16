@@ -6,6 +6,6 @@ package com.chatcamp.uikit.utils;
 
 public interface DownloadFileListener {
     void downloadStart();
-    void downloadProgress(int progress);
+    void downloadProgress(int progress) throws InterruptedException;
     void downloadComplete();
 }
