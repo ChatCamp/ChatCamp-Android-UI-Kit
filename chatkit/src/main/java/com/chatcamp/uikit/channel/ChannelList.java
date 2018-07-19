@@ -83,7 +83,7 @@ public class ChannelList extends RecyclerView {
 
     @Override
     public void setAdapter(Adapter adapter) {
-        throw new IllegalArgumentException("You can't set adapter to MessagesList. Use #setAdapter(MessagesListAdapter) instead.");
+        throw new IllegalArgumentException("You can't set adapter to ChannelList.");
     }
 
     private void init() {
