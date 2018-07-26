@@ -38,3 +38,5 @@
  -dontwarn org.apache.commons.logging.**
 #
 -dontwarn org.xmlpull.v1.**
+
+-keep class com.chatcamp.uikit.** {*;}
