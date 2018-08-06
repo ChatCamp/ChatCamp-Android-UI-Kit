@@ -40,6 +40,7 @@ dependencies {
     compile 'org.apmem.tools:layouts:1.10@aar'
     compile "com.squareup.picasso:picasso:2.5.2"
     compile 'me.zhanghai.android.materialprogressbar:library:1.4.2'
+    implementation 'com.davemorrissey.labs:subsampling-scale-image-view:3.10.0'
 //    api project(':chatcamp')
 //    compile(name:'chatcamp-release', ext:'aar')
 }
