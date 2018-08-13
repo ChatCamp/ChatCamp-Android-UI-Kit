@@ -362,7 +362,7 @@ public class ChatCampDatabaseHelper extends SQLiteOpenHelper {
                             List<String> groupFilters = new ArrayList<>();
                             JSONArray sellerArray = new JSONArray(customFilterString);
                             for (int i = 0; i < sellerArray.length(); ++i) {
-                                groupFilters.add((String) sellerArray.get(i));
+                                groupFilters.add(String.valueOf(sellerArray.get(i)));
                             }
                             Set<String> incomingFiltersSet = new HashSet<>(customFilters);
                             Set<String> groupFiltersSet = new HashSet<>(groupFilters);
