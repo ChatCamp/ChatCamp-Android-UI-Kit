@@ -138,6 +138,21 @@ public class MessagesListAdapter
         if (channel instanceof GroupChannel) {
             databaseHelper.addGroupChannel((GroupChannel) channel);
         }
+        if(channel instanceof GroupChannel) {
+            GroupChannel groupChannel = (GroupChannel) channel;
+            Map<String, Long> readReceipt = groupChannel.getReadReceipt();
+            if (readReceipt.size() == groupChannel.getParticipants().size()) {
+                Long lastRead = 0L;
+                for (Map.Entry<String, Long> entry : readReceipt.entrySet()) {
+                    if (lastRead == 0L || entry.getValue() < lastRead) {
+                        lastRead = entry.getValue();
+                    }
+                }
+                lastReadTime = lastRead * 1000;
+                //TODO need to optimise this
+                notifyDataSetChanged();
+            }
+        }
         //TODO get the number of message from client
         loadMessages();
     }
