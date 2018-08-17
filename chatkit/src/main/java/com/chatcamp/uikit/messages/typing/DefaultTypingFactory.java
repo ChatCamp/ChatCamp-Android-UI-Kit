@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.chatcamp.uikit.R;
 import com.chatcamp.uikit.utils.CircleTransform;
@@ -13,6 +14,7 @@ import com.wang.avi.AVLoadingIndicatorView;
 
 import java.util.List;
 
+import io.chatcamp.sdk.ChatCamp;
 import io.chatcamp.sdk.Participant;
 
 /**
@@ -34,9 +36,22 @@ public class DefaultTypingFactory extends TypingFactory<DefaultTypingFactory.Def
 
     @Override
     public void bindView(DefaultTypingHolder typingHolder, List<Participant> typingUsers) {
-        if(typingUsers.size() > 0) {
-            Picasso.with(context).load(typingUsers.get(0).getAvatarUrl()).transform(new CircleTransform()).error(R.drawable.icon_default_contact).into(typingHolder.avatarView);
-            typingHolder.indicatorView.show();
+        if (typingUsers.size() > 0) {
+            for (Participant participant : typingUsers) {
+                if(participant.getId().equals(ChatCamp.getCurrentUser().getId())) {
+                    continue;
+                } else {
+                    if (participant.getAvatarUrl() != null) {
+                        Picasso.with(context).load(participant.getAvatarUrl())
+                                .transform(new CircleTransform()).error(R.drawable.icon_default_contact).into(typingHolder.avatarView);
+                    } else {
+                        Picasso.with(context).load(R.drawable.icon_default_contact).into(typingHolder.avatarView);
+                    }
+                    typingHolder.indicatorView.show();
+                    typingHolder.usernameTv.setText(participant.getDisplayName());
+                    break;
+                }
+            }
         } else {
             typingHolder.indicatorView.hide();
         }
@@ -45,11 +60,13 @@ public class DefaultTypingFactory extends TypingFactory<DefaultTypingFactory.Def
     public static class DefaultTypingHolder extends TypingFactory.TypingHolder {
         AVLoadingIndicatorView indicatorView;
         ImageView avatarView;
+        TextView usernameTv;
 
         public DefaultTypingHolder(View view) {
             //TODO add image of the user (in future we can combine the images like ( ( ( ) ...))
             indicatorView = view.findViewById(R.id.indication);
             avatarView = view.findViewById(R.id.messageUserAvatar);
+            usernameTv = view.findViewById(R.id.tv_username);
         }
     }
 }
