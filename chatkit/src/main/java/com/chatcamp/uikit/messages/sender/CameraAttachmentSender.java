@@ -2,6 +2,7 @@ package com.chatcamp.uikit.messages.sender;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -17,6 +18,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 
 import com.chatcamp.uikit.utils.FileUtils;
 import com.chatcamp.uikit.utils.Utils;
@@ -169,7 +171,15 @@ public class CameraAttachmentSender extends AttachmentSender {
             contentType = "image/*";
         } else {
             fileName = FileUtils.getFileName(context, uri);
-            contentType = context.getContentResolver().getType(uri);
+            if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
+                ContentResolver cr = context.getContentResolver();
+                contentType = cr.getType(uri);
+            } else {
+                String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
+                        .toString());
+                contentType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                        fileExtension.toLowerCase());
+            }
         }
         if (TextUtils.isEmpty(contentType)) {
             Log.e("CameraAttachmentSender", "content type is empty");
