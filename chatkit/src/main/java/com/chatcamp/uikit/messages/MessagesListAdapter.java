@@ -41,6 +41,7 @@ import io.chatcamp.sdk.Message;
 import io.chatcamp.sdk.OpenChannel;
 import io.chatcamp.sdk.Participant;
 import io.chatcamp.sdk.PreviousMessageListQuery;
+import io.chatcamp.sdk.TotalCountFilterParams;
 
 import static android.view.View.VISIBLE;
 
@@ -225,11 +226,8 @@ public class MessagesListAdapter
     }
 
     private void addChannelListener() {
-        ChatCamp.addChannelListener(CHANNEL_LISTENER, new ChatCamp.ChannelListener() {
-            @Override
-            public void onOpenChannelMessageReceived(OpenChannel openChannel, Message message) {
 
-            }
+        ChatCamp.addChannelListener(CHANNEL_LISTENER, new ChatCamp.ChannelListener() {
 
             @Override
             public void onGroupChannelMessageReceived(GroupChannel groupChannel, Message message) {
@@ -257,11 +255,6 @@ public class MessagesListAdapter
                     }
                     restoreScrollPositionAfterAdAdded();
                 }
-            }
-
-            @Override
-            public void onGroupChannelUpdated(GroupChannel groupChannel) {
-                // DO nothing
             }
 
             @Override
@@ -296,11 +289,6 @@ public class MessagesListAdapter
             }
 
             @Override
-            public void onOpenChannelTypingStatusChanged(OpenChannel openChannel) {
-
-            }
-
-            @Override
             public void onGroupChannelReadStatusUpdated(GroupChannel groupChannel) {
                 Map<String, Long> readReceipt = groupChannel.getReadReceipt();
                 if (readReceipt.size() == groupChannel.getParticipants().size()) {
@@ -314,11 +302,6 @@ public class MessagesListAdapter
                     //TODO need to optimise this
                     notifyDataSetChanged();
                 }
-            }
-
-            @Override
-            public void onOpenChannelReadStatusUpdated(OpenChannel openChannel) {
-
             }
         });
     }

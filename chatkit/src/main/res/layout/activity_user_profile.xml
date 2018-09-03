@@ -42,38 +42,59 @@
     <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" >
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="8dp">
+            android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/tv_online_status"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginLeft="16dp"
-                android:layout_marginStart="16dp" />
+                android:orientation="horizontal"
+                android:padding="8dp">
 
-            <ImageView
-                android:id="@+id/iv_online"
-                android:layout_width="10dp"
-                android:layout_height="10dp"
-                android:src="@drawable/ic_online"
-                android:layout_gravity="center_vertical"
-                android:visibility="gone"/>
+                <TextView
+                    android:id="@+id/tv_online_status"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1" />
+
+                <ImageView
+                    android:id="@+id/iv_online"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:layout_gravity="center_vertical"
+                    android:src="@drawable/ic_online"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/tv_last_seen"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:textSize="10dp"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginBottom="8dp"
+                android:layout_marginStart="8dp"
+                android:background="@color/bg_divider" />
 
             <TextView
-                android:id="@+id/tv_last_seen"
+                android:id="@+id/tv_block"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="10dp"
-                android:layout_gravity="center_vertical"
-                android:visibility="gone"/>
+                android:layout_marginStart="8dp"
+                android:drawableLeft="@drawable/ic_block"
+                android:text="Block"
+                android:textColor="@color/color_action"
+                android:drawablePadding="8dp"/>
         </LinearLayout>
 
     </android.support.v4.widget.NestedScrollView>
