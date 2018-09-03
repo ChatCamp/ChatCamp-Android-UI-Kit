@@ -1,3 +1,327 @@
 <resources>
     <string name="hint_enter_a_message">Type a message…</string>
+    <string-array name="notification_snooze_items">
+        <item>Mute Notification</item>
+        <item>For 1 Hour</item>
+        <item>For 3 Hours</item>
+        <item>For 6 Hours</item>
+        <item>For 9 Hours</item>
+        <item>For 12 Hours</item>
+    </string-array>
+
+    <string-array name="dnd_schedule">
+        <item>12:00 AM</item>
+        <item>12:30 AM</item>
+        <item>1:00 AM</item>
+        <item>1:30 AM</item>
+        <item>2:00 AM</item>
+        <item>2:30 AM</item>
+        <item>3:00 AM</item>
+        <item>3:30 AM</item>
+        <item>4:00 AM</item>
+        <item>4:30 AM</item>
+        <item>5:00 AM</item>
+        <item>5:30 AM</item>
+        <item>6:00 AM</item>
+        <item>6:30 AM</item>
+        <item>7:00 AM</item>
+        <item>7:30 AM</item>
+        <item>8:00 AM</item>
+        <item>8:30 AM</item>
+        <item>9:00 AM</item>
+        <item>9:30 AM</item>
+        <item>10:00 AM</item>
+        <item>10:30 AM</item>
+        <item>11:00 AM</item>
+        <item>11:30 AM</item>
+        <item>12:00 PM</item>
+        <item>12:30 PM</item>
+        <item>1:00 PM</item>
+        <item>1:30 PM</item>
+        <item>2:00 PM</item>
+        <item>2:30 PM</item>
+        <item>3:00 PM</item>
+        <item>3:30 PM</item>
+        <item>4:00 PM</item>
+        <item>4:30 PM</item>
+        <item>5:00 PM</item>
+        <item>5:30 PM</item>
+        <item>6:00 PM</item>
+        <item>6:30 PM</item>
+        <item>7:00 PM</item>
+        <item>7:30 PM</item>
+        <item>8:00 PM</item>
+        <item>8:30 PM</item>
+        <item>9:00 PM</item>
+        <item>9:30 PM</item>
+        <item>10:00 PM</item>
+        <item>10:30 PM</item>
+        <item>11:00 PM</item>
+        <item>11:30 PM</item>
+    </string-array>
+
+    <string-array name="time_zones">
+        <item> (UTC - 11:00) Pacific/Niue</item>
+        <item> (UTC - 11:00) Pacific/Pago_Pago</item>
+        <item> (UTC - 10:00) Pacific/Honolulu</item>
+        <item> (UTC - 10:00) Pacific/Rarotonga</item>
+        <item> (UTC - 10:00) Pacific/Tahiti</item>
+        <item> (UTC - 9:30) Pacific/Marquesas</item>
+        <item> (UTC - 9:00) Pacific/Gambier</item>
+        <item> (UTC - 8:00) America/Anchorage</item>
+        <item> (UTC - 8:00) Pacific/Pitcairn</item>
+        <item> (UTC - 7:00) America/Dawson</item>
+        <item> (UTC - 7:00) America/Phoenix</item>
+        <item> (UTC - 7:00) America/Dawson_Creek</item>
+        <item> (UTC - 7:00) America/Hermosillo</item>
+        <item> (UTC - 7:00) America/Los_Angeles</item>
+        <item> (UTC - 7:00) America/Tijuana</item>
+        <item> (UTC - 7:00) America/Vancouver</item>
+        <item> (UTC - 7:00) America/Whitehorse</item>
+        <item> (UTC - 6:00) America/Belize</item>
+        <item> (UTC - 6:00) America/Boise</item>
+        <item> (UTC - 6:00) America/Regina</item>
+        <item> (UTC - 6:00) America/Tegucigalpa</item>
+        <item> (UTC - 6:00) America/Costa_Rica</item>
+        <item> (UTC - 6:00) Pacific/Easter</item>
+        <item> (UTC - 6:00) America/El_Salvador</item>
+        <item> (UTC - 6:00) Pacific/Galapagos</item>
+        <item> (UTC - 6:00) America/Guatemala</item>
+        <item> (UTC - 6:00) America/Managua</item>
+        <item> (UTC - 6:00) America/Denver</item>
+        <item> (UTC - 6:00) America/Mazatlan</item>
+        <item> (UTC - 6:00) America/Edmonton</item>
+        <item> (UTC - 6:00) America/Yellowknife</item>
+        <item> (UTC - 5:00) America/Cancun</item>
+        <item> (UTC - 5:00) America/Bogota</item>
+        <item> (UTC - 5:00) America/Chicago</item>
+        <item> (UTC - 5:00) America/Mexico_City</item>
+        <item> (UTC - 5:00) America/Winnipeg</item>
+        <item> (UTC - 5:00) America/Guayaquil</item>
+        <item> (UTC - 5:00) America/Jamaica</item>
+        <item> (UTC - 5:00) America/Lima</item>
+        <item> (UTC - 5:00) America/Panama</item>
+        <item> (UTC - 5:00) America/Rio_Branco</item>
+        <item> (UTC - 4:00) America/Asuncion</item>
+        <item> (UTC - 4:00) America/Barbados</item>
+        <item> (UTC - 4:00) America/Boa_Vista</item>
+        <item> (UTC - 4:00) America/Campo_Grande</item>
+        <item> (UTC - 4:00) America/Caracas</item>
+        <item> (UTC - 4:00) America/Cuiaba</item>
+        <item> (UTC - 4:00) America/Curacao</item>
+        <item> (UTC - 4:00) America/Detroit</item>
+        <item> (UTC - 4:00) America/New_York</item>
+        <item> (UTC - 4:00) America/Iqaluit</item>
+        <item> (UTC - 4:00) America/Toronto</item>
+        <item> (UTC - 4:00) America/Grand_Turk</item>
+        <item> (UTC - 4:00) America/Guyana</item>
+        <item> (UTC - 4:00) America/Havana</item>
+        <item> (UTC - 4:00) America/La_Paz</item>
+        <item> (UTC - 4:00) America/Manaus</item>
+        <item> (UTC - 4:00) America/Martinique</item>
+        <item> (UTC - 4:00) America/Nassau</item>
+        <item> (UTC - 4:00) America/Port_of_Spain</item>
+        <item> (UTC - 4:00) America/Port-au-Princ</item>
+        <item> (UTC - 4:00) America/Porto_Velho</item>
+        <item> (UTC - 4:00) America/Puerto_Rico</item>
+        <item> (UTC - 4:00) America/Santiago</item>
+        <item> (UTC - 4:00) America/Santo_Domingo</item>
+        <item> (UTC - 3:00) America/Araguaina</item>
+        <item> (UTC - 3:00) America/Halifax</item>
+        <item> (UTC - 3:00) America/Belem</item>
+        <item> (UTC - 3:00) Atlantic/Bermuda</item>
+        <item> (UTC - 3:00) America/Argentina/Bue</item>
+        <item> (UTC - 3:00) America/Cayenne</item>
+        <item> (UTC - 3:00) America/Argentina/Cor</item>
+        <item> (UTC - 3:00) America/Fortaleza</item>
+        <item> (UTC - 3:00) America/Maceio</item>
+        <item> (UTC - 3:00) America/Montevideo</item>
+        <item> (UTC - 3:00) Antarctica/Palmer</item>
+        <item> (UTC - 3:00) America/Paramaribo</item>
+        <item> (UTC - 3:00) America/Punta_Arenas</item>
+        <item> (UTC - 3:00) America/Recife</item>
+        <item> (UTC - 3:00) Antarctica/Rothera</item>
+        <item> (UTC - 3:00) America/Bahia</item>
+        <item> (UTC - 3:00) America/Sao_Paulo</item>
+        <item> (UTC - 3:00) Atlantic/Stanley</item>
+        <item> (UTC - 3:00) America/Thule</item>
+        <item> (UTC - 2:30) America/St_Johns</item>
+        <item> (UTC - 2:00) America/Godthab</item>
+        <item> (UTC - 2:00) America/Miquelon</item>
+        <item> (UTC - 2:00) America/Noronha</item>
+        <item> (UTC - 2:00) Atlantic/South_Georgi</item>
+        <item> (UTC - 1:00) Atlantic/Cape_Verde</item>
+        <item> (UTC) Africa/Abidjan</item>
+        <item> (UTC) Africa/Accra</item>
+        <item> (UTC) Atlantic/Azores</item>
+        <item> (UTC) Africa/Bissau</item>
+        <item> (UTC) Africa/Casablanca</item>
+        <item> (UTC) America/Danmarkshavn</item>
+        <item> (UTC) Africa/El_Aaiun</item>
+        <item> Etc/GMT</item>
+        <item> (UTC) Africa/Monrovia</item>
+        <item> (UTC) Atlantic/Reykjavik</item>
+        <item> (UTC) America/Scoresbysund</item>
+        <item> UTC</item>
+        <item> (UTC + 1:00) Africa/Algiers</item>
+        <item> (UTC + 1:00) Atlantic/Canary</item>
+        <item> (UTC + 1:00) Europe/Dublin</item>
+        <item> (UTC + 1:00) Atlantic/Faroe</item>
+        <item> (UTC + 1:00) Africa/Lagos</item>
+        <item> (UTC + 1:00) Europe/Lisbon</item>
+        <item> (UTC + 1:00) Europe/London</item>
+        <item> (UTC + 1:00) Africa/Ndjamena</item>
+        <item> (UTC + 1:00) Africa/Sao_Tome</item>
+        <item> (UTC + 1:00) Africa/Tunis</item>
+        <item> (UTC + 2:00) Europe/Amsterdam</item>
+        <item> (UTC + 2:00) Europe/Andorra</item>
+        <item> (UTC + 2:00) Europe/Berlin</item>
+        <item> (UTC + 2:00) Europe/Brussels</item>
+        <item> (UTC + 2:00) Europe/Budapest</item>
+        <item> (UTC + 2:00) Africa/Cairo</item>
+        <item> (UTC + 2:00) Europe/Belgrade</item>
+        <item> (UTC + 2:00) Europe/Prague</item>
+        <item> (UTC + 2:00) Africa/Ceuta</item>
+        <item> (UTC + 2:00) Europe/Copenhagen</item>
+        <item> (UTC + 2:00) Europe/Gibraltar</item>
+        <item> (UTC + 2:00) Africa/Johannesburg</item>
+        <item> (UTC + 2:00) Africa/Khartoum</item>
+        <item> (UTC + 2:00) Europe/Luxembourg</item>
+        <item> (UTC + 2:00) Europe/Madrid</item>
+        <item> (UTC + 2:00) Europe/Malta</item>
+        <item> (UTC + 2:00) Africa/Maputo</item>
+        <item> (UTC + 2:00) Europe/Monaco</item>
+        <item> (UTC + 2:00) Europe/Kaliningrad</item>
+        <item> (UTC + 2:00) Europe/Oslo</item>
+        <item> (UTC + 2:00) Europe/Paris</item>
+        <item> (UTC + 2:00) Europe/Rome</item>
+        <item> (UTC + 2:00) Europe/Stockholm</item>
+        <item> (UTC + 2:00) Europe/Tirane</item>
+        <item> (UTC + 2:00) Africa/Tripoli</item>
+        <item> (UTC + 2:00) Europe/Vienna</item>
+        <item> (UTC + 2:00) Europe/Warsaw</item>
+        <item> (UTC + 2:00) Africa/Windhoek</item>
+        <item> (UTC + 2:00) Europe/Zurich</item>
+        <item> (UTC + 3:00) Asia/Amman</item>
+        <item> (UTC + 3:00) Europe/Athens</item>
+        <item> (UTC + 3:00) Asia/Baghdad</item>
+        <item> (UTC + 3:00) Asia/Beirut</item>
+        <item> (UTC + 3:00) Europe/Bucharest</item>
+        <item> (UTC + 3:00) Europe/Chisinau</item>
+        <item> (UTC + 3:00) Asia/Damascus</item>
+        <item> (UTC + 3:00) Asia/Gaza</item>
+        <item> (UTC + 3:00) Europe/Helsinki</item>
+        <item> (UTC + 3:00) Europe/Istanbul</item>
+        <item> (UTC + 3:00) Asia/Jerusalem</item>
+        <item> (UTC + 3:00) Europe/Kiev</item>
+        <item> (UTC + 3:00) Europe/Minsk</item>
+        <item> (UTC + 3:00) Europe/Moscow</item>
+        <item> (UTC + 3:00) Africa/Nairobi</item>
+        <item> (UTC + 3:00) Asia/Nicosia</item>
+        <item> (UTC + 3:00) Asia/Qatar</item>
+        <item> (UTC + 3:00) Europe/Riga</item>
+        <item> (UTC + 3:00) Asia/Riyadh</item>
+        <item> (UTC + 3:00) Europe/Sofia</item>
+        <item> (UTC + 3:00) Antarctica/Syowa</item>
+        <item> (UTC + 3:00) Europe/Tallinn</item>
+        <item> (UTC + 3:00) Europe/Vilnius</item>
+        <item> (UTC + 4:00) Asia/Baku</item>
+        <item> (UTC + 4:00) Asia/Dubai</item>
+        <item> (UTC + 4:00) Indian/Mahe</item>
+        <item> (UTC + 4:00) Indian/Mauritius</item>
+        <item> (UTC + 4:00) Europe/Samara</item>
+        <item> (UTC + 4:00) Indian/Reunion</item>
+        <item> (UTC + 4:00) Asia/Tbilisi</item>
+        <item> (UTC + 4:00) Asia/Yerevan</item>
+        <item> (UTC + 4:30) Asia/Kabul</item>
+        <item> (UTC + 4:30) Asia/Tehran</item>
+        <item> (UTC + 5:00) Asia/Aqtau</item>
+        <item> (UTC + 5:00) Asia/Aqtobe</item>
+        <item> (UTC + 5:00) Asia/Ashgabat</item>
+        <item> (UTC + 5:00) Asia/Dushanbe</item>
+        <item> (UTC + 5:00) Asia/Karachi</item>
+        <item> (UTC + 5:00) Indian/Kerguelen</item>
+        <item> (UTC + 5:00) Indian/Maldives</item>
+        <item> (UTC + 5:00) Antarctica/Mawson</item>
+        <item> (UTC + 5:00) Asia/Yekaterinburg</item>
+        <item> (UTC + 5:00) Asia/Tashkent</item>
+        <item> (UTC + 5:30) Asia/Colombo</item>
+        <item> (UTC + 5:30) Asia/Calcutta</item>
+        <item> (UTC + 5:45) Asia/Katmandu</item>
+        <item> (UTC + 6:00) Asia/Almaty</item>
+        <item> (UTC + 6:00) Asia/Bishkek</item>
+        <item> (UTC + 6:00) Indian/Chagos</item>
+        <item> (UTC + 6:00) Asia/Dhaka</item>
+        <item> (UTC + 6:00) Asia/Omsk</item>
+        <item> (UTC + 6:00) Asia/Thimphu</item>
+        <item> (UTC + 6:00) Antarctica/Vostok</item>
+        <item> (UTC + 6:30) Indian/Cocos</item>
+        <item> (UTC + 6:30) Asia/Yangon</item>
+        <item> (UTC + 7:00) Asia/Bangkok</item>
+        <item> (UTC + 7:00) Indian/Christmas</item>
+        <item> (UTC + 7:00) Antarctica/Davis</item>
+        <item> (UTC + 7:00) Asia/Saigon</item>
+        <item> (UTC + 7:00) Asia/Hovd</item>
+        <item> (UTC + 7:00) Asia/Jakarta</item>
+        <item> (UTC + 7:00) Asia/Krasnoyarsk</item>
+        <item> (UTC + 8:00) Asia/Brunei</item>
+        <item> (UTC + 8:00) Antarctica/Casey</item>
+        <item> (UTC + 8:00) Asia/Shanghai</item>
+        <item> (UTC + 8:00) Asia/Choibalsan</item>
+        <item> (UTC + 8:00) Asia/Hong_Kong</item>
+        <item> (UTC + 8:00) Asia/Kuala_Lumpur</item>
+        <item> (UTC + 8:00) Asia/Macau</item>
+        <item> (UTC + 8:00) Asia/Makassar</item>
+        <item> (UTC + 8:00) Asia/Manila</item>
+        <item> (UTC + 8:00) Asia/Irkutsk</item>
+        <item> (UTC + 8:00) Asia/Singapore</item>
+        <item> (UTC + 8:00) Asia/Taipei</item>
+        <item> (UTC + 8:00) Asia/Ulaanbaatar</item>
+        <item> (UTC + 8:00) Australia/Perth</item>
+        <item> (UTC + 9:00) Asia/Dili</item>
+        <item> (UTC + 9:00) Asia/Jayapura</item>
+        <item> (UTC + 9:00) Asia/Yakutsk</item>
+        <item> (UTC + 9:00) Pacific/Palau</item>
+        <item> (UTC + 9:00) Asia/Pyongyang</item>
+        <item> (UTC + 9:00) Asia/Seoul</item>
+        <item> (UTC + 9:00) Asia/Tokyo</item>
+        <item> (UTC + 9:30) Australia/Adelaide</item>
+        <item> (UTC + 9:30) Australia/Darwin</item>
+        <item> (UTC + 10:00) Antarctica/DumontDUr</item>
+        <item> (UTC + 10:00) Australia/Brisbane</item>
+        <item> (UTC + 10:00) Australia/Hobart</item>
+        <item> (UTC + 10:00) Australia/Melbourne</item>
+        <item> (UTC + 10:00) Australia/Sydney</item>
+        <item> (UTC + 10:00) Pacific/Guam</item>
+        <item> (UTC + 10:00) Asia/Vladivostok</item>
+        <item> (UTC + 10:00) Pacific/Port_Moresby</item>
+        <item> (UTC + 10:00) Pacific/Chuuk</item>
+        <item> (UTC + 11:00) Pacific/Efate</item>
+        <item> (UTC + 11:00) Pacific/Guadalcanal</item>
+        <item> (UTC + 11:00) Pacific/Kosrae</item>
+        <item> (UTC + 11:00) Asia/Magadan</item>
+        <item> (UTC + 11:00) Pacific/Norfolk</item>
+        <item> (UTC + 11:00) Pacific/Noumea</item>
+        <item> (UTC + 11:00) Pacific/Pohnpei</item>
+        <item> (UTC + 12:00) Pacific/Auckland</item>
+        <item> (UTC + 12:00) Pacific/Fiji</item>
+        <item> (UTC + 12:00) Pacific/Funafuti</item>
+        <item> (UTC + 12:00) Pacific/Kwajalein</item>
+        <item> (UTC + 12:00) Pacific/Majuro</item>
+        <item> (UTC + 12:00) Asia/Kamchatka</item>
+        <item> (UTC + 12:00) Pacific/Nauru</item>
+        <item> (UTC + 12:00) Pacific/Tarawa</item>
+        <item> (UTC + 12:00) Pacific/Wake</item>
+        <item> (UTC + 12:00) Pacific/Wallis</item>
+        <item> (UTC + 13:00) Pacific/Apia</item>
+        <item> (UTC + 13:00) Pacific/Enderbury</item>
+        <item> (UTC + 13:00) Pacific/Fakaofo</item>
+        <item> (UTC + 13:00) Pacific/Tongatapu</item>
+        <item> (UTC + 14:00) Pacific/Kiritimati</item>
+    </string-array>
+
+    <string-array name="notification_template">
+        <item>Default</item>
+        <item>Private</item>
+    </string-array>
 </resources>

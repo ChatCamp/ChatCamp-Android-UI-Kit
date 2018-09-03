@@ -5,10 +5,10 @@
     <application
         android:allowBackup="false"
         android:supportsRtl="true">
-        <activity android:name="com.chatcamp.uikit.preview.MediaPreviewActivity" />
+        <activity android:name=".preview.MediaPreviewActivity" />
 
         <provider
-            android:name="com.chatcamp.uikit.utils.ChatCampFileProvider"
+            android:name=".utils.ChatCampFileProvider"
             android:authorities="${applicationId}.chatcamp.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
@@ -18,17 +18,20 @@
         </provider>
 
         <activity
-            android:name="com.chatcamp.uikit.preview.ShowImageActivity"
+            android:name=".preview.ShowImageActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="com.chatcamp.uikit.preview.ShowVideoActivity"
+            android:name=".preview.ShowVideoActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="com.chatcamp.uikit.conversationdetails.GroupDetailActivity"
+            android:name=".conversationdetails.GroupDetailActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="com.chatcamp.uikit.conversationdetails.UserProfileActivity"
+            android:name=".conversationdetails.UserProfileActivity"
             android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity android:name=".user.BlockedUserListActivity"
+            />
     </application>
 
 </manifest>

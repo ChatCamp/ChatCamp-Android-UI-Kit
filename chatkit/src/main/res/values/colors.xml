@@ -32,7 +32,7 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
-    <color name="color_action">#b71c1c</color>
+    <color name="color_action">#fc3c40</color>
     <color name="action_incoming_bg">#efefef</color>
     <color name="action_confirm">#00838f</color>
     <color name="bg_divider">#b9b9b9</color>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingTop="8dp"
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp">
+
+    <ImageView
+        android:id="@+id/iv_avatar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center_vertical"/>
+
+    <ImageView
+        android:id="@+id/iv_online"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:src="@drawable/ic_online"
+        android:layout_gravity="center_vertical"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/tv_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_gravity="center_vertical"
+        android:textColor="@color/black"
+        android:paddingRight="8dp"
+        android:paddingLeft="8dp"/>
+
+    <TextView
+        android:id="@+id/tv_unblock"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:text="Unblock"
+        android:background="@color/colorPrimary"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:padding="4dp"
+        android:layout_marginStart="4dp"/>
+</LinearLayout>

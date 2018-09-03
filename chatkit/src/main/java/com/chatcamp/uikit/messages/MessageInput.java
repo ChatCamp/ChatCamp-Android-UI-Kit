@@ -2,13 +2,16 @@
 package com.chatcamp.uikit.messages;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.provider.Telephony;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.Space;
+import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
@@ -33,7 +36,10 @@ import java.lang.reflect.Field;
 import java.util.List;
 
 import io.chatcamp.sdk.BaseChannel;
+import io.chatcamp.sdk.ChatCamp;
+import io.chatcamp.sdk.ChatCampException;
 import io.chatcamp.sdk.GroupChannel;
+import io.chatcamp.sdk.Participant;
 
 /**
  * Component for input outcoming messages
@@ -63,6 +69,9 @@ public class MessageInput extends RelativeLayout
     private boolean isRecording;
     private MessageInputStyle style;
 
+    private OnUserUnblockedListener onUserUnblockedListener;
+    private Participant otherParticipant;
+
     public MessageInput(Context context) {
         super(context);
         init(context);
@@ -86,6 +95,10 @@ public class MessageInput extends RelativeLayout
      */
     public void setAttachmentsListener(AttachmentsListener attachmentsListener) {
         this.attachmentsListener = attachmentsListener;
+    }
+
+    public void setOnUserOnUnblockedListener(OnUserUnblockedListener listener) {
+        this.onUserUnblockedListener = listener;
     }
 
     /**
@@ -112,6 +125,60 @@ public class MessageInput extends RelativeLayout
 
     @Override
     public void onClick(View view) {
+        boolean isBlocked = false;
+        if(channel.isGroupChannel()) {
+            GroupChannel groupChannel = (GroupChannel) channel;
+            boolean isOneToOneConversation = false;
+            if (groupChannel.getParticipants().size() <= 2) {
+                isOneToOneConversation = true;
+            }
+            if (isOneToOneConversation) {
+                List<Participant> participants = ((GroupChannel) channel).getParticipants();
+                for (Participant participant : participants) {
+                    if (!participant.getId().equals(ChatCamp.getCurrentUser().getId())) {
+                        otherParticipant = participant;
+                        isBlocked = otherParticipant.isBlockedByMe();
+                    }
+                }
+            }
+        }
+        if(isBlocked) {
+            // show a dialog that You cannot send a message, You have blocked {user},
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            builder.setMessage("User has been blocked by you. Unblock user to continue chatting with them.");
+            builder.setCancelable(true);
+
+            builder.setPositiveButton(
+                    "Unblock",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            if(otherParticipant != null) {
+                                ChatCamp.unBlockUser(otherParticipant.getId(), new ChatCamp.OnUserUnBlockListener() {
+                                    @Override
+                                    public void onUserUnBlocked(Participant participant, ChatCampException exception) {
+                                        if(onUserUnblockedListener != null) {
+                                            onUserUnblockedListener.onUserUnblocked(participant);
+                                        }
+                                    }
+                                });
+                            }
+                            dialog.cancel();
+                        }
+
+                    });
+
+            builder.setNegativeButton(
+                    "Cancel",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+
+            AlertDialog alert = builder.create();
+            alert.show();
+            return;
+        }
         int id = view.getId();
         if (id == R.id.messageSendButton) {
             if (sendClickListener != null) {
@@ -345,9 +412,21 @@ public class MessageInput extends RelativeLayout
         void onSendClicked(String text);
     }
 
+    public interface OnUserUnblockedListener{
+        void onUserUnblocked(Participant participant);
+    }
+
     @Override
     protected void onWindowVisibilityChanged(int visibility) {
         super.onWindowVisibilityChanged(visibility);
+        if(channel != null && channel.isGroupChannel() && visibility == VISIBLE) {
+            GroupChannel.get(channel.getId(), new GroupChannel.GetListener() {
+                @Override
+                public void onResult(GroupChannel groupChannel, ChatCampException e) {
+                    channel = groupChannel;
+                }
+            });
+        }
         if(visibility != VISIBLE && voiceSender != null) {
             voiceSender.freeResources();
         }
