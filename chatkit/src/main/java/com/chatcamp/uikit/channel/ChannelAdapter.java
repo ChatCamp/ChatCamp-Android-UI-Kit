@@ -35,11 +35,9 @@ import io.chatcamp.sdk.ChatCamp;
 import io.chatcamp.sdk.ChatCampException;
 import io.chatcamp.sdk.GroupChannel;
 import io.chatcamp.sdk.GroupChannelListQuery;
-import io.chatcamp.sdk.Message;
 import io.chatcamp.sdk.OpenChannel;
 import io.chatcamp.sdk.OpenChannelListQuery;
 import io.chatcamp.sdk.Participant;
-import io.chatcamp.sdk.TotalCountFilterParams;
 
 import static android.view.View.VISIBLE;
 
@@ -111,12 +109,21 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
                     return;
                 }
                 if (channelType == BaseChannel.ChannelType.GROUP) {
+                    boolean isListUpdated = false;
                     for (int i = 0; i < dataset.size(); ++i) {
                         if (dataset.get(i).getId().equals(groupChannel.getId())) {
-                            dataset.set(i, groupChannel);
+                            dataset.remove(i);
+                            dataset.add(0, groupChannel);
+                            notifyItemRemoved(i);
+                            notifyItemInserted(0);
+                            isListUpdated = true;
                             chatCampDatabaseHelper.addGroupChannel(groupChannel);
-                            notifyItemChanged(i);
                         }
+                    }
+                    if(!isListUpdated) {
+                        dataset.add(0, groupChannel);
+                        notifyItemInserted(0);
+                        chatCampDatabaseHelper.addGroupChannel(groupChannel);
                     }
                 }
             }
@@ -178,7 +185,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
                 chatCampDatabaseHelper.getGroupChannels(participantState, customFilter, new ChatCampDatabaseHelper.GetGroupChannelsListener() {
                     @Override
                     public void onGetGroupChannels(List<GroupChannel> groupChannels) {
-                        if(loadingFirstTime) {
+                        if (loadingFirstTime) {
                             Collections.sort(groupChannels, comparator);
                             dataset.clear();
                             dataset.addAll(groupChannels);
@@ -206,7 +213,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
                             recyclerScrollMoreListener.resetLoading();
                         }
                         Log.e("Group Channel", "result from first api call");
-                        if (dataset.size() == 0 && onChannelsLoadedListener != null) {
+                        if ((dataset.size() == 0 || groupChannelList.size() == 0) && onChannelsLoadedListener != null) {
                             channelLoaded = true;
                         }
                         dataset.clear();
@@ -218,7 +225,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
                         Collections.sort(groupChannelList, comparator);
                     }
                     dataset.addAll(groupChannelList);
-                    if(channelLoaded) {
+                    if (channelLoaded) {
                         onChannelsLoadedListener.onChannelsLoaded();
                     }
 
