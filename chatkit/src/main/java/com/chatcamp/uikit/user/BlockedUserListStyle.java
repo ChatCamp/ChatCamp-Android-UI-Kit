@@ -57,7 +57,7 @@ public class BlockedUserListStyle extends Style {
         blockedUserListStyle.unBlockDrawableColor = typedArray.getColor(R.styleable.BlockedUserList_unBlockDrawableColor, blockedUserListStyle.getColor(R.color.colorPrimary));
         blockedUserListStyle.showUnBlock = typedArray.getBoolean(R.styleable.BlockedUserList_showUnBlock, true);
         blockedUserListStyle.unBlockTextSize = typedArray.getDimensionPixelSize(R.styleable.BlockedUserList_unBlockTextSize,  blockedUserListStyle.getDimension(R.dimen.blocked_user_list_username_textsize));
-        blockedUserListStyle.unBlockTextStyle = typedArray.getInt(R.styleable.BlockedUserList_usernameTextStyle, Typeface.NORMAL);
+        blockedUserListStyle.unBlockTextStyle = typedArray.getInt(R.styleable.BlockedUserList_unBlockTextStyle, Typeface.NORMAL);
         blockedUserListStyle.unBlockTextColor = typedArray.getColor(R.styleable.BlockedUserList_unBlockTextColor, blockedUserListStyle.getColor(R.color.white));
         return blockedUserListStyle;
     }

@@ -3,15 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.chatcamp.uikit.user.BlockedUserListActivity">
 
     <com.chatcamp.uikit.user.BlockedUserList
         android:id="@+id/blocked_user_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:userAvatarHeight="100dp"
-        app:userAvatarWidth="100dp"/>
+        android:layout_height="match_parent" />
 
     <ProgressBar
         android:id="@+id/progress_bar"

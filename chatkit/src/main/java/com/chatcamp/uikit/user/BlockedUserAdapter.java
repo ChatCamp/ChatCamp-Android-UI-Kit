@@ -167,7 +167,7 @@ public class BlockedUserAdapter extends RecyclerView.Adapter<BlockedUserAdapter.
             boolean showUsername = style.isShowUsername();
             if(showUsername) {
                 nameTv.setTextSize(TypedValue.COMPLEX_UNIT_PX, style.getUsernameTextSize());
-                nameTv.setTypeface(nameTv.getTypeface(), style.getUnBlockTextStyle());
+                nameTv.setTypeface(nameTv.getTypeface(), style.getUsernameTextStyle());
                 nameTv.setTextColor(style.getUsernameTextColor());
                 nameTv.setVisibility(View.VISIBLE);
                 nameTv.setText(user.getDisplayName());
@@ -180,7 +180,7 @@ public class BlockedUserAdapter extends RecyclerView.Adapter<BlockedUserAdapter.
             boolean showUnblock = style.isShowUnBlock();
             if(showUnblock) {
                 unblockTv.setTextColor(style.getUnBlockTextColor());
-                unblockTv.setTextSize(TypedValue.COMPLEX_UNIT_PX, style.getUsernameTextSize());
+                unblockTv.setTextSize(TypedValue.COMPLEX_UNIT_PX, style.getUnBlockTextSize());
                 unblockTv.setTypeface(unblockTv.getTypeface(), style.getUnBlockTextStyle());
                 unblockTv.setBackground(style.getunBlockDrawable());
                 unblockTv.setVisibility(View.VISIBLE);
