@@ -334,5 +334,33 @@
         </attr>
         <attr name="unreadMessageCountBackgroundColor" format="color|reference"/>
     </declare-styleable>
+    <declare-styleable name="BlockedUserList">
+        <attr name="userAvatarWidth" format="dimension|reference"/>
+        <attr name="userAvatarHeight" format="dimension|reference"/>
+
+        <attr name="onlineIndicatorWidth" format="dimension|reference"/>
+        <attr name="onlineIndicatorHeight" format="dimension|reference"/>
+
+        <attr name="showUserAvatar" format="boolean|reference"/>
+        <attr name="usernameTextSize" format="dimension|reference"/>
+        <attr name="usernameTextStyle">
+            <flag name="normal" value="0"/>
+            <flag name="bold" value="1"/>
+            <flag name="italic" value="2"/>
+        </attr>
+        <attr name="usernameTextColor" format="color|reference"/>
+        <attr name="showUsername" format="boolean|reference"/>
+        <attr name="unBlockDrawable" format="reference"/>
+        <attr name="unBlockDrawableColor" format="color|reference"/>
+        <attr name="showUnBlock" format="boolean"/>
+        <attr name="unBlockTextSize" format="dimension|reference"/>
+        <attr name="unBlockTextStyle">
+            <flag name="normal" value="0"/>
+            <flag name="bold" value="1"/>
+            <flag name="italic" value="2"/>
+        </attr>
+        <attr name="unBlockTextColor" format="color|reference"/>
+        
+    </declare-styleable>
 
 </resources>
