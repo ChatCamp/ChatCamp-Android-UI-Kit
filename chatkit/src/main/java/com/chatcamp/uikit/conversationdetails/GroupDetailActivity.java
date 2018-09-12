@@ -24,6 +24,7 @@ import com.chatcamp.uikit.R;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.chatcamp.sdk.BaseChannel;
 import io.chatcamp.sdk.ChatCampException;
 import io.chatcamp.sdk.GroupChannel;
 import io.chatcamp.sdk.Participant;
@@ -107,10 +108,12 @@ public class GroupDetailActivity extends AppCompatActivity implements GroupDetai
                             if(TextUtils.isEmpty(input.getText())) {
                                 input.setError("Group name could not be empty");
                             } else {
-                                groupChannelGLobal.update(input.getText().toString(), null, null, new GroupChannel.UpdateListener() {
+                                groupChannelGLobal.update(input.getText().toString(), null, null, new BaseChannel.UpdateListener() {
                                     @Override
-                                    public void onResult(GroupChannel groupChannel, ChatCampException e) {
-                                        populateUi(groupChannel);
+                                    public void onResult(BaseChannel baseChannel, ChatCampException e) {
+                                        if(baseChannel instanceof GroupChannel) {
+                                            populateUi((GroupChannel) baseChannel);
+                                        }
                                     }
                                 });
                             }
