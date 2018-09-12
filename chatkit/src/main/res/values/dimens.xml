@@ -80,4 +80,13 @@
     <dimen name="margin_x">8dp</dimen>
     <dimen name="normal_text">16sp</dimen>
     <dimen name="default_text">14sp</dimen>
+
+    <!--blocked user default dimens-->
+    <dimen name="blocked_user_list_avatar_height">40dp</dimen>
+    <dimen name="blocked_user_list_avatar_width">40dp</dimen>
+    <dimen name="blocked_user_list_online_indicator_width">10dp</dimen>
+    <dimen name="blocked_user_list_online_indicator_height">10dp</dimen>
+    <dimen name="blocked_user_list_username_textsize">14sp</dimen>
+    <dimen name="blocked_user_list_block_bg_radius">5sp</dimen>
+
 </resources>

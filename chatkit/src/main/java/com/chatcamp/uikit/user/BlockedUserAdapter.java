@@ -1,11 +1,15 @@
 package com.chatcamp.uikit.user;
 
 import android.content.Context;
+import android.support.v4.widget.Space;
 import android.support.v7.widget.RecyclerView;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.chatcamp.uikit.R;
@@ -112,6 +116,8 @@ public class BlockedUserAdapter extends RecyclerView.Adapter<BlockedUserAdapter.
         private TextView nameTv;
         private ImageView onlineIndicator;
         private TextView unblockTv;
+        private RelativeLayout avatarContainer;
+        private Space space;
 
         public BlockedUserViewHolder(View itemView) {
             super(itemView);
@@ -119,18 +125,67 @@ public class BlockedUserAdapter extends RecyclerView.Adapter<BlockedUserAdapter.
             nameTv = itemView.findViewById(R.id.tv_name);
             onlineIndicator = itemView.findViewById(R.id.iv_online);
             unblockTv = itemView.findViewById(R.id.tv_unblock);
+            avatarContainer = itemView.findViewById(R.id.container_avatar);
+            space = itemView.findViewById(R.id.space);
         }
 
         public void bind(final int position) {
             User user = userList.get(position);
-            Picasso.with(context).load(user.getAvatarUrl())
-                    .placeholder(com.chatcamp.uikit.R.drawable.icon_default_contact)
-                    .transform(new CircleTransform()).into(avatar);
-            nameTv.setText(user.getDisplayName());
-            if(user.isOnline()) {
-                onlineIndicator.setVisibility(View.VISIBLE);
+            boolean showAvatar = style.isShowUserAvatar();
+
+            if(showAvatar) {
+                int avatarHeight = style.getUserAvatarHeight();
+                int avatarWidth = style.getUserAvatarWidth();
+
+                int onlineIndicatorWidth = style.getOnlineIndicatorWidth() ;
+                int onlineIndicatorHeight = style.getOnlineIndicatirHeight();
+
+                LinearLayout.LayoutParams avatarParams
+                        = (LinearLayout.LayoutParams) avatarContainer.getLayoutParams();
+                avatarParams.height = avatarHeight;
+                avatarParams.width = avatarWidth;
+
+                RelativeLayout.LayoutParams onlineIndicatorParams
+                        = (RelativeLayout.LayoutParams) onlineIndicator.getLayoutParams();
+                onlineIndicatorParams.height = onlineIndicatorHeight;
+                onlineIndicatorParams.width = onlineIndicatorWidth;
+
+                Picasso.with(context).load(user.getAvatarUrl())
+                        .placeholder(com.chatcamp.uikit.R.drawable.icon_default_contact)
+                        .transform(new CircleTransform()).into(avatar);
+
+                if(user.isOnline()) {
+                    onlineIndicator.setVisibility(View.VISIBLE);
+                } else {
+                    onlineIndicator.setVisibility(View.GONE);
+                }
+                avatarContainer.setVisibility(View.VISIBLE);
             } else {
-                onlineIndicator.setVisibility(View.GONE);
+                avatarContainer.setVisibility(View.GONE);
+            }
+
+            boolean showUsername = style.isShowUsername();
+            if(showUsername) {
+                nameTv.setTextSize(TypedValue.COMPLEX_UNIT_PX, style.getUsernameTextSize());
+                nameTv.setTypeface(nameTv.getTypeface(), style.getUnBlockTextStyle());
+                nameTv.setTextColor(style.getUsernameTextColor());
+                nameTv.setVisibility(View.VISIBLE);
+                nameTv.setText(user.getDisplayName());
+                space.setVisibility(View.GONE);
+            } else {
+                nameTv.setVisibility(View.GONE);
+                space.setVisibility(View.VISIBLE);
+            }
+
+            boolean showUnblock = style.isShowUnBlock();
+            if(showUnblock) {
+                unblockTv.setTextColor(style.getUnBlockTextColor());
+                unblockTv.setTextSize(TypedValue.COMPLEX_UNIT_PX, style.getUsernameTextSize());
+                unblockTv.setTypeface(unblockTv.getTypeface(), style.getUnBlockTextStyle());
+                unblockTv.setBackground(style.getunBlockDrawable());
+                unblockTv.setVisibility(View.VISIBLE);
+            } else {
+                unblockTv.setVisibility(View.GONE);
             }
             unblockTv.setTag(user);
             unblockTv.setOnClickListener(new View.OnClickListener() {

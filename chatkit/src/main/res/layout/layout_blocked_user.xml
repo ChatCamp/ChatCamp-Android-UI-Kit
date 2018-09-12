@@ -1,44 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal"
-    android:paddingTop="8dp"
     android:paddingLeft="8dp"
-    android:paddingRight="8dp">
+    android:paddingRight="8dp"
+    android:paddingTop="8dp">
 
-    <ImageView
-        android:id="@+id/iv_avatar"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_gravity="center_vertical"/>
+    <RelativeLayout
+        android:id="@+id/container_avatar"
+        android:layout_width="@dimen/blocked_user_list_avatar_width"
+        android:layout_height="@dimen/blocked_user_list_avatar_height"
+        android:layout_gravity="center_vertical">
 
-    <ImageView
-        android:id="@+id/iv_online"
-        android:layout_width="10dp"
-        android:layout_height="10dp"
-        android:src="@drawable/ic_online"
-        android:layout_gravity="center_vertical"
-        android:visibility="gone"/>
+        <ImageView
+            android:id="@+id/iv_avatar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical" />
+
+        <ImageView
+            android:id="@+id/iv_online"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/ic_online" />
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/tv_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:layout_gravity="center_vertical"
-        android:textColor="@color/black"
+        android:layout_weight="1"
+        android:paddingLeft="8dp"
         android:paddingRight="8dp"
-        android:paddingLeft="8dp"/>
+        android:textColor="@color/black" />
+
+    <android.support.v4.widget.Space
+        android:id="@+id/space"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 
     <TextView
         android:id="@+id/tv_unblock"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:text="Unblock"
-        android:background="@color/colorPrimary"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:layout_marginStart="4dp"
+        android:background="@color/colorPrimary"
         android:gravity="center"
         android:padding="4dp"
-        android:layout_marginStart="4dp"/>
+        android:text="Unblock"
+        android:textColor="@color/white"
+        />
 </LinearLayout>
