@@ -50,7 +50,7 @@ public class ChatCampDatabaseHelper extends SQLiteOpenHelper {
                 + ChatCampDatabaseContract.GroupEntry.TABLE_NAME_ALL + "("
                 + ChatCampDatabaseContract.GroupEntry._ID + " TEXT PRIMARY KEY,"
                 + ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP + " TEXT,"
-                + ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_CUSTOM_FILTERS + " TEXT"+ ")";
+                + ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_CUSTOM_FILTERS + " TEXT" + ")";
 
         sqLiteDatabase.execSQL(CREATE_GROUP_CHANNEL_ALL_TABLE);
 
@@ -58,7 +58,7 @@ public class ChatCampDatabaseHelper extends SQLiteOpenHelper {
                 + ChatCampDatabaseContract.GroupEntry.TABLE_NAME_INVITED + "("
                 + ChatCampDatabaseContract.GroupEntry._ID + " TEXT PRIMARY KEY,"
                 + ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP + " TEXT,"
-                + ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_CUSTOM_FILTERS + " TEXT"+ ")";
+                + ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_CUSTOM_FILTERS + " TEXT" + ")";
 
         sqLiteDatabase.execSQL(CREATE_GROUP_CHANNEL_INVITE_TABLE);
 
@@ -66,7 +66,7 @@ public class ChatCampDatabaseHelper extends SQLiteOpenHelper {
                 + ChatCampDatabaseContract.GroupEntry.TABLE_NAME_ACCEPTED + "("
                 + ChatCampDatabaseContract.GroupEntry._ID + " TEXT PRIMARY KEY,"
                 + ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP + " TEXT,"
-                + ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_CUSTOM_FILTERS + " TEXT"+ ")";
+                + ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_CUSTOM_FILTERS + " TEXT" + ")";
 
         sqLiteDatabase.execSQL(CREATE_GROUP_CHANNEL_ACCEPTED_TABLE);
     }
@@ -196,107 +196,109 @@ public class ChatCampDatabaseHelper extends SQLiteOpenHelper {
     private static void addGroupChannelsLocal(List<GroupChannel> groupChannels,
                                               GroupChannelListQuery.ParticipantState participantState,
                                               List<String> queryCustomFilter, SQLiteDatabase sqliteDatabase) {
-        StringBuilder inQuery = new StringBuilder();
-        StringBuilder subQuery = new StringBuilder();
-        String tableName = getTableName(participantState);
+        synchronized (groupChannels) {
+            StringBuilder inQuery = new StringBuilder();
+            StringBuilder subQuery = new StringBuilder();
+            String tableName = getTableName(participantState);
 
-        // if there is no filter used then we delete all the groups which are not part of the groups
-        // that we got from api of that state.
-        if (queryCustomFilter == null) {
-            inQuery.append("(");
-            boolean first = true;
-            for (GroupChannel groupChannel : groupChannels) {
-                if (first) {
-                    first = false;
-                    inQuery.append("'").append(groupChannel.getId()).append("'");
-                } else {
-                    inQuery.append(", '").append(groupChannel.getId()).append("'");
-                }
-            }
-            inQuery.append(")");
-            if (!TextUtils.isEmpty(inQuery.toString())) {
-                sqliteDatabase.execSQL("DELETE FROM " + tableName
-                        + " WHERE "
-                        + ChatCampDatabaseContract.GroupEntry._ID + " NOT IN "
-                        + inQuery);
-            }
-        } else {
-            // if there is any custom filter then we get all the groups of that state and that
-            // filter from database and delete the one that we did not get from api
-            List<GroupChannel> savedGroupChannel = getGroupChannelsLocal(participantState, queryCustomFilter, sqliteDatabase);
-            if (savedGroupChannel != null && savedGroupChannel.size() > 0) {
+            // if there is no filter used then we delete all the groups which are not part of the groups
+            // that we got from api of that state.
+            if (queryCustomFilter == null) {
+                inQuery.append("(");
                 boolean first = true;
-                for (GroupChannel groupChannel : savedGroupChannel) {
-                    boolean continueLoop = false;
-                    for (GroupChannel queryChannel : groupChannels) {
-                        if (queryChannel.getId().equals(groupChannel.getId())) {
-                            continueLoop = true;
-                            break;
-                        }
-                    }
-                    if(continueLoop) {
-                        continue;
-                    }
+                for (GroupChannel groupChannel : groupChannels) {
                     if (first) {
                         first = false;
-                        subQuery.append("'").append(groupChannel.getId()).append("'");
+                        inQuery.append("'").append(groupChannel.getId()).append("'");
                     } else {
-                        subQuery.append(", '").append(groupChannel.getId()).append("'");
+                        inQuery.append(", '").append(groupChannel.getId()).append("'");
                     }
                 }
-                if(!TextUtils.isEmpty(subQuery.toString())) {
-                    inQuery.append("(");
-                    inQuery.append(subQuery);
-                    inQuery.append(")");
+                inQuery.append(")");
+                if (!TextUtils.isEmpty(inQuery.toString())) {
+                    sqliteDatabase.execSQL("DELETE FROM " + tableName
+                            + " WHERE "
+                            + ChatCampDatabaseContract.GroupEntry._ID + " NOT IN "
+                            + inQuery);
+                }
+            } else {
+                // if there is any custom filter then we get all the groups of that state and that
+                // filter from database and delete the one that we did not get from api
+                List<GroupChannel> savedGroupChannel = getGroupChannelsLocal(participantState, queryCustomFilter, sqliteDatabase);
+                if (savedGroupChannel != null && savedGroupChannel.size() > 0) {
+                    boolean first = true;
+                    for (GroupChannel groupChannel : savedGroupChannel) {
+                        boolean continueLoop = false;
+                        for (GroupChannel queryChannel : groupChannels) {
+                            if (queryChannel.getId().equals(groupChannel.getId())) {
+                                continueLoop = true;
+                                break;
+                            }
+                        }
+                        if (continueLoop) {
+                            continue;
+                        }
+                        if (first) {
+                            first = false;
+                            subQuery.append("'").append(groupChannel.getId()).append("'");
+                        } else {
+                            subQuery.append(", '").append(groupChannel.getId()).append("'");
+                        }
+                    }
+                    if (!TextUtils.isEmpty(subQuery.toString())) {
+                        inQuery.append("(");
+                        inQuery.append(subQuery);
+                        inQuery.append(")");
+                    }
+                }
+                if (!TextUtils.isEmpty(inQuery.toString())) {
+                    sqliteDatabase.execSQL("DELETE FROM " + tableName
+                            + " WHERE "
+                            + ChatCampDatabaseContract.GroupEntry._ID + " IN"
+                            + inQuery);
                 }
             }
-            if (!TextUtils.isEmpty(inQuery.toString())) {
-                sqliteDatabase.execSQL("DELETE FROM " + tableName
-                        + " WHERE "
-                        + ChatCampDatabaseContract.GroupEntry._ID + " IN"
-                        + inQuery);
-            }
-        }
-        for (int i = 0; i < groupChannels.size(); ++i) {
-            Cursor cursor = sqliteDatabase.rawQuery("SELECT *    FROM " + tableName
-                            + " WHERE " + ChatCampDatabaseContract.GroupEntry._ID + " = " + "'" + groupChannels.get(i).getId() + "'",
+            for (int i = 0; i < groupChannels.size(); ++i) {
+                Cursor cursor = sqliteDatabase.rawQuery("SELECT *    FROM " + tableName
+                                + " WHERE " + ChatCampDatabaseContract.GroupEntry._ID + " = " + "'" + groupChannels.get(i).getId() + "'",
 //                            + "' AND "
 //                            + ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_PARTICIPANT_STATE + " = " + "'" + participantState.name() + "'",
-                    null);
+                        null);
 
-            if (cursor.getCount() == 0) {
-                // no group match with the id and participant state.
-                ContentValues values = new ContentValues();
-                values.put(ChatCampDatabaseContract.GroupEntry._ID, groupChannels.get(i).getId());
-                values.put(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP,
-                        groupChannels.get(i).serialize()); // serialized group channel
-              //  values.put(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_PARTICIPANT_STATE, participantState.name());
-                List<String> customFilters = groupChannels.get(i).getCustomFilter();
-                if (customFilters != null) {
-                    values.put(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_CUSTOM_FILTERS, customFilters.toString());
-                }
-                sqliteDatabase.insert(tableName,
-                        null, values);
-            } else {
-                // a group already exists with this id and participant state
-                if (cursor.moveToFirst()) {
-                    GroupChannel groupChannel = GroupChannel.createfromSerializedData(cursor.
-                            getString(cursor.getColumnIndexOrThrow(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP)));
-                    if (groupChannel != null && !groupChannel.equals(groupChannels.get(i))) {
-                        ContentValues values = new ContentValues();
-                        values.put(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP,
-                                groupChannels.get(i).serialize());
+                if (cursor.getCount() == 0) {
+                    // no group match with the id and participant state.
+                    ContentValues values = new ContentValues();
+                    values.put(ChatCampDatabaseContract.GroupEntry._ID, groupChannels.get(i).getId());
+                    values.put(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP,
+                            groupChannels.get(i).serialize()); // serialized group channel
+                    //  values.put(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_PARTICIPANT_STATE, participantState.name());
+                    List<String> customFilters = groupChannels.get(i).getCustomFilter();
+                    if (customFilters != null) {
+                        values.put(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_CUSTOM_FILTERS, customFilters.toString());
+                    }
+                    sqliteDatabase.insert(tableName,
+                            null, values);
+                } else {
+                    // a group already exists with this id and participant state
+                    if (cursor.moveToFirst()) {
+                        GroupChannel groupChannel = GroupChannel.createfromSerializedData(cursor.
+                                getString(cursor.getColumnIndexOrThrow(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP)));
+                        if (groupChannel != null && !groupChannel.equals(groupChannels.get(i))) {
+                            ContentValues values = new ContentValues();
+                            values.put(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_GROUP,
+                                    groupChannels.get(i).serialize());
 //                        values.put(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_PARTICIPANT_STATE, participantState.name());
-                        List<String> customFilters = groupChannels.get(i).getCustomFilter();
-                        if (customFilters != null) {
-                            values.put(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_CUSTOM_FILTERS, customFilters.toString());
+                            List<String> customFilters = groupChannels.get(i).getCustomFilter();
+                            if (customFilters != null) {
+                                values.put(ChatCampDatabaseContract.GroupEntry.COLUMN_NAME_CUSTOM_FILTERS, customFilters.toString());
+                            }
+                            sqliteDatabase.update(tableName, values,
+                                    ChatCampDatabaseContract.GroupEntry._ID + "=?", new String[]{groupChannel.getId()});
                         }
-                        sqliteDatabase.update(tableName, values,
-                                ChatCampDatabaseContract.GroupEntry._ID + "=?", new String[]{groupChannel.getId()});
                     }
                 }
+                cursor.close();
             }
-            cursor.close();
         }
     }
 
@@ -345,7 +347,7 @@ public class ChatCampDatabaseHelper extends SQLiteOpenHelper {
     }
 
     private static List<GroupChannel> getGroupChannelsLocal(GroupChannelListQuery.ParticipantState participantState,
-                                               List<String> customFilters, SQLiteDatabase sqLiteDatabase) {
+                                                            List<String> customFilters, SQLiteDatabase sqLiteDatabase) {
         ArrayList<GroupChannel> list = new ArrayList<>();
         String tableName = getTableName(participantState);
 
@@ -435,9 +437,9 @@ public class ChatCampDatabaseHelper extends SQLiteOpenHelper {
     }
 
     private static String getTableName(GroupChannelListQuery.ParticipantState participantState) {
-        if(participantState == GroupChannelListQuery.ParticipantState.INVITED) {
+        if (participantState == GroupChannelListQuery.ParticipantState.INVITED) {
             return ChatCampDatabaseContract.GroupEntry.TABLE_NAME_INVITED;
-        } else if (participantState == GroupChannelListQuery.ParticipantState.ACCEPTED){
+        } else if (participantState == GroupChannelListQuery.ParticipantState.ACCEPTED) {
             return ChatCampDatabaseContract.GroupEntry.TABLE_NAME_ACCEPTED;
         } else {
             return ChatCampDatabaseContract.GroupEntry.TABLE_NAME_ALL;
@@ -517,7 +519,7 @@ public class ChatCampDatabaseHelper extends SQLiteOpenHelper {
 
         @Override
         protected void onPostExecute(List<Message> messages) {
-            if(getMessagesListener != null) {
+            if (getMessagesListener != null) {
                 getMessagesListener.onGetMessages(messages);
             }
         }
@@ -585,7 +587,7 @@ public class ChatCampDatabaseHelper extends SQLiteOpenHelper {
 
         @Override
         protected void onPostExecute(List<GroupChannel> groupChannels) {
-            if(getGroupChannelsListener != null) {
+            if (getGroupChannelsListener != null) {
                 getGroupChannelsListener.onGetGroupChannels(groupChannels);
             }
         }
@@ -612,7 +614,7 @@ public class ChatCampDatabaseHelper extends SQLiteOpenHelper {
 
         @Override
         protected void onPostExecute(GroupChannel groupChannel) {
-            if(getGroupChannelListener != null) {
+            if (getGroupChannelListener != null) {
                 getGroupChannelListener.onGetGroupChannel(groupChannel);
             }
         }
