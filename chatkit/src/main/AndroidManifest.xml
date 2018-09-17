@@ -5,7 +5,9 @@
     <application
         android:allowBackup="false"
         android:supportsRtl="true">
-        <activity android:name=".preview.MediaPreviewActivity" />
+        <activity
+            android:name=".preview.MediaPreviewActivity"
+            android:theme="@style/ChatCampTheme.NoActionBar" />
 
         <provider
             android:name=".utils.ChatCampFileProvider"
@@ -19,19 +21,18 @@
 
         <activity
             android:name=".preview.ShowImageActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/ChatCampTheme.NoActionBar" />
         <activity
             android:name=".preview.ShowVideoActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/ChatCampTheme.NoActionBar" />
         <activity
             android:name=".conversationdetails.GroupDetailActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/ChatCampTheme.NoActionBar" />
         <activity
             android:name=".conversationdetails.UserProfileActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/ChatCampTheme.NoActionBar" />
 
-        <activity android:name=".user.BlockedUserListActivity"
-            />
+        <activity android:name=".user.BlockedUserListActivity" />
     </application>
 
 </manifest>
