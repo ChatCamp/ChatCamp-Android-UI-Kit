@@ -149,6 +149,8 @@ public class MessagesListStyle extends Style {
     private int readReceiptReadLayout;
     private int readReeiptUnReadLayout;
 
+    private String customFont;
+
     static MessagesListStyle parse(Context context, AttributeSet attrs) {
         MessagesListStyle style = new MessagesListStyle(context, attrs);
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MessagesList);
@@ -161,7 +163,7 @@ public class MessagesListStyle extends Style {
         style.incomingTextLinkColor = typedArray.getColor(R.styleable.MessagesList_incomingTextLinkColor,
                 style.getSystemAccentColor());
         style.incomingTextColor = typedArray.getColor(R.styleable.MessagesList_incomingTextColor,
-                style.getColor(R.color.dark_grey_two));
+                style.getColor(R.color.chatCampTextBlack));
         style.incomingTextSize = typedArray.getDimensionPixelSize(R.styleable.MessagesList_incomingTextSize,
                 style.getDimension(R.dimen.message_text_size));
         style.incomingTextStyle = typedArray.getInt(R.styleable.MessagesList_incomingTextStyle, Typeface.NORMAL);
@@ -173,7 +175,7 @@ public class MessagesListStyle extends Style {
         style.incomingDefaultBubblePressedColor = typedArray.getColor(R.styleable.MessagesList_incomingDefaultBubblePressedColor,
                 style.getColor(R.color.white_two));
         style.incomingDefaultBubbleSelectedColor = typedArray.getColor(R.styleable.MessagesList_incomingDefaultBubbleSelectedColor,
-                style.getColor(R.color.cornflower_blue_two_24));
+                style.getColor(R.color.chatCampColorPrimary));
 
         style.incomingDefaultBubblePaddingLeft = typedArray.getDimensionPixelSize(R.styleable.MessagesList_incomingBubblePaddingLeft,
                 style.getDimension(R.dimen.message_padding_left));
@@ -198,7 +200,7 @@ public class MessagesListStyle extends Style {
 
         //time
         style.incomingTimeTextColor = typedArray.getColor(R.styleable.MessagesList_incomingTimeTextColor,
-                style.getColor(R.color.warm_grey_four));
+                style.getColor(R.color.chatCampGrayColor));
         style.incomingTimeTextSize = typedArray.getDimensionPixelSize(R.styleable.MessagesList_incomingTimeTextSize,
                 style.getDimension(R.dimen.message_text_time));
         style.incomingTimeTextStyle = typedArray.getInt(R.styleable.MessagesList_incomingTimeTextStyle, Typeface.NORMAL);
@@ -215,7 +217,7 @@ public class MessagesListStyle extends Style {
 
         // Username
         style.incomingUsernameTextColor = typedArray.getColor(R.styleable.MessagesList_incomingUsernameTextColor,
-                style.getColor(R.color.black));
+                style.getColor(R.color.chatCampTextBlack));
         style.incomingUsernameTextSize = typedArray.getDimensionPixelSize(R.styleable.MessagesList_incomingUsernameTextSize,
                 style.getDimension(R.dimen.message_text_username));
         style.incomingUsernameTextStyle = typedArray.getInt(R.styleable.MessagesList_incomingUsernameTextStyle, Typeface.NORMAL);
@@ -233,7 +235,7 @@ public class MessagesListStyle extends Style {
         style.outcomingTextLinkColor = typedArray.getColor(R.styleable.MessagesList_outcomingTextLinkColor,
                 style.getSystemAccentColor());
         style.outcomingTextColor = typedArray.getColor(R.styleable.MessagesList_outcomingTextColor,
-                style.getColor(R.color.white));
+                style.getColor(R.color.chatCampTextWhite));
         style.outcomingTextSize = typedArray.getDimensionPixelSize(R.styleable.MessagesList_outcomingTextSize,
                 style.getDimension(R.dimen.message_text_size));
         style.outcomingTextStyle = typedArray.getInt(R.styleable.MessagesList_outcomingTextStyle, Typeface.NORMAL);
@@ -241,11 +243,11 @@ public class MessagesListStyle extends Style {
         //bubble
         style.outcomingBubbleDrawable = typedArray.getResourceId(R.styleable.MessagesList_outcomingBubbleDrawable, -1);
         style.outcomingDefaultBubbleColor = typedArray.getColor(R.styleable.MessagesList_outcomingDefaultBubbleColor,
-                style.getColor(R.color.cornflower_blue_two));
+                style.getColor(R.color.chatCampColorPrimary));
         style.outcomingDefaultBubblePressedColor = typedArray.getColor(R.styleable.MessagesList_outcomingDefaultBubblePressedColor,
-                style.getColor(R.color.cornflower_blue_two));
+                style.getColor(R.color.chatCampColorPrimary));
         style.outcomingDefaultBubbleSelectedColor = typedArray.getColor(R.styleable.MessagesList_outcomingDefaultBubbleSelectedColor,
-                style.getColor(R.color.cornflower_blue_two_24));
+                style.getColor(R.color.chatCampColorPrimary));
 
         style.outcomingDefaultBubblePaddingLeft = typedArray.getDimensionPixelSize(R.styleable.MessagesList_outcomingBubblePaddingLeft,
                 style.getDimension(R.dimen.message_padding_left));
@@ -269,7 +271,7 @@ public class MessagesListStyle extends Style {
 
         //time
         style.outcomingTimeTextColor = typedArray.getColor(R.styleable.MessagesList_outcomingTimeTextColor,
-                style.getColor(R.color.warm_grey_four));
+                style.getColor(R.color.chatCampGrayColor));
         style.outcomingTimeTextSize = typedArray.getDimensionPixelSize(R.styleable.MessagesList_outcomingTimeTextSize,
                 style.getDimension(R.dimen.message_text_time));
         style.outcomingTimeTextStyle = typedArray.getInt(R.styleable.MessagesList_outcomingTimeTextStyle, Typeface.NORMAL);
@@ -288,7 +290,7 @@ public class MessagesListStyle extends Style {
 
         //username
         style.outcomingUsernameTextColor = typedArray.getColor(R.styleable.MessagesList_outcomingUsernameTextColor,
-                style.getColor(R.color.black));
+                style.getColor(R.color.chatCampTextBlack));
         style.outcomingUsernameTextSize = typedArray.getDimensionPixelSize(R.styleable.MessagesList_outcomingUsernameTextSize,
                 style.getDimension(R.dimen.message_text_username));
         style.outcomingUsernameTextStyle = typedArray.getInt(R.styleable.MessagesList_outcomingUsernameTextStyle, Typeface.NORMAL);
@@ -304,7 +306,7 @@ public class MessagesListStyle extends Style {
                 style.getDimension(R.dimen.message_date_header_padding));
         style.dateHeaderFormat = typedArray.getString(R.styleable.MessagesList_dateHeaderFormat);
         style.dateHeaderTextColor = typedArray.getColor(R.styleable.MessagesList_dateHeaderTextColor,
-                style.getColor(R.color.warm_grey_two));
+                style.getColor(R.color.chatCampGrayColor));
         style.dateHeaderTextSize = typedArray.getDimensionPixelSize(R.styleable.MessagesList_dateHeaderTextSize,
                 style.getDimension(R.dimen.message_date_header_text_size));
         style.dateHeaderTextStyle = typedArray.getInt(R.styleable.MessagesList_dateHeaderTextStyle, Typeface.NORMAL);
@@ -323,6 +325,7 @@ public class MessagesListStyle extends Style {
         // read receipt layout
         style.readReceiptReadLayout = typedArray.getResourceId(R.styleable.MessagesList_readReceiptReadLayout, R.layout.layout_read_receipt_read);
         style.readReeiptUnReadLayout = typedArray.getResourceId(R.styleable.MessagesList_readReceiptUnReadLayout, R.layout.layout_read_receipt_unread);
+        style.customFont = typedArray.getString(R.styleable.MessagesList_messageListCustomFont);
         typedArray.recycle();
         return style;
     }
@@ -688,5 +691,9 @@ public class MessagesListStyle extends Style {
 
     public int getReadReceiptUnReadLayout() {
         return readReeiptUnReadLayout;
+    }
+
+    public String getCustomFont() {
+        return customFont;
     }
 }

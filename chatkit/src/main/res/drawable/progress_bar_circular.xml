@@ -9,9 +9,9 @@
 
 
             <gradient
-                android:centerColor="#cfd8dc"
-                android:endColor="#cfd8dc"
-                android:startColor="#cfd8dc"
+                android:centerColor="@color/chatCampTextWhite"
+                android:endColor="@color/chatCampTextWhite"
+                android:startColor="@color/chatCampTextWhite"
                 android:type="sweep" />
         </shape>
     </item>
@@ -37,9 +37,9 @@
                     android:toDegrees="360" />
 
                 <gradient
-                    android:centerColor="@color/colorPrimary"
-                    android:endColor="@color/colorPrimary"
-                    android:startColor="@color/colorPrimary"
+                    android:centerColor="@color/chatCampColorPrimary"
+                    android:endColor="@color/chatCampColorPrimary"
+                    android:startColor="@color/chatCampColorPrimary"
                     android:type="sweep" />
 
             </shape>

@@ -2,7 +2,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal"
     android:paddingLeft="8dp"
     android:paddingRight="8dp"
@@ -29,7 +28,7 @@
             android:src="@drawable/ic_online" />
     </RelativeLayout>
 
-    <TextView
+    <com.chatcamp.uikit.utils.TextViewFont
         android:id="@+id/tv_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -37,24 +36,23 @@
         android:layout_weight="1"
         android:paddingLeft="8dp"
         android:paddingRight="8dp"
-        android:textColor="@color/black" />
+        android:textColor="@color/chatCampTextBlack" />
 
     <android.support.v4.widget.Space
         android:id="@+id/space"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_weight="1" />
 
-    <TextView
+    <com.chatcamp.uikit.utils.TextViewFont
         android:id="@+id/tv_unblock"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginStart="4dp"
-        android:background="@color/colorPrimary"
+        android:background="@color/chatCampColorPrimary"
         android:gravity="center"
         android:padding="4dp"
         android:text="Unblock"
-        android:textColor="@color/white"
-        />
+        android:textColor="@color/chatCampTextWhite" />
 </LinearLayout>

@@ -31,23 +31,23 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <TextView
+            <com.chatcamp.uikit.utils.TextViewFont
                 android:id="@+id/tv_title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textColor="@color/black"
+                android:textColor="@color/chatCampTextBlack"
                 android:textSize="@dimen/channel_list_name_text_size"
                 android:textStyle="bold"
                 tools:text="Title" />
 
-            <TextView
+            <com.chatcamp.uikit.utils.TextViewFont
                 android:id="@+id/tv_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/black"
+                android:textColor="@color/chatCampTextBlack"
                 android:textSize="12sp"
                 tools:text="Title" />
         </LinearLayout>
@@ -58,18 +58,18 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <TextView
+            <com.chatcamp.uikit.utils.TextViewFont
                 android:id="@+id/tv_last_message"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textColor="@color/black"
+                android:textColor="@color/chatCampTextBlack"
                 android:textSize="14sp"
                 tools:text="Title" />
 
-            <TextView
+            <com.chatcamp.uikit.utils.TextViewFont
                 android:id="@+id/tv_unread_message"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -79,7 +79,7 @@
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:paddingTop="2dp"
-                android:textColor="@color/white"
+                android:textColor="@color/chatCampTextWhite"
                 android:textSize="12sp"
                 android:visibility="gone" />
         </LinearLayout>
@@ -88,6 +88,6 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginTop="8dp"
-            android:background="@color/gray" />
+            android:background="@color/chatCampDividerColor" />
     </LinearLayout>
 </LinearLayout>

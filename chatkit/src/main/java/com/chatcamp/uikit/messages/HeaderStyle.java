@@ -21,14 +21,15 @@ public class HeaderStyle extends Style {
     private int imageHeight;
     private int imageWidth;
     private int titleMarginLeft;
+    private String customFont;
 
     public static HeaderStyle parseStyle(Context context, AttributeSet attrs) {
         HeaderStyle headerStyle = new HeaderStyle(context, attrs);
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.HeaderView);
-        headerStyle.backgroundColor = typedArray.getColor(R.styleable.HeaderView_backgroundColor, headerStyle.getSystemPrimaryColor());
+        headerStyle.backgroundColor = typedArray.getColor(R.styleable.HeaderView_backgroundColor, headerStyle.getColor(R.color.chatCampColorPrimary));
         headerStyle.titleTextSize = typedArray.getDimensionPixelSize(R.styleable.HeaderView_headerTitleTextSize,
                 headerStyle.getDimension(R.dimen.header_view_text_size));
-        headerStyle.titleTextColor = typedArray.getColor(R.styleable.HeaderView_headerTitleTextColor, headerStyle.getColor(R.color.white));
+        headerStyle.titleTextColor = typedArray.getColor(R.styleable.HeaderView_headerTitleTextColor, headerStyle.getColor(R.color.chatCampTextWhite));
         headerStyle.titleTextStyle = typedArray.getInt(R.styleable.HeaderView_headerTitleTextStyle, Typeface.NORMAL);
         headerStyle.imageHeight = typedArray.getDimensionPixelSize(R.styleable.HeaderView_imageHeight,
                 headerStyle.getDimension(R.dimen.header_view_image_height));
@@ -36,6 +37,7 @@ public class HeaderStyle extends Style {
                 headerStyle.getDimension(R.dimen.header_view_image_width));
         headerStyle.titleMarginLeft = typedArray.getDimensionPixelSize(R.styleable.HeaderView_headerTitleMarginLeft,
                 headerStyle.getDimension(R.dimen.header_view_title_left_margin));
+        headerStyle.customFont = typedArray.getString(R.styleable.HeaderView_headerViewCustomFont);
         typedArray.recycle();
         return headerStyle;
     }
@@ -75,5 +77,9 @@ public class HeaderStyle extends Style {
 
     public int getTitleMarginLeft() {
         return titleMarginLeft;
+    }
+
+    public String getCustomFont() {
+        return customFont;
     }
 }

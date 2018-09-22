@@ -26,6 +26,7 @@ import com.chatcamp.uikit.R;
 import com.chatcamp.uikit.preview.ShowVideoActivity;
 import com.chatcamp.uikit.utils.DownloadFileListener;
 import com.chatcamp.uikit.utils.FileUtils;
+import com.chatcamp.uikit.utils.TextViewFont;
 import com.chatcamp.uikit.utils.Utils;
 
 import java.lang.ref.WeakReference;
@@ -70,7 +71,7 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
                                                   boolean isMe, LayoutInflater layoutInflater) {
 
         View view = layoutInflater.inflate(R.layout.layout_message_video, cellView, true);
-        TextView textView = view.findViewById(R.id.tv_video_name);
+        TextViewFont textView = view.findViewById(R.id.tv_video_name);
 
         Drawable backgroundDrawable = isMe ? messageStyle.getOutcomingBubbleDrawable() :
                 messageStyle.getIncomingBubbleDrawable();
@@ -79,16 +80,15 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
         int videoIcon = isMe ? R.drawable.ic_video_white_placeholder : R.drawable.ic_video_placeholder;
         ImageView documentImage = view.findViewById(R.id.iv_video);
         documentImage.setImageResource(videoIcon);
+        if(!TextUtils.isEmpty(messageStyle.getCustomFont())) {
+            textView.setCustomFont(messageStyle.getCustomFont());
+        }
 
         int downloadIcon = isMe ? R.drawable.ic_download_white : R.drawable.ic_download;
         ImageView downloadImage = view.findViewById(R.id.iv_download);
         downloadImage.setImageResource(downloadIcon);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            view.setBackground(backgroundDrawable);
-        } else {
-            view.setBackgroundDrawable(backgroundDrawable);
-        }
+        view.setBackground(backgroundDrawable);
         return new VideoMessageHolder(view);
     }
 

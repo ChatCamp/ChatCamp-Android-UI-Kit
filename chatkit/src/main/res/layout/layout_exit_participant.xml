@@ -18,5 +18,5 @@
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
         android:text="Exit Group"
-        android:textColor="#e94f4f"/>
+        android:textColor="@color/chatCampRedColor"/>
 </LinearLayout>

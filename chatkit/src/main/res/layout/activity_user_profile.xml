@@ -17,7 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
-            app:contentScrim="?attr/colorPrimary"
+            app:contentScrim="@color/chatCampColorPrimary"
             app:expandedTitleMarginEnd="64dp"
             app:expandedTitleMarginStart="48dp"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
@@ -84,7 +84,7 @@
                 android:layout_height="1dp"
                 android:layout_marginBottom="8dp"
                 android:layout_marginStart="8dp"
-                android:background="@color/bg_divider" />
+                android:background="@color/chatCampDividerColor" />
 
             <TextView
                 android:id="@+id/tv_block"
@@ -93,7 +93,7 @@
                 android:layout_marginStart="8dp"
                 android:drawableLeft="@drawable/ic_block"
                 android:text="Block"
-                android:textColor="@color/color_action"
+                android:textColor="@color/chatCampRedColor"
                 android:drawablePadding="8dp"/>
         </LinearLayout>
 

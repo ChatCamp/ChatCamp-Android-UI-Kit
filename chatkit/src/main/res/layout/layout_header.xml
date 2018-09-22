@@ -15,7 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
+            android:background="@color/chatCampColorPrimary"
             app:contentInsetLeft="0dp"
             app:contentInsetStart="0dp"
             app:contentInsetStartWithNavigation="0dp"
@@ -32,14 +32,14 @@
                     android:layout_height="@dimen/header_view_image_height"
                     android:layout_gravity="center_vertical" />
 
-                <TextView
+                <com.chatcamp.uikit.utils.TextViewFont
                     android:id="@+id/tv_group_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="@dimen/header_view_title_left_margin"
                     android:layout_marginStart="@dimen/header_view_title_left_margin"
-                    android:textColor="@android:color/white"
+                    android:textColor="@color/chatCampTextWhite"
                     android:textSize="@dimen/header_view_text_size" />
             </LinearLayout>
         </android.support.v7.widget.Toolbar>
