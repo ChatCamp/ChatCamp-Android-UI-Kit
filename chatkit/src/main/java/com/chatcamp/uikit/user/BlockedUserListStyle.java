@@ -37,6 +37,8 @@ public class BlockedUserListStyle extends Style {
     private int unBlockTextStyle;
     private int unBlockTextColor;
 
+    private String customFont;
+
     protected BlockedUserListStyle(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -59,6 +61,7 @@ public class BlockedUserListStyle extends Style {
         blockedUserListStyle.unBlockTextSize = typedArray.getDimensionPixelSize(R.styleable.BlockedUserList_unBlockTextSize,  blockedUserListStyle.getDimension(R.dimen.blocked_user_list_username_textsize));
         blockedUserListStyle.unBlockTextStyle = typedArray.getInt(R.styleable.BlockedUserList_unBlockTextStyle, Typeface.NORMAL);
         blockedUserListStyle.unBlockTextColor = typedArray.getColor(R.styleable.BlockedUserList_unBlockTextColor, blockedUserListStyle.getColor(R.color.white));
+        blockedUserListStyle.customFont = typedArray.getString(R.styleable.BlockedUserList_blockedUserListCustomFont);
         return blockedUserListStyle;
     }
 
@@ -122,5 +125,9 @@ public class BlockedUserListStyle extends Style {
 
     public int getUnBlockTextColor() {
         return unBlockTextColor;
+    }
+
+    public String getCustomFont() {
+        return customFont;
     }
 }

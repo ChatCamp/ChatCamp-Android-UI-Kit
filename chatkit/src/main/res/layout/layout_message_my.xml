@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:paddingBottom="@dimen/message_gap">
 
-    <TextView
+    <com.chatcamp.uikit.utils.TextViewFont
         android:id="@+id/messageDateHeader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -47,7 +47,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <TextView
+                <com.chatcamp.uikit.utils.TextViewFont
                     android:id="@+id/messageUsername"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -68,7 +68,7 @@
                     android:layout_gravity="end"
                     android:orientation="horizontal">
 
-                    <TextView
+                    <com.chatcamp.uikit.utils.TextViewFont
                         android:id="@+id/messageTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

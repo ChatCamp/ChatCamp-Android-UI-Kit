@@ -3,6 +3,7 @@ package com.chatcamp.uikit.user;
 import android.content.Context;
 import android.support.v4.widget.Space;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,7 @@ import android.widget.TextView;
 import com.chatcamp.uikit.R;
 import com.chatcamp.uikit.messages.RecyclerScrollMoreListener;
 import com.chatcamp.uikit.utils.CircleTransform;
+import com.chatcamp.uikit.utils.TextViewFont;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -113,9 +115,9 @@ public class BlockedUserAdapter extends RecyclerView.Adapter<BlockedUserAdapter.
     public class BlockedUserViewHolder extends RecyclerView.ViewHolder {
 
         private ImageView avatar;
-        private TextView nameTv;
+        private TextViewFont nameTv;
         private ImageView onlineIndicator;
-        private TextView unblockTv;
+        private TextViewFont unblockTv;
         private RelativeLayout avatarContainer;
         private Space space;
 
@@ -171,6 +173,9 @@ public class BlockedUserAdapter extends RecyclerView.Adapter<BlockedUserAdapter.
                 nameTv.setTextColor(style.getUsernameTextColor());
                 nameTv.setVisibility(View.VISIBLE);
                 nameTv.setText(user.getDisplayName());
+                if(!TextUtils.isEmpty(style.getCustomFont())) {
+                    nameTv.setCustomFont(style.getCustomFont());
+                }
                 space.setVisibility(View.GONE);
             } else {
                 nameTv.setVisibility(View.GONE);
@@ -184,6 +189,9 @@ public class BlockedUserAdapter extends RecyclerView.Adapter<BlockedUserAdapter.
                 unblockTv.setTypeface(unblockTv.getTypeface(), style.getUnBlockTextStyle());
                 unblockTv.setBackground(style.getunBlockDrawable());
                 unblockTv.setVisibility(View.VISIBLE);
+                if(!TextUtils.isEmpty(style.getCustomFont())) {
+                    unblockTv.setCustomFont(style.getCustomFont());
+                }
             } else {
                 unblockTv.setVisibility(View.GONE);
             }

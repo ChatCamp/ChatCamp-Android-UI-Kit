@@ -149,6 +149,8 @@ public class MessagesListStyle extends Style {
     private int readReceiptReadLayout;
     private int readReeiptUnReadLayout;
 
+    private String customFont;
+
     static MessagesListStyle parse(Context context, AttributeSet attrs) {
         MessagesListStyle style = new MessagesListStyle(context, attrs);
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MessagesList);
@@ -323,6 +325,7 @@ public class MessagesListStyle extends Style {
         // read receipt layout
         style.readReceiptReadLayout = typedArray.getResourceId(R.styleable.MessagesList_readReceiptReadLayout, R.layout.layout_read_receipt_read);
         style.readReeiptUnReadLayout = typedArray.getResourceId(R.styleable.MessagesList_readReceiptUnReadLayout, R.layout.layout_read_receipt_unread);
+        style.customFont = typedArray.getString(R.styleable.MessagesList_messageListCustomFont);
         typedArray.recycle();
         return style;
     }
@@ -688,5 +691,9 @@ public class MessagesListStyle extends Style {
 
     public int getReadReceiptUnReadLayout() {
         return readReeiptUnReadLayout;
+    }
+
+    public String getCustomFont() {
+        return customFont;
     }
 }

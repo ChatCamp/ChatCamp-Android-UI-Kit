@@ -21,6 +21,7 @@ public class HeaderStyle extends Style {
     private int imageHeight;
     private int imageWidth;
     private int titleMarginLeft;
+    private String customFont;
 
     public static HeaderStyle parseStyle(Context context, AttributeSet attrs) {
         HeaderStyle headerStyle = new HeaderStyle(context, attrs);
@@ -36,6 +37,7 @@ public class HeaderStyle extends Style {
                 headerStyle.getDimension(R.dimen.header_view_image_width));
         headerStyle.titleMarginLeft = typedArray.getDimensionPixelSize(R.styleable.HeaderView_headerTitleMarginLeft,
                 headerStyle.getDimension(R.dimen.header_view_title_left_margin));
+        headerStyle.customFont = typedArray.getString(R.styleable.HeaderView_headerViewCustomFont);
         typedArray.recycle();
         return headerStyle;
     }
@@ -75,5 +77,9 @@ public class HeaderStyle extends Style {
 
     public int getTitleMarginLeft() {
         return titleMarginLeft;
+    }
+
+    public String getCustomFont() {
+        return customFont;
     }
 }

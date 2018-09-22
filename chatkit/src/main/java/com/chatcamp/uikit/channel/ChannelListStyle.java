@@ -33,6 +33,8 @@ public class ChannelListStyle extends Style {
     private int unreadMessageCountTextSize;
     private int unreadMessageCountTextStyle;
     private int unreadMessageCountBackgroundColor;
+    private String customFont;
+    private String usernameCustomFont;
 
 
     protected ChannelListStyle(Context context, AttributeSet attrs) {
@@ -72,6 +74,8 @@ public class ChannelListStyle extends Style {
         style.unreadMessageCountTextStyle = typedArray.getInteger(R.styleable.ChannelList_unreadMessageCountTextStyle, Typeface.NORMAL);
         style.unreadMessageCountBackgroundColor = typedArray.getColor(R.styleable.ChannelList_unreadMessageCountBackgroundColor,
                 style.getColor(R.color.chatCampColorPrimary));
+        style.customFont = typedArray.getString(R.styleable.ChannelList_channelListCustomFont);
+        style.usernameCustomFont = typedArray.getString(R.styleable.ChannelList_channelListUsernameCustomFont);
         typedArray.recycle();
         return style;
     }
@@ -134,5 +138,13 @@ public class ChannelListStyle extends Style {
 
     public int getUnreadMessageCountBackgroundColor() {
         return unreadMessageCountBackgroundColor;
+    }
+
+    public String getCustomFont() {
+        return customFont;
+    }
+
+    public String getUsernameCustomFont() {
+        return usernameCustomFont;
     }
 }

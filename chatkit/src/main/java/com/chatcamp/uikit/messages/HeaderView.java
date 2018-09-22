@@ -18,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.chatcamp.uikit.commons.ImageLoader;
+import com.chatcamp.uikit.utils.TextViewFont;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.chatcamp.uikit.R;
@@ -41,7 +42,7 @@ public class HeaderView extends LinearLayout {
 
     private Toolbar toolbar;
     private ImageView groupImageIv;
-    private TextView groupTitleTv;
+    private TextViewFont groupTitleTv;
     private BaseChannel channel;
     private Participant otherParticipant;
     private HeaderStyle headerStyle;
@@ -79,6 +80,9 @@ public class HeaderView extends LinearLayout {
         groupTitleTv.setTextColor(headerStyle.getTitleTextColor());
         groupTitleTv.setTextSize(TypedValue.COMPLEX_UNIT_PX, headerStyle.getTitleTextSize());
         groupTitleTv.setTypeface(groupTitleTv.getTypeface(), headerStyle.getTitleTextStyle());
+        if(!TextUtils.isEmpty(headerStyle.getCustomFont())) {
+            groupTitleTv.setCustomFont(headerStyle.getCustomFont());
+        }
         LayoutParams titleParams = (LayoutParams) groupTitleTv.getLayoutParams();
         titleParams.leftMargin = headerStyle.getTitleMarginLeft();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {

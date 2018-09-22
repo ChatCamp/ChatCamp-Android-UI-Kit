@@ -3,6 +3,7 @@ package com.chatcamp.uikit.messages.messagetypes;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
+import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.chatcamp.uikit.R;
+import com.chatcamp.uikit.utils.TextViewFont;
 
 import io.chatcamp.sdk.Message;
 
@@ -27,7 +29,7 @@ public class TextMessageFactory extends MessageFactory<TextMessageFactory.TextMe
     @Override
     public TextMessageHolder createMessageHolder(ViewGroup cellView, boolean isMe, LayoutInflater layoutInflater) {
         View view = layoutInflater.inflate(R.layout.layout_message_text, cellView, true);
-        TextView textView = view.findViewById(R.id.messageTextView);
+        TextViewFont textView = view.findViewById(R.id.messageTextView);
         Drawable backgroundDrawable = isMe ? messageStyle.getOutcomingBubbleDrawable() :
                 messageStyle.getIncomingBubbleDrawable();
         int paddingTop = isMe ? messageStyle.getOutcomingDefaultBubblePaddingTop() : messageStyle.getIncomingDefaultBubblePaddingTop();
@@ -44,6 +46,9 @@ public class TextMessageFactory extends MessageFactory<TextMessageFactory.TextMe
         textView.setAutoLinkMask(messageStyle.getTextAutoLinkMask());
         textView.setLinkTextColor(textLinkColor);
         textView.setTextColor(textColor);
+        if(!TextUtils.isEmpty(messageStyle.getCustomFont())) {
+            textView.setCustomFont(messageStyle.getCustomFont());
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             textView.setBackground(backgroundDrawable);
         } else {

@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -21,6 +22,7 @@ import com.chatcamp.uikit.commons.ImageLoader;
 import com.chatcamp.uikit.database.ChatCampDatabaseHelper;
 import com.chatcamp.uikit.messages.RecyclerScrollMoreListener;
 import com.chatcamp.uikit.utils.DefaultTimeFormat;
+import com.chatcamp.uikit.utils.TextViewFont;
 import com.chatcamp.uikit.utils.TimeFormat;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
@@ -253,10 +255,10 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.row_channel_list, parent, false);
         ImageView avatar = v.findViewById(R.id.iv_avatar);
-        TextView nameText = v.findViewById(R.id.tv_title);
-        TextView timeText = v.findViewById(R.id.tv_time);
-        TextView lastMessageText = v.findViewById(R.id.tv_last_message);
-        TextView unreadMessageText = v.findViewById(R.id.tv_unread_message);
+        TextViewFont nameText = v.findViewById(R.id.tv_title);
+        TextViewFont timeText = v.findViewById(R.id.tv_time);
+        TextViewFont lastMessageText = v.findViewById(R.id.tv_last_message);
+        TextViewFont unreadMessageText = v.findViewById(R.id.tv_unread_message);
 
         avatar.getLayoutParams().width = channelListStyle.getAvatarWidth();
         avatar.getLayoutParams().height = channelListStyle.getAvatarHeight();
@@ -264,15 +266,24 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
         nameText.setTextColor(channelListStyle.getNameTextColor());
         nameText.setTextSize(TypedValue.COMPLEX_UNIT_PX, channelListStyle.getNameTextSize());
         nameText.setTypeface(nameText.getTypeface(), channelListStyle.getNameTextStyle());
+        if(!TextUtils.isEmpty(channelListStyle.getUsernameCustomFont())) {
+            nameText.setCustomFont(channelListStyle.getUsernameCustomFont());
+        }
 
         timeText.setTextSize(TypedValue.COMPLEX_UNIT_PX, channelListStyle.getLastSeenTextSize());
         timeText.setTextColor(channelListStyle.getLastSeenTextColor());
         timeText.setTypeface(timeText.getTypeface(), channelListStyle.getLastSeenTextStyle());
+        if(!TextUtils.isEmpty(channelListStyle.getCustomFont())) {
+            timeText.setCustomFont(channelListStyle.getCustomFont());
+        }
 
         lastMessageText.setTextSize(TypedValue.COMPLEX_UNIT_PX, channelListStyle.getLastMessageTextSize());
         lastMessageText.setTextColor(channelListStyle.getLastMessageTextColor());
         lastMessageText.setTypeface(lastMessageText.getTypeface(), channelListStyle.getLastMessageTextStyle());
 
+        if(!TextUtils.isEmpty(channelListStyle.getCustomFont())) {
+            lastMessageText.setCustomFont(channelListStyle.getCustomFont());
+        }
         Drawable unreadMessageTextBackground = unreadMessageText.getBackground();
         unreadMessageTextBackground.mutate().setColorFilter(channelListStyle.getUnreadMessageCountBackgroundColor(), PorterDuff.Mode.SRC_IN);
 
@@ -282,6 +293,9 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
         unreadMessageText.setTextSize(TypedValue.COMPLEX_UNIT_PX, channelListStyle.getUnreadMessageCountTextSize());
         unreadMessageText.setTextColor(channelListStyle.getUnreadMessageCountTextColor());
         unreadMessageText.setTypeface(unreadMessageText.getTypeface(), channelListStyle.getUnreadMessageCountTextStyle());
+        if(!TextUtils.isEmpty(channelListStyle.getCustomFont())) {
+            unreadMessageText.setCustomFont(channelListStyle.getCustomFont());
+        }
 
         ChannelViewHolder vh = new ChannelViewHolder(v, channelClickedListener);
         return vh;

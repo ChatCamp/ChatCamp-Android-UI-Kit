@@ -24,6 +24,7 @@ import com.chatcamp.uikit.messages.messagetypes.VoiceMessageFactory;
 import com.chatcamp.uikit.messages.typing.TypingFactory;
 import com.chatcamp.uikit.utils.CircleTransform;
 import com.chatcamp.uikit.utils.DateFormatter;
+import com.chatcamp.uikit.utils.TextViewFont;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -392,6 +393,9 @@ public class MessagesListAdapter
                     holder.messageDateHeader.setTypeface(holder.messageDateHeader.getTypeface(), dateHeaderTextStyle);
                     holder.messageDateHeader.setTextColor(dateHeaderTextColor);
                     holder.messageDateHeader.setVisibility(View.VISIBLE);
+                    if(!TextUtils.isEmpty(messagesListStyle.getCustomFont())) {
+                        holder.messageDateHeader.setCustomFont(messagesListStyle.getCustomFont());
+                    }
                     bindDateTimeForMessage(holder, message);
                 } else {
                     holder.messageDateHeader.setVisibility(View.GONE);
@@ -418,6 +422,9 @@ public class MessagesListAdapter
                 holder.messageTime.setTextSize(TypedValue.COMPLEX_UNIT_PX, timeTextSize);
                 holder.messageTime.setTypeface(holder.messageTime.getTypeface(), timeTextStyle);
                 holder.messageTime.setTextColor(timeTextColor);
+                if(!TextUtils.isEmpty(messagesListStyle.getCustomFont())) {
+                    holder.messageTime.setCustomFont(messagesListStyle.getCustomFont());
+                }
                 Date date = new Date();
                 date.setTime(message.getInsertedAt() * 1000);
                 if (TextUtils.isEmpty(timeFormat)) {
@@ -452,6 +459,9 @@ public class MessagesListAdapter
             holder.messageUsername.setTypeface(holder.messageUsername.getTypeface(), usernameTextStyle);
             holder.messageUsername.setTextColor(usernameTextColor);
             holder.messageUsername.setText(username);
+            if(!TextUtils.isEmpty(messagesListStyle.getCustomFont())) {
+                holder.messageUsername.setCustomFont(messagesListStyle.getCustomFont());
+            }
         } else {
             holder.messageUsername.setVisibility(View.GONE);
         }
@@ -754,13 +764,13 @@ public class MessagesListAdapter
 
         protected Message message;
 
-        protected TextView messageDateHeader;
+        protected TextViewFont messageDateHeader;
         protected ImageView messageUserAvatar;
         protected ViewGroup messageContainer;
-        protected TextView messageUsername;
+        protected TextViewFont messageUsername;
         protected ViewGroup messageContentContainer;
         protected ViewGroup messageTimeContainer;
-        protected TextView messageTime;
+        protected TextViewFont messageTime;
         protected ViewGroup readReceiptContainer;
 
         protected MessageFactory.MessageHolder messageHolder;

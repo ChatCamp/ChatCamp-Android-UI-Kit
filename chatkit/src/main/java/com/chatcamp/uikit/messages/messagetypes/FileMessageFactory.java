@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +25,7 @@ import android.widget.TextView;
 import com.chatcamp.uikit.R;
 import com.chatcamp.uikit.utils.DownloadFileListener;
 import com.chatcamp.uikit.utils.FileUtils;
+import com.chatcamp.uikit.utils.TextViewFont;
 import com.chatcamp.uikit.utils.Utils;
 
 import java.io.File;
@@ -69,12 +71,15 @@ public class FileMessageFactory<T> extends MessageFactory<FileMessageFactory.Doc
     @Override
     public DocumentMessageHolder createMessageHolder(ViewGroup cellView, boolean isMe, LayoutInflater layoutInflater) {
         View view = layoutInflater.inflate(R.layout.layout_message_document, cellView, true);
-        TextView textView = view.findViewById(R.id.tv_document_name);
+        TextViewFont textView = view.findViewById(R.id.tv_document_name);
 
         Drawable backgroundDrawable = isMe ? messageStyle.getOutcomingBubbleDrawable() :
                 messageStyle.getIncomingBubbleDrawable();
         int textColor = isMe ? messageStyle.getOutcomingTextColor() : messageStyle.getIncomingTextColor();
         textView.setTextColor(textColor);
+        if(!TextUtils.isEmpty(messageStyle.getCustomFont())) {
+            textView.setCustomFont(messageStyle.getCustomFont());
+        }
         int documentIcon = isMe ? R.drawable.ic_document_white_chat : R.drawable.ic_document_chat;
         ImageView documentImage = view.findViewById(R.id.iv_document);
         documentImage.setImageResource(documentIcon);

@@ -1,6 +1,7 @@
 package com.chatcamp.uikit.messages.typing;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.widget.TextView;
 
 import com.chatcamp.uikit.R;
 import com.chatcamp.uikit.utils.CircleTransform;
+import com.chatcamp.uikit.utils.TextViewFont;
 import com.squareup.picasso.Picasso;
 import com.wang.avi.AVLoadingIndicatorView;
 
@@ -49,6 +51,9 @@ public class DefaultTypingFactory extends TypingFactory<DefaultTypingFactory.Def
                     }
                     typingHolder.indicatorView.show();
                     typingHolder.usernameTv.setText(participant.getDisplayName());
+                    if(!TextUtils.isEmpty(messageStyle.getCustomFont())) {
+                        typingHolder.usernameTv.setCustomFont(messageStyle.getCustomFont());
+                    }
                     break;
                 }
             }
@@ -60,7 +65,7 @@ public class DefaultTypingFactory extends TypingFactory<DefaultTypingFactory.Def
     public static class DefaultTypingHolder extends TypingFactory.TypingHolder {
         AVLoadingIndicatorView indicatorView;
         ImageView avatarView;
-        TextView usernameTv;
+        TextViewFont usernameTv;
 
         public DefaultTypingHolder(View view) {
             //TODO add image of the user (in future we can combine the images like ( ( ( ) ...))
