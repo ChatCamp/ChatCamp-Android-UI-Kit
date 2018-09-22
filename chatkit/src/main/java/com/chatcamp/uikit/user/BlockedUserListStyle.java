@@ -51,10 +51,10 @@ public class BlockedUserListStyle extends Style {
         blockedUserListStyle.onlineIndicatirHeight = typedArray.getDimensionPixelSize(R.styleable.BlockedUserList_onlineIndicatorHeight, blockedUserListStyle.getDimension(R.dimen.blocked_user_list_online_indicator_width));
         blockedUserListStyle.usernameTextSize = typedArray.getDimensionPixelSize(R.styleable.BlockedUserList_usernameTextSize, blockedUserListStyle.getDimension(R.dimen.blocked_user_list_username_textsize));
         blockedUserListStyle.usernameTextStyle = typedArray.getInt(R.styleable.BlockedUserList_usernameTextStyle, Typeface.NORMAL);
-        blockedUserListStyle.usernameTextColor = typedArray.getColor(R.styleable.BlockedUserList_usernameTextColor, blockedUserListStyle.getColor(R.color.black));
+        blockedUserListStyle.usernameTextColor = typedArray.getColor(R.styleable.BlockedUserList_usernameTextColor, blockedUserListStyle.getColor(R.color.chatCampTextBlack));
         blockedUserListStyle.showUsername = typedArray.getBoolean(R.styleable.BlockedUserList_showUsername, true);
         blockedUserListStyle.unBlockDrawable = typedArray.getResourceId(R.styleable.BlockedUserList_unBlockDrawable, -1);
-        blockedUserListStyle.unBlockDrawableColor = typedArray.getColor(R.styleable.BlockedUserList_unBlockDrawableColor, blockedUserListStyle.getColor(R.color.colorPrimary));
+        blockedUserListStyle.unBlockDrawableColor = typedArray.getColor(R.styleable.BlockedUserList_unBlockDrawableColor, blockedUserListStyle.getColor(R.color.chatCampColorPrimary));
         blockedUserListStyle.showUnBlock = typedArray.getBoolean(R.styleable.BlockedUserList_showUnBlock, true);
         blockedUserListStyle.unBlockTextSize = typedArray.getDimensionPixelSize(R.styleable.BlockedUserList_unBlockTextSize,  blockedUserListStyle.getDimension(R.dimen.blocked_user_list_username_textsize));
         blockedUserListStyle.unBlockTextStyle = typedArray.getInt(R.styleable.BlockedUserList_unBlockTextStyle, Typeface.NORMAL);

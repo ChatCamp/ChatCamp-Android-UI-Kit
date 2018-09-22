@@ -34,7 +34,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:background="@color/colorPrimary"
+                android:background="@color/chatCampColorPrimary"
                 android:padding="8dp"
                 android:layout_margin="8dp"
                 android:text="Edit" />
@@ -61,7 +61,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@color/colorPrimary"
+                android:background="@color/chatCampColorPrimary"
                 android:padding="8dp"
                 android:text="save" />
         </LinearLayout>
@@ -70,7 +70,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_margin="8dp"
-            android:background="@color/bg_divider" />
+            android:background="@color/chatCampDividerColor" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -90,7 +90,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_margin="8dp"
-            android:background="@color/bg_divider" />
+            android:background="@color/chatCampDividerColor" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -123,7 +123,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:text="Resume Notifications"
-                android:background="@color/colorPrimary"
+                android:background="@color/chatCampColorPrimary"
                 android:padding="8dp"/>
         </LinearLayout>
 
@@ -131,7 +131,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_margin="8dp"
-            android:background="@color/bg_divider" />
+            android:background="@color/chatCampDividerColor" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -198,7 +198,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_margin="8dp"
-            android:background="@color/bg_divider" />
+            android:background="@color/chatCampDividerColor" />
 
         <TextView
             android:layout_width="wrap_content"

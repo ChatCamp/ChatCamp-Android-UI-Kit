@@ -49,29 +49,29 @@ public class ChannelListStyle extends Style {
 
         style.nameTextSize = typedArray.getDimensionPixelSize(R.styleable.ChannelList_nameTextSize,
                 style.getDimension(R.dimen.channel_list_name_text_size));
-        style.nameTextColor = typedArray.getColor(R.styleable.ChannelList_nameTextColor, style.getColor(R.color.black));
+        style.nameTextColor = typedArray.getColor(R.styleable.ChannelList_nameTextColor, style.getColor(R.color.chatCampTextBlack));
         style.nameTextStyle = typedArray.getInteger(R.styleable.ChannelList_nameTextStyle, Typeface.BOLD);
 
         style.lastMessageTextSize = typedArray.getDimensionPixelSize(R.styleable.ChannelList_lastMessageTextSize,
                 style.getDimension(R.dimen.channel_list_last_message_text_size));
         style.lastMessageTextColor = typedArray.getColor(R.styleable.ChannelList_lastMessageTextColor,
-                style.getColor(R.color.black));
+                style.getColor(R.color.chatCampTextBlack));
         style.lastMessageTextStyle = typedArray.getInteger(R.styleable.ChannelList_lastMessageTextStyle,
                 Typeface.NORMAL);
 
         style.lastSeenTextSize = typedArray.getDimensionPixelSize(R.styleable.ChannelList_lastSeenTextSize,
                 style.getDimension(R.dimen.channel_list_last_seen_text_size));
         style.lastSeenTextColor = typedArray.getColor(R.styleable.ChannelList_lastSeenTextColor,
-                style.getColor(R.color.black));
+                style.getColor(R.color.chatCampTextBlack));
         style.lastSeenTextStyle = typedArray.getInteger(R.styleable.ChannelList_lastSeenTextStyle, Typeface.NORMAL);
 
         style.unreadMessageCountTextSize = typedArray.getDimensionPixelSize(R.styleable.ChannelList_unreadMessageCountTextSize,
                 style.getDimension(R.dimen.channel_list_unread_message_count_text_size));
         style.unreadMessageCountTextColor = typedArray.getColor(R.styleable.ChannelList_unreadMessageCountTextColor,
-                style.getColor(R.color.white));
+                style.getColor(R.color.chatCampTextWhite));
         style.unreadMessageCountTextStyle = typedArray.getInteger(R.styleable.ChannelList_unreadMessageCountTextStyle, Typeface.NORMAL);
         style.unreadMessageCountBackgroundColor = typedArray.getColor(R.styleable.ChannelList_unreadMessageCountBackgroundColor,
-                style.getColor(R.color.colorPrimary));
+                style.getColor(R.color.chatCampColorPrimary));
         typedArray.recycle();
         return style;
     }

@@ -15,7 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
+            android:background="@color/chatCampColorPrimary"
             app:contentInsetLeft="0dp"
             app:contentInsetStart="0dp"
             app:contentInsetStartWithNavigation="0dp"
@@ -39,7 +39,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="@dimen/header_view_title_left_margin"
                     android:layout_marginStart="@dimen/header_view_title_left_margin"
-                    android:textColor="@android:color/white"
+                    android:textColor="@color/chatCampTextWhite"
                     android:textSize="@dimen/header_view_text_size" />
             </LinearLayout>
         </android.support.v7.widget.Toolbar>

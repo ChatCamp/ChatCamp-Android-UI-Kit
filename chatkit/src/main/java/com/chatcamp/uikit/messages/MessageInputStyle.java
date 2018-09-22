@@ -90,19 +90,19 @@ class MessageInputStyle extends Style {
 
         style.attachmentButtonBackground = typedArray.getResourceId(R.styleable.MessageInput_attachmentButtonBackground, -1);
         style.attachmentButtonDefaultBgColor = typedArray.getColor(R.styleable.MessageInput_attachmentButtonDefaultBgColor,
-                style.getColor(R.color.white_four));
+                style.getColor(R.color.chatCampTextWhite));
         style.attachmentButtonDefaultBgPressedColor = typedArray.getColor(R.styleable.MessageInput_attachmentButtonDefaultBgPressedColor,
-                style.getColor(R.color.white_five));
+                style.getColor(R.color.chatCampTextWhite));
         style.attachmentButtonDefaultBgDisabledColor = typedArray.getColor(R.styleable.MessageInput_attachmentButtonDefaultBgDisabledColor,
                 style.getColor(R.color.transparent));
 
         style.attachmentButtonIcon = typedArray.getResourceId(R.styleable.MessageInput_attachmentButtonIcon, -1);
         style.attachmentButtonDefaultIconColor = typedArray.getColor(R.styleable.MessageInput_attachmentButtonDefaultIconColor,
-                style.getColor(R.color.cornflower_blue_two));
+                style.getColor(R.color.chatCampColorPrimary));
         style.attachmentButtonDefaultIconPressedColor = typedArray.getColor(R.styleable.MessageInput_attachmentButtonDefaultIconPressedColor,
-                style.getColor(R.color.cornflower_blue_two_dark));
+                style.getColor(R.color.chatCampColorPrimary));
         style.attachmentButtonDefaultIconDisabledColor = typedArray.getColor(R.styleable.MessageInput_attachmentButtonDefaultIconDisabledColor,
-                style.getColor(R.color.cornflower_blue_light_40));
+                style.getColor(R.color.chatCampColorPrimary));
 
         style.attachmentButtonWidth = typedArray.getDimensionPixelSize(R.styleable.MessageInput_attachmentButtonWidth, style.getDimension(R.dimen.input_button_width));
         style.attachmentButtonHeight = typedArray.getDimensionPixelSize(R.styleable.MessageInput_attachmentButtonHeight, style.getDimension(R.dimen.input_button_height));
@@ -110,19 +110,19 @@ class MessageInputStyle extends Style {
 
         style.inputButtonBackground = typedArray.getResourceId(R.styleable.MessageInput_inputButtonBackground, -1);
         style.inputButtonDefaultBgColor = typedArray.getColor(R.styleable.MessageInput_inputButtonDefaultBgColor,
-                style.getColor(R.color.cornflower_blue_two));
+                style.getColor(R.color.chatCampColorPrimary));
         style.inputButtonDefaultBgPressedColor = typedArray.getColor(R.styleable.MessageInput_inputButtonDefaultBgPressedColor,
-                style.getColor(R.color.cornflower_blue_two_dark));
+                style.getColor(R.color.chatCampColorPrimary));
         style.inputButtonDefaultBgDisabledColor = typedArray.getColor(R.styleable.MessageInput_inputButtonDefaultBgDisabledColor,
-                style.getColor(R.color.white_four));
+                style.getColor(R.color.chatCampTextWhite));
 
         style.inputButtonIcon = typedArray.getResourceId(R.styleable.MessageInput_inputButtonIcon, -1);
         style.inputButtonDefaultIconColor = typedArray.getColor(R.styleable.MessageInput_inputButtonDefaultIconColor,
-                style.getColor(R.color.white));
+                style.getColor(R.color.chatCampTextWhite));
         style.inputButtonDefaultIconPressedColor = typedArray.getColor(R.styleable.MessageInput_inputButtonDefaultIconPressedColor,
                 style.getColor(R.color.white));
         style.inputButtonDefaultIconDisabledColor = typedArray.getColor(R.styleable.MessageInput_inputButtonDefaultIconDisabledColor,
-                style.getColor(R.color.warm_grey));
+                style.getColor(R.color.chatCampGrayColor));
 
         style.inputButtonWidth = typedArray.getDimensionPixelSize(R.styleable.MessageInput_inputButtonWidth, style.getDimension(R.dimen.input_button_width));
         style.inputButtonHeight = typedArray.getDimensionPixelSize(R.styleable.MessageInput_inputButtonHeight, style.getDimension(R.dimen.input_button_height));
@@ -133,19 +133,19 @@ class MessageInputStyle extends Style {
         style.inputText = typedArray.getString(R.styleable.MessageInput_inputText);
 
         style.inputTextSize = typedArray.getDimensionPixelSize(R.styleable.MessageInput_inputTextSize, style.getDimension(R.dimen.input_text_size));
-        style.inputTextColor = typedArray.getColor(R.styleable.MessageInput_inputTextColor, style.getColor(R.color.dark_grey_two));
-        style.inputHintColor = typedArray.getColor(R.styleable.MessageInput_inputHintColor, style.getColor(R.color.warm_grey_three));
+        style.inputTextColor = typedArray.getColor(R.styleable.MessageInput_inputTextColor, style.getColor(R.color.chatCampTextBlack));
+        style.inputHintColor = typedArray.getColor(R.styleable.MessageInput_inputHintColor, style.getColor(R.color.chatCampTextBlack));
 
         style.inputBackground = typedArray.getDrawable(R.styleable.MessageInput_inputBackground);
         style.inputCursorDrawable = typedArray.getDrawable(R.styleable.MessageInput_inputCursorDrawable);
 
         style.voiceMessageButtonBackground = typedArray.getResourceId(R.styleable.MessageInput_voiceMessageButtonBackground, -1);
         style.voiceMessageButtonDefaultBgColor = typedArray.getColor(R.styleable.MessageInput_voiceMessageButtonDefaultBgColor,
-                style.getColor(R.color.cornflower_blue_two));
+                style.getColor(R.color.chatCampColorPrimary));
         style.voiceMessageButtonDefaultBgPressedColor = typedArray.getColor(R.styleable.MessageInput_voiceMessageButtonDefaultBgPressedColor,
-                style.getColor(R.color.cornflower_blue_two_dark));
+                style.getColor(R.color.chatCampColorPrimary));
         style.voiceMessageButtonDefaultBgDisabledColor = typedArray.getColor(R.styleable.MessageInput_voiceMessageButtonDefaultBgDisabledColor,
-                style.getColor(R.color.white_four));
+                style.getColor(R.color.chatCampTextWhite));
 
         style.voiceMessageButtonIcon = typedArray.getResourceId(R.styleable.MessageInput_voiceMessageButtonIcon, -1);
         style.voiceMessageButtonMuteIcon = typedArray.getResourceId(R.styleable.MessageInput_voiceMessageButtonMuteIcon, -1);
@@ -154,7 +154,7 @@ class MessageInputStyle extends Style {
         style.voiceMessageButtonDefaultIconPressedColor = typedArray.getColor(R.styleable.MessageInput_voiceMessageButtonDefaultIconPressedColor,
                 style.getColor(R.color.white));
         style.voiceMessageButtonDefaultIconDisabledColor = typedArray.getColor(R.styleable.MessageInput_voiceMessageButtonDefaultIconDisabledColor,
-                style.getColor(R.color.warm_grey));
+                style.getColor(R.color.chatCampGrayColor));
 
         style.voiceMessageButtonWidth = typedArray.getDimensionPixelSize(R.styleable.MessageInput_voiceMessageButtonWidth, style.getDimension(R.dimen.input_button_width));
         style.voiceMessageButtonHeight = typedArray.getDimensionPixelSize(R.styleable.MessageInput_voiceMessageButtonHeight, style.getDimension(R.dimen.input_button_height));
