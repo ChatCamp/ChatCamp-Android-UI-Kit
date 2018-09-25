@@ -91,6 +91,12 @@ public class MessagesListAdapter
     private ImageLoader avatarImageLoader;
     private MessagesList.OnMessagesLoadedListener onMessagesLoadedListener;
 
+    private RecyclerScrollMoreListener recyclerScrollMoreListener;
+
+    public void setRecyclerScrollMoreListener(RecyclerScrollMoreListener recyclerScrollMoreListener) {
+        this.recyclerScrollMoreListener = recyclerScrollMoreListener;
+    }
+
     public MessagesListAdapter(Context context) {
         items = new ArrayList<>();
         mUiThreadHandler = new Handler(Looper.getMainLooper());
@@ -156,6 +162,9 @@ public class MessagesListAdapter
             }
         }
         //TODO get the number of message from client
+        if (recyclerScrollMoreListener != null) {
+            recyclerScrollMoreListener.stopLoading();
+        }
         loadMessages();
     }
 
@@ -206,6 +215,9 @@ public class MessagesListAdapter
                 }
                 if (loadingFirstTime) {
                     loadingFirstTime = false;
+                    if (recyclerScrollMoreListener != null) {
+                        recyclerScrollMoreListener.resetLoading();
+                    }
                     if (items.size() == 0 && onMessagesLoadedListener != null) {
                         onMessagesLoadedListener.onMessagesLoaded();
                     }

@@ -51,9 +51,9 @@ public class DefaultTypingFactory extends TypingFactory<DefaultTypingFactory.Def
                     }
                     typingHolder.indicatorView.show();
                     typingHolder.usernameTv.setText(participant.getDisplayName());
-                    if(!TextUtils.isEmpty(messageStyle.getCustomFont())) {
-                        typingHolder.usernameTv.setCustomFont(messageStyle.getCustomFont());
-                    }
+//                    if(!TextUtils.isEmpty(messageStyle.getCustomFont())) {
+//                        typingHolder.usernameTv.setCustomFont(messageStyle.getCustomFont());
+//                    }
                     break;
                 }
             }

@@ -20,7 +20,7 @@ public class DefaultTextSender extends TextSender {
     @Override
     public void sendMessage(@NonNull String message) {
         if(!TextUtils.isEmpty(message.trim())) {
-            channel.sendMessage(message, new BaseChannel.SendMessageListener() {
+            channel.sendMessage(message.trim(), new BaseChannel.SendMessageListener() {
                 @Override
                 public void onSent(Message message, ChatCampException e) {
                     // can do something here
