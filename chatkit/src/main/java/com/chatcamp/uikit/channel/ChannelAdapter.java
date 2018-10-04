@@ -50,6 +50,7 @@ import static android.view.View.VISIBLE;
 public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelViewHolder> implements RecyclerScrollMoreListener.OnLoadMoreListener {
 
     private static final String CHANNEL_LISTENER = "channel_list_channel_listener";
+    private static final String KEY_PRODUCT_NAME = "product_name";
     private ChannelComparator comparator;
     private GroupChannelListQuery groupChannelListQuery;
     private boolean loadingFirstTime = true;
@@ -259,6 +260,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
         TextViewFont timeText = v.findViewById(R.id.tv_time);
         TextViewFont lastMessageText = v.findViewById(R.id.tv_last_message);
         TextViewFont unreadMessageText = v.findViewById(R.id.tv_unread_message);
+        TextViewFont productName = v.findViewById(R.id.tv_product_name);
 
         avatar.getLayoutParams().width = channelListStyle.getAvatarWidth();
         avatar.getLayoutParams().height = channelListStyle.getAvatarHeight();
@@ -297,6 +299,10 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
             unreadMessageText.setCustomFont(channelListStyle.getCustomFont());
         }
 
+        if(!TextUtils.isEmpty(channelListStyle.getCustomFont())) {
+            productName.setCustomFont(channelListStyle.getCustomFont());
+        }
+
         ChannelViewHolder vh = new ChannelViewHolder(v, channelClickedListener);
         return vh;
     }
@@ -319,6 +325,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
         TextView timeTv;
         TextView lastMessageTv;
         TextView unreadMessageTv;
+        TextView productNameTv;
 
         public ChannelViewHolder(View v, ChannelClickedListener listener) {
             super(v);
@@ -327,6 +334,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
             timeTv = v.findViewById(R.id.tv_time);
             lastMessageTv = v.findViewById(R.id.tv_last_message);
             unreadMessageTv = v.findViewById(R.id.tv_unread_message);
+            productNameTv = v.findViewById(R.id.tv_product_name);
             channelClickedListener = listener;
         }
 
@@ -364,6 +372,13 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
                 }
             } else {
                 populateTitle(baseChannel.getAvatarUrl(), baseChannel.getName());
+            }
+            if(baseChannel.getMetadata() != null && baseChannel.getMetadata().get(KEY_PRODUCT_NAME) != null &&
+                    !TextUtils.isEmpty((CharSequence) baseChannel.getMetadata().get(KEY_PRODUCT_NAME))) {
+                productNameTv.setText((CharSequence) baseChannel.getMetadata().get(KEY_PRODUCT_NAME));
+                productNameTv.setVisibility(VISIBLE);
+            } else {
+                productNameTv.setVisibility(View.GONE);
             }
 
         }
