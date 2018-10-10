@@ -229,6 +229,11 @@
         <attr name="imageWidth" format="dimension|reference"/>
         <attr name="headerTitleMarginLeft" format="dimension|reference"/>
         <attr name="headerViewCustomFont" format="string"/>
+        <attr name="headerViewAlwaysShowChannelName" format="boolean"/>
+        <attr name="participantCountBackgroundColor" format="color"/>
+        <attr name="participantCountTextColor" format="color"/>
+        <attr name="showParticipantCount" format="boolean"/>
+        <attr name="showBlockOption" format="boolean"/>
     </declare-styleable>
 
     <declare-styleable name="ChannelList">
@@ -265,6 +270,7 @@
         <attr name="unreadMessageCountBackgroundColor" format="color|reference"/>
         <attr name="channelListUsernameCustomFont" format="string"/>
         <attr name="channelListCustomFont" format="string"/>
+        <attr name="alwaysShowChannelName" format="boolean"/>
     </declare-styleable>
     <declare-styleable name="BlockedUserList">
         <attr name="userAvatarWidth" format="dimension|reference"/>

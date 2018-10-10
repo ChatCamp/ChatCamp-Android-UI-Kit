@@ -28,6 +28,7 @@ public class UserProfileActivity extends AppCompatActivity {
 
     public static final String KEY_PARTICIPANT_ID = "key_participant_id";
     public static final String KEY_GROUP_ID = "key_group_id";
+    public static final String KEY_SHOW_BLOCK_OPTION = "key_show_block_option";
 
     private TextView onlineStatusTv;
     private ImageView onlineIv;
@@ -52,6 +53,7 @@ public class UserProfileActivity extends AppCompatActivity {
         blockTv = findViewById(R.id.tv_block);
         final String participantId = getIntent().getStringExtra(KEY_PARTICIPANT_ID);
         String groupId = getIntent().getStringExtra(KEY_GROUP_ID);
+        boolean showBlockOption = getIntent().getBooleanExtra(KEY_SHOW_BLOCK_OPTION, true);
         if(!TextUtils.isEmpty(groupId)) {
             GroupChannel.get(groupId, new GroupChannel.GetListener() {
                 @Override
@@ -66,28 +68,33 @@ public class UserProfileActivity extends AppCompatActivity {
                 }
             });
         }
-        blockTv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(!isBlocked) {
-                    ChatCamp.blockUser(participantId, new ChatCamp.OnUserBlockListener() {
-                        @Override
-                        public void onUserBlocked(Participant participant, ChatCampException exception) {
-                            blockTv.setText("UnBlock");
-                            isBlocked = true;
-                        }
-                    });
-                } else {
-                    ChatCamp.unBlockUser(participantId, new ChatCamp.OnUserUnBlockListener() {
-                        @Override
-                        public void onUserUnBlocked(Participant participant, ChatCampException exception) {
-                            blockTv.setText("Block");
-                            isBlocked = false;
-                        }
-                    });
+        if(showBlockOption) {
+            blockTv.setVisibility(View.VISIBLE);
+            blockTv.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (!isBlocked) {
+                        ChatCamp.blockUser(participantId, new ChatCamp.OnUserBlockListener() {
+                            @Override
+                            public void onUserBlocked(Participant participant, ChatCampException exception) {
+                                blockTv.setText("UnBlock");
+                                isBlocked = true;
+                            }
+                        });
+                    } else {
+                        ChatCamp.unBlockUser(participantId, new ChatCamp.OnUserUnBlockListener() {
+                            @Override
+                            public void onUserUnBlocked(Participant participant, ChatCampException exception) {
+                                blockTv.setText("Block");
+                                isBlocked = false;
+                            }
+                        });
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            blockTv.setVisibility(View.GONE);
+        }
     }
 
     private void populateUi(GroupChannel groupChannel,  String participantId) {

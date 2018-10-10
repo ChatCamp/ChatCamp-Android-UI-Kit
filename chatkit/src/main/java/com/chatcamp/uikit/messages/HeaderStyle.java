@@ -22,6 +22,11 @@ public class HeaderStyle extends Style {
     private int imageWidth;
     private int titleMarginLeft;
     private String customFont;
+    private boolean headerViewAlwaysShowChannelName;
+    private int participantCountBackgroundColor;
+    private int participantCountTextColor;
+    private boolean showParticipantCount;
+    private boolean showBlockOption;
 
     public static HeaderStyle parseStyle(Context context, AttributeSet attrs) {
         HeaderStyle headerStyle = new HeaderStyle(context, attrs);
@@ -38,6 +43,13 @@ public class HeaderStyle extends Style {
         headerStyle.titleMarginLeft = typedArray.getDimensionPixelSize(R.styleable.HeaderView_headerTitleMarginLeft,
                 headerStyle.getDimension(R.dimen.header_view_title_left_margin));
         headerStyle.customFont = typedArray.getString(R.styleable.HeaderView_headerViewCustomFont);
+        headerStyle.headerViewAlwaysShowChannelName = typedArray.getBoolean(R.styleable.HeaderView_headerViewAlwaysShowChannelName, false);
+        headerStyle.participantCountBackgroundColor = typedArray.getColor(R.styleable.HeaderView_participantCountBackgroundColor,
+                headerStyle.getColor(R.color.chatCampParticipantCountColor));
+        headerStyle.participantCountTextColor = typedArray.getColor(R.styleable.HeaderView_participantCountTextColor,
+                headerStyle.getColor(R.color.chatCampTextWhite));
+        headerStyle.showParticipantCount = typedArray.getBoolean(R.styleable.HeaderView_showParticipantCount, false);
+        headerStyle.showBlockOption = typedArray.getBoolean(R.styleable.HeaderView_showBlockOption, true);
         typedArray.recycle();
         return headerStyle;
     }
@@ -81,5 +93,25 @@ public class HeaderStyle extends Style {
 
     public String getCustomFont() {
         return customFont;
+    }
+
+    public boolean isHeaderViewAlwaysShowChannelName() {
+        return headerViewAlwaysShowChannelName;
+    }
+
+    public int getParticipantCountBackgroundColor() {
+        return participantCountBackgroundColor;
+    }
+
+    public int getParticipantCountTextColor() {
+        return participantCountTextColor;
+    }
+
+    public boolean isShowParticipantCount() {
+        return showParticipantCount;
+    }
+
+    public boolean isShowBlockOption() {
+        return showBlockOption;
     }
 }

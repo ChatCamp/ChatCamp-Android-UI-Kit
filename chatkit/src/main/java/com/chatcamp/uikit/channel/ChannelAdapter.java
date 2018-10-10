@@ -360,7 +360,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
                 unreadMessageTv.setVisibility(View.GONE);
             }
             if (baseChannel instanceof GroupChannel
-                    && ((GroupChannel) baseChannel).getParticipantsCount() == 2) {
+                    && ((GroupChannel) baseChannel).getParticipantsCount() == 2 && !channelListStyle.isAlwaysShowChannelName()) {
                 GroupChannel groupChannel = (GroupChannel) baseChannel;
                 if (groupChannel != null && groupChannel.getParticipants() != null && groupChannel.getParticipants().size() > 0) {
                     List<Participant> participants = groupChannel.getParticipants();

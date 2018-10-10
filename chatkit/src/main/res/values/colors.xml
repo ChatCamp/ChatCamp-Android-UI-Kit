@@ -17,5 +17,6 @@
     <color name="chatCampGrayColor">@color/warm_grey_four</color>
     <color name="chatCampRedColor">#fc3c40</color>
     <color name="transparent">#00000000</color>
+    <color name="chatCampParticipantCountColor">@color/chatCampColorAccent</color>
 
 </resources>
