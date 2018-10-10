@@ -35,6 +35,7 @@ public class ChannelListStyle extends Style {
     private int unreadMessageCountBackgroundColor;
     private String customFont;
     private String usernameCustomFont;
+    private boolean alwaysShowChannelName;
 
 
     protected ChannelListStyle(Context context, AttributeSet attrs) {
@@ -76,6 +77,7 @@ public class ChannelListStyle extends Style {
                 style.getColor(R.color.chatCampColorPrimary));
         style.customFont = typedArray.getString(R.styleable.ChannelList_channelListCustomFont);
         style.usernameCustomFont = typedArray.getString(R.styleable.ChannelList_channelListUsernameCustomFont);
+        style.alwaysShowChannelName = typedArray.getBoolean(R.styleable.ChannelList_alwaysShowChannelName, false);
         typedArray.recycle();
         return style;
     }
@@ -146,5 +148,9 @@ public class ChannelListStyle extends Style {
 
     public String getUsernameCustomFont() {
         return usernameCustomFont;
+    }
+
+    public boolean isAlwaysShowChannelName() {
+        return alwaysShowChannelName;
     }
 }

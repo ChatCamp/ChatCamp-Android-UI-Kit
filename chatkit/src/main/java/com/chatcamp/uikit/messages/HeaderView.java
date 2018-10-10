@@ -3,7 +3,9 @@ package com.chatcamp.uikit.messages;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
@@ -12,25 +14,25 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
+import com.chatcamp.uikit.R;
 import com.chatcamp.uikit.commons.ImageLoader;
+import com.chatcamp.uikit.conversationdetails.GroupDetailActivity;
+import com.chatcamp.uikit.conversationdetails.UserProfileActivity;
+import com.chatcamp.uikit.utils.HeaderViewClickListener;
 import com.chatcamp.uikit.utils.TextViewFont;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
-import com.chatcamp.uikit.R;
-import com.chatcamp.uikit.conversationdetails.GroupDetailActivity;
-import com.chatcamp.uikit.conversationdetails.UserProfileActivity;
-import com.chatcamp.uikit.utils.AvatarLoader;
-import com.chatcamp.uikit.utils.HeaderViewClickListener;
 
 import java.util.List;
 
 import io.chatcamp.sdk.BaseChannel;
 import io.chatcamp.sdk.ChatCamp;
+import io.chatcamp.sdk.ChatCampException;
 import io.chatcamp.sdk.GroupChannel;
 import io.chatcamp.sdk.Participant;
 
@@ -47,7 +49,9 @@ public class HeaderView extends LinearLayout {
     private Participant otherParticipant;
     private HeaderStyle headerStyle;
     private ImageLoader avatarLoader;
+    private TextViewFont participantCount;
     private HeaderViewClickListener headerViewClickListener;
+    private boolean isBlocked;
 
     public HeaderView(Context context) {
         super(context);
@@ -69,6 +73,7 @@ public class HeaderView extends LinearLayout {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         groupImageIv = toolbar.findViewById(R.id.iv_group_image);
         groupTitleTv = toolbar.findViewById(R.id.tv_group_name);
+        participantCount = toolbar.findViewById(R.id.tv_participant_count);
     }
 
     private void init(Context context, AttributeSet attrs) {
@@ -80,8 +85,19 @@ public class HeaderView extends LinearLayout {
         groupTitleTv.setTextColor(headerStyle.getTitleTextColor());
         groupTitleTv.setTextSize(TypedValue.COMPLEX_UNIT_PX, headerStyle.getTitleTextSize());
         groupTitleTv.setTypeface(groupTitleTv.getTypeface(), headerStyle.getTitleTextStyle());
-        if(!TextUtils.isEmpty(headerStyle.getCustomFont())) {
+        if (!TextUtils.isEmpty(headerStyle.getCustomFont())) {
             groupTitleTv.setCustomFont(headerStyle.getCustomFont());
+            participantCount.setCustomFont(headerStyle.getCustomFont());
+        }
+        if (headerStyle.isShowParticipantCount()) {
+            participantCount.setVisibility(VISIBLE);
+            participantCount.setTextColor(headerStyle.getParticipantCountTextColor());
+            Drawable participantCountBackground = participantCount.getBackground();
+            participantCountBackground.mutate().setColorFilter(headerStyle.getParticipantCountBackgroundColor(), PorterDuff.Mode.SRC_IN);
+
+            participantCount.setBackground(participantCountBackground);
+        } else {
+            participantCount.setVisibility(GONE);
         }
         LayoutParams titleParams = (LayoutParams) groupTitleTv.getLayoutParams();
         titleParams.leftMargin = headerStyle.getTitleMarginLeft();
@@ -104,7 +120,8 @@ public class HeaderView extends LinearLayout {
         boolean isOneToOneConversation = false;
         if (channel instanceof GroupChannel) {
             GroupChannel groupChannel = (GroupChannel) channel;
-            if (groupChannel.getParticipants().size() <= 2) {
+            participantCount.setText(String.valueOf(groupChannel.getParticipantsCount()));
+            if (groupChannel.getParticipants().size() == 2 && !headerStyle.isHeaderViewAlwaysShowChannelName()) {
                 isOneToOneConversation = true;
             }
             if (isOneToOneConversation) {
@@ -159,6 +176,70 @@ public class HeaderView extends LinearLayout {
         groupTitleTv.setText(title);
     }
 
+    public void onOptionsItemSelected(final MenuItem item) {
+        if (otherParticipant != null) {
+            if (!isBlocked) {
+                ChatCamp.blockUser(otherParticipant.getId(), new ChatCamp.OnUserBlockListener() {
+                    @Override
+                    public void onUserBlocked(Participant participant, ChatCampException exception) {
+                        item.setTitle("UnBlock");
+                        isBlocked = true;
+                    }
+                });
+            } else {
+                ChatCamp.unBlockUser(otherParticipant.getId(), new ChatCamp.OnUserUnBlockListener() {
+                    @Override
+                    public void onUserUnBlocked(Participant participant, ChatCampException exception) {
+                        item.setTitle("Block");
+                        isBlocked = false;
+                    }
+                });
+            }
+        }
+    }
+
+    public void onCreateOptionMenu(MenuItem menuItem) {
+        if (channel != null && channel instanceof GroupChannel) {
+            GroupChannel groupChannel = (GroupChannel) channel;
+            if (groupChannel.getParticipants().size() == 2) {
+                List<Participant> participants = ((GroupChannel) channel).getParticipants();
+                for (Participant participant : participants) {
+                    if (!participant.getId().equals(ChatCamp.getCurrentUser().getId())) {
+                        otherParticipant = participant;
+                        isBlocked = otherParticipant.isBlockedByMe();
+                    }
+                }
+            }
+            if (isBlocked) {
+                menuItem.setTitle("UnBlock");
+            } else {
+                menuItem.setTitle("Block");
+            }
+        }
+    }
+
+    public void onPrepareOptionsMenu(final MenuItem menuItem) {
+        if(otherParticipant != null) {
+            GroupChannel.get(channel.getId(), new GroupChannel.GetListener() {
+                @Override
+                public void onResult(GroupChannel groupChannel, ChatCampException e) {
+                    List<Participant> participants = groupChannel.getParticipants();
+                    for (Participant participant : participants) {
+                        if (!participant.getId().equals(ChatCamp.getCurrentUser().getId())) {
+                            otherParticipant = participant;
+                            isBlocked = otherParticipant.isBlockedByMe();
+                        }
+                    }
+                    if (isBlocked) {
+                        menuItem.setTitle("UnBlock");
+                    } else {
+                        menuItem.setTitle("Block");
+                    }
+                }
+            });
+        }
+    }
+
 
     class OnTitleClickListener implements View.OnClickListener {
 
@@ -179,12 +260,13 @@ public class HeaderView extends LinearLayout {
                 continueExecution = headerViewClickListener.onHeaderViewClicked(channel.getId(),
                         isOneToOneConversation, participantId);
             }
-            if(continueExecution) {
+            if (continueExecution) {
                 if (isOneToOneConversation) {
                     Intent intent = new Intent(getContext(), UserProfileActivity.class);
                     if (!TextUtils.isEmpty(participantId)) {
                         intent.putExtra(UserProfileActivity.KEY_PARTICIPANT_ID, participantId);
                         intent.putExtra(UserProfileActivity.KEY_GROUP_ID, channelId);
+                        intent.putExtra(UserProfileActivity.KEY_SHOW_BLOCK_OPTION, headerStyle.isShowBlockOption());
                     }
                     getContext().startActivity(intent);
                 } else {

@@ -35,13 +35,31 @@
 
                 <com.chatcamp.uikit.utils.TextViewFont
                     android:id="@+id/tv_group_name"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="@dimen/header_view_title_left_margin"
                     android:layout_marginStart="@dimen/header_view_title_left_margin"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:layout_weight="1"
                     android:textColor="@color/chatCampTextWhite"
                     android:textSize="@dimen/header_view_text_size" />
+
+                <com.chatcamp.uikit.utils.TextViewFont
+                    android:id="@+id/tv_participant_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_circular_participant_count"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_gravity="center_vertical"
+                    android:paddingBottom="2dp"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:paddingTop="2dp"
+                    android:textColor="@color/chatCampTextWhite"
+                    android:textSize="12sp"/>
             </LinearLayout>
         </android.support.v7.widget.Toolbar>
 
