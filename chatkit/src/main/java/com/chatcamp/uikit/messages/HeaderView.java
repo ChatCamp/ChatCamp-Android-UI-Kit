@@ -23,6 +23,7 @@ import com.chatcamp.uikit.R;
 import com.chatcamp.uikit.commons.ImageLoader;
 import com.chatcamp.uikit.conversationdetails.GroupDetailActivity;
 import com.chatcamp.uikit.conversationdetails.UserProfileActivity;
+import com.chatcamp.uikit.utils.CircleTransform;
 import com.chatcamp.uikit.utils.HeaderViewClickListener;
 import com.chatcamp.uikit.utils.TextViewFont;
 import com.squareup.picasso.Callback;
@@ -154,24 +155,11 @@ public class HeaderView extends LinearLayout {
         if (avatarLoader != null) {
             avatarLoader.loadImage(groupImageIv, imageUrl);
         } else {
+
             Picasso.with(getContext()).load(imageUrl)
                     .placeholder(R.drawable.icon_default_contact)
                     .error(R.drawable.icon_default_contact)
-                    .into(groupImageIv, new Callback() {
-                        @Override
-                        public void onSuccess() {
-                            Bitmap imageBitmap = ((BitmapDrawable) groupImageIv.getDrawable()).getBitmap();
-                            RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(getResources(), imageBitmap);
-                            imageDrawable.setCircular(true);
-                            imageDrawable.setCornerRadius(Math.max(imageBitmap.getWidth(), imageBitmap.getHeight()) / 2.0f);
-                            groupImageIv.setImageDrawable(imageDrawable);
-                        }
-
-                        @Override
-                        public void onError() {
-                            groupImageIv.setImageResource(R.drawable.icon_default_contact);
-                        }
-                    });
+                    .transform(new CircleTransform()).into(groupImageIv);
         }
         groupTitleTv.setText(title);
     }
