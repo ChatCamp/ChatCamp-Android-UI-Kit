@@ -21,6 +21,7 @@ import com.chatcamp.uikit.R;
 import com.chatcamp.uikit.commons.ImageLoader;
 import com.chatcamp.uikit.database.ChatCampDatabaseHelper;
 import com.chatcamp.uikit.messages.RecyclerScrollMoreListener;
+import com.chatcamp.uikit.utils.CircleTransform;
 import com.chatcamp.uikit.utils.DefaultTimeFormat;
 import com.chatcamp.uikit.utils.TextViewFont;
 import com.chatcamp.uikit.utils.TimeFormat;
@@ -390,21 +391,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
                 Picasso.with(context).load(imageUrl)
                         .placeholder(R.drawable.icon_default_contact)
                         .error(R.drawable.icon_default_contact)
-                        .into(avatarIv, new Callback() {
-                            @Override
-                            public void onSuccess() {
-                                Bitmap imageBitmap = ((BitmapDrawable) avatarIv.getDrawable()).getBitmap();
-                                RoundedBitmapDrawable imageDrawable = RoundedBitmapDrawableFactory.create(context.getResources(), imageBitmap);
-                                imageDrawable.setCircular(true);
-                                imageDrawable.setCornerRadius(Math.max(imageBitmap.getWidth(), imageBitmap.getHeight()) / 2.0f);
-                                avatarIv.setImageDrawable(imageDrawable);
-                            }
-
-                            @Override
-                            public void onError() {
-                                avatarIv.setImageResource(R.drawable.icon_default_contact);
-                            }
-                        });
+                        .transform(new CircleTransform()).into(avatarIv);
             }
 
             titleTv.setText(title);
