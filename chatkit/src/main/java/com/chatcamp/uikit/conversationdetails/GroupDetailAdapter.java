@@ -30,6 +30,8 @@ public class GroupDetailAdapter extends RecyclerView.Adapter {
     private static final int VIEW_PARTICIPANT_COUNT = 3;
     private final Context context;
 
+    private boolean isGroupChannel;
+
     private List<ParticipantView> participants;
 
     public interface OnParticipantClickedListener {
@@ -52,6 +54,10 @@ public class GroupDetailAdapter extends RecyclerView.Adapter {
         participants.add(new ParticipantView(null));
         participants.add(new ParticipantView(null));
         this.context = context;
+    }
+
+    public void setIsGroupChannel(boolean groupChannel) {
+        isGroupChannel = groupChannel;
     }
 
     public void add(ParticipantView participant) {
@@ -171,14 +177,19 @@ public class GroupDetailAdapter extends RecyclerView.Adapter {
         }
 
         public void bind() {
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (participantClickedListener != null) {
-                        participantClickedListener.onExitGroupClicked();
+            if(isGroupChannel) {
+                itemView.setVisibility(View.VISIBLE);
+                itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (participantClickedListener != null) {
+                            participantClickedListener.onExitGroupClicked();
+                        }
                     }
-                }
-            });
+                });
+            } else {
+                itemView.setVisibility(View.GONE);
+            }
         }
     }
 

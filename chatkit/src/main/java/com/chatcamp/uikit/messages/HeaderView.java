@@ -260,6 +260,11 @@ public class HeaderView extends LinearLayout {
                 } else {
                     Intent intent = new Intent(getContext(), GroupDetailActivity.class);
                     intent.putExtra(GroupDetailActivity.KEY_GROUP_ID, channelId);
+                    if(channel instanceof GroupChannel) {
+                        intent.putExtra(GroupDetailActivity.KEY_IS_GROUP_CHANNEL, true);
+                    } else {
+                        intent.putExtra(GroupDetailActivity.KEY_IS_GROUP_CHANNEL, false);
+                    }
                     getContext().startActivity(intent);
                 }
             }
