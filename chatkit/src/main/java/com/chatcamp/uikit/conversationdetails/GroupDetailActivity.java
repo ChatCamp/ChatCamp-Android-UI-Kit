@@ -27,10 +27,12 @@ import java.util.List;
 import io.chatcamp.sdk.BaseChannel;
 import io.chatcamp.sdk.ChatCampException;
 import io.chatcamp.sdk.GroupChannel;
+import io.chatcamp.sdk.OpenChannel;
 import io.chatcamp.sdk.Participant;
 
 public class GroupDetailActivity extends AppCompatActivity implements GroupDetailAdapter.OnParticipantClickedListener {
     public  static final String KEY_GROUP_ID = "key_group_id";
+    public  static final String KEY_IS_GROUP_CHANNEL = "key_is_group_channel";
 
 
     private RecyclerView participantRv;
@@ -38,7 +40,9 @@ public class GroupDetailActivity extends AppCompatActivity implements GroupDetai
     private Toolbar toolbar;
     private CollapsingToolbarLayout collapsingToolbarLayout;
     private GroupDetailAdapter adapter;
-    private GroupChannel groupChannelGLobal;
+    private GroupChannel groupChannelGlobal;
+    private OpenChannel openChannelGlobal;
+    private boolean isGroupChannel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,17 +60,28 @@ public class GroupDetailActivity extends AppCompatActivity implements GroupDetai
         participantRv.setAdapter(adapter);
         toolbarIv = findViewById(R.id.toolbarImage);
         String id = getIntent().getStringExtra(KEY_GROUP_ID);
-        GroupChannel.get(id, new GroupChannel.GetListener() {
-            @Override
-            public void onResult(GroupChannel groupChannel, ChatCampException e) {
-                populateUi(groupChannel);
-            }
-        });
+        isGroupChannel = getIntent().getBooleanExtra(KEY_IS_GROUP_CHANNEL, true);
+        adapter.setIsGroupChannel(isGroupChannel);
+        if(isGroupChannel) {
+            GroupChannel.get(id, new GroupChannel.GetListener() {
+                @Override
+                public void onResult(GroupChannel groupChannel, ChatCampException e) {
+                    populateUi(groupChannel);
+                }
+            });
+        } else {
+            OpenChannel.get(id, new OpenChannel.GetListener() {
+                @Override
+                public void onResult(OpenChannel groupChannel, ChatCampException e) {
+                    populateUi(groupChannel);
+                }
+            });
+        }
 
     }
 
     private void populateUi(GroupChannel groupChannel) {
-        groupChannelGLobal = groupChannel;
+        groupChannelGlobal = groupChannel;
         collapsingToolbarLayout.setTitle(groupChannel.getName());
         Picasso.with(this).load(groupChannel.getAvatarUrl())
                 .placeholder(R.drawable.icon_default_contact).error(R.drawable.icon_default_contact).into(toolbarIv);
@@ -74,6 +89,20 @@ public class GroupDetailActivity extends AppCompatActivity implements GroupDetai
         for(Participant participant : groupChannel.getParticipants()) {
             participantList.add(new ParticipantView(participant));
         }
+        adapter.clear();
+        adapter.addAll(participantList);
+    }
+
+    private void populateUi(OpenChannel openChannel) {
+        openChannelGlobal = openChannel;
+        collapsingToolbarLayout.setTitle(openChannel.getName());
+        Picasso.with(this).load(openChannel.getAvatarUrl())
+                .placeholder(R.drawable.icon_default_contact).error(R.drawable.icon_default_contact).into(toolbarIv);
+        List<ParticipantView> participantList = new ArrayList<>();
+        //TODO how to get participant list in open channel
+//        for(Participant participant : openChannel()) {
+//            participantList.add(new ParticipantView(participant));
+//        }
         adapter.clear();
         adapter.addAll(participantList);
     }
@@ -90,6 +119,10 @@ public class GroupDetailActivity extends AppCompatActivity implements GroupDetai
         if(item.getItemId() == android.R.id.home) {
             finish();
         } else if(item.getItemId() == R.id.action_edit_group) {
+            //TODO How to update info like group name in open channel
+            if(groupChannelGlobal == null) {
+                return true;
+            }
             //Toast.makeText(this, "Edit group", Toast.LENGTH_LONG).show();
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(GroupDetailActivity.this);
             alertDialog.setTitle("Update Group");
@@ -108,7 +141,7 @@ public class GroupDetailActivity extends AppCompatActivity implements GroupDetai
                             if(TextUtils.isEmpty(input.getText())) {
                                 input.setError("Group name could not be empty");
                             } else {
-                                groupChannelGLobal.update(input.getText().toString(), null, null, new BaseChannel.UpdateListener() {
+                                groupChannelGlobal.update(input.getText().toString(), null, null, new BaseChannel.UpdateListener() {
                                     @Override
                                     public void onResult(BaseChannel baseChannel, ChatCampException e) {
                                         if(baseChannel instanceof GroupChannel) {
@@ -142,13 +175,14 @@ public class GroupDetailActivity extends AppCompatActivity implements GroupDetai
         Toast.makeText(this, participant.getDisplayName() + " Participant Clicked", Toast.LENGTH_LONG).show();
         Intent intent = new Intent(this, UserProfileActivity.class);
         intent.putExtra(UserProfileActivity.KEY_PARTICIPANT_ID, participant.getId());
-        intent.putExtra(UserProfileActivity.KEY_GROUP_ID, groupChannelGLobal.getId());
+        intent.putExtra(UserProfileActivity.KEY_GROUP_ID, groupChannelGlobal.getId());
         startActivity(intent);
     }
 
     @Override
     public void onExitGroupClicked() {
-        groupChannelGLobal.leave(new GroupChannel.LeaveListener() {
+        //TODO what will happen to the exit button
+        groupChannelGlobal.leave(new GroupChannel.LeaveListener() {
             @Override
             public void onResult(ChatCampException e) {
                 finish();

@@ -243,6 +243,31 @@ public class MessagesListAdapter
         ChatCamp.addChannelListener(CHANNEL_LISTENER, new ChatCamp.ChannelListener() {
 
             @Override
+            public void onOpenChannelMessageReceived(OpenChannel openChannel, Message message) {
+                if (channel == null) {
+                    return;
+                }
+                if (openChannel.getId().equals(channel.getId())) {
+                    //TODO handle announcements
+                    if (message.getType().equals("announcement")) {
+                        return;
+                    }
+                    items.add(0, message);
+                    databaseHelper.addMessage(message, channel.getId(), BaseChannel.ChannelType.OPEN);
+
+
+                    //TODO add is typing implementation once it is added
+//                    if (isTyping) {
+//                        notifyItemInserted(1);
+//                    } else {
+//                        notifyItemInserted(0);
+//                    }
+                    notifyItemInserted(0);
+                    restoreScrollPositionAfterAdAdded();
+                }
+            }
+
+            @Override
             public void onGroupChannelMessageReceived(GroupChannel groupChannel, Message message) {
                 if (channel == null) {
                     return;
@@ -253,14 +278,13 @@ public class MessagesListAdapter
                         return;
                     }
                     items.add(0, message);
-                    databaseHelper.addMessage(message, channel.getId(), channel.isGroupChannel()
-                            ? BaseChannel.ChannelType.GROUP : BaseChannel.ChannelType.OPEN);
-                    if (channel instanceof GroupChannel) {
+                    databaseHelper.addMessage(message, channel.getId(), BaseChannel.ChannelType.GROUP);
+
                         //TODO should open channel also have something for mark as read?
                         if (lastReadTime < message.getInsertedAt() * 1000) {
                             ((GroupChannel) channel).markAsRead();
                         }
-                    }
+
                     if (isTyping) {
                         notifyItemInserted(1);
                     } else {
@@ -374,7 +398,7 @@ public class MessagesListAdapter
         // read receipt
         {
             boolean readReceiptVisibility = messageType.isMe ? messagesListStyle.isShowOutcomingReadReceipt() : messagesListStyle.isShowIncomingReadReceipt();
-            if (readReceiptVisibility) {
+            if (readReceiptVisibility && channel.isGroupChannel()) {
                 holder.readReceiptContainer.setVisibility(View.VISIBLE);
                 holder.readReceiptContainer.removeAllViews();
                 if (message.getInsertedAt() * 1000 > lastReadTime) {
