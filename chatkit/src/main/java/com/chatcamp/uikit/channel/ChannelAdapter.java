@@ -58,6 +58,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
     private OpenChannelListQuery openChannelListQuery;
     private ChannelList.OnChannelsLoadedListener onChannelsLoadedListener;
     private RecyclerScrollMoreListener recyclerScrollMoreListener;
+    private RecyclerView recyclerView;
 
     public void setRecyclerScrollMoreListener(RecyclerScrollMoreListener recyclerScrollMoreListener) {
         this.recyclerScrollMoreListener = recyclerScrollMoreListener;
@@ -96,6 +97,12 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
         notifyDataSetChanged();
     }
 
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        this.recyclerView = recyclerView;
+        super.onAttachedToRecyclerView(recyclerView);
+    }
+
     public void onWindowVisibilityChanged(int visibility) {
         if (visibility == VISIBLE) {
             addChannelListener();
@@ -128,6 +135,10 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
                         dataset.add(0, groupChannel);
                         notifyItemInserted(0);
                         chatCampDatabaseHelper.addGroupChannel(groupChannel);
+                    }
+                    if(recyclerView != null && recyclerView.getLayoutManager() != null) {
+                        RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+                        layoutManager.scrollToPosition(0);
                     }
                 }
             }
