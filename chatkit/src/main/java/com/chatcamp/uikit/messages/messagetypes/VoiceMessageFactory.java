@@ -126,7 +126,7 @@ public class VoiceMessageFactory extends MessageFactory<VoiceMessageFactory.Voic
         } else {
             messageHolder.view.setBackgroundDrawable(backgroundDrawable);
         }
-        if (messageId != null && message.getId().equals(messageId)) {
+        if (messageId != null && message.getId().equals(messageId) && mediaPlayer != null) {
             final int duration = mediaPlayer.getDuration();
             messageHolder.seekBar.setMax(duration);
             handler.removeCallbacksAndMessages(null);
@@ -170,6 +170,9 @@ public class VoiceMessageFactory extends MessageFactory<VoiceMessageFactory.Voic
                 try {
                     if (seekBar != null) {
                         seekBar.setProgress(0);
+                    }
+                    if(mediaPlayer != null) {
+                        return;
                     }
                     mediaPlayer.reset();
                     handler.removeCallbacksAndMessages(null);

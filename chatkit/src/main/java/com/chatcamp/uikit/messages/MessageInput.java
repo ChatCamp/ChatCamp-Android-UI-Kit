@@ -124,7 +124,7 @@ public class MessageInput extends RelativeLayout
 
     @Override
     public void onClick(final View view) {
-        if (channel.isGroupChannel()) {
+        if (channel != null && channel.isGroupChannel()) {
             GroupChannel.get(channel.getId(), new GroupChannel.GetListener() {
                 @Override
                 public void onResult(GroupChannel groupChannel, ChatCampException e) {
