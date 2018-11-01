@@ -82,7 +82,7 @@ public class TextMessageFactory extends MessageFactory<TextMessageFactory.TextMe
     }
 
     public static class TextMessageHolder extends MessageFactory.MessageHolder {
-        TextView messageText;
+        TextViewFont messageText;
 
         public TextMessageHolder(View view) {
             messageText = view.findViewById(R.id.messageTextView);
