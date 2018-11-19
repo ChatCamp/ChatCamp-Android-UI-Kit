@@ -1,13 +1,13 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
-group = 'com.github.ChatCamp'
+//apply plugin: 'com.github.dcendents.android-maven'
+//group = 'com.github.ChatCamp'
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 27
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionCode 4
         versionName "0.0.4"
         consumerProguardFile 'proguard-chatkit-rules.pro'
@@ -32,15 +32,15 @@ repositories {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'io.chatcamp.sdk:chatcamp-android-sdk:0.1.54'
-    compile 'com.android.support:appcompat-v7:26.1.0'
-    compile 'com.android.support:design:26.1.0'
-    compile 'com.wang.avi:library:2.1.3'
-    compile 'org.apmem.tools:layouts:1.10@aar'
-    compile "com.squareup.picasso:picasso:2.5.2"
-    compile 'me.zhanghai.android.materialprogressbar:library:1.4.2'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+//    implementation 'io.chatcamp.sdk:chatcamp-android-sdk:0.1.55'
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.android.support:design:27.1.1'
+    implementation 'com.wang.avi:library:2.1.3'
+    implementation 'org.apmem.tools:layouts:1.10@aar'
+    implementation "com.squareup.picasso:picasso:2.5.2"
+    implementation 'me.zhanghai.android.materialprogressbar:library:1.4.2'
     implementation 'com.davemorrissey.labs:subsampling-scale-image-view:3.10.0'
-//    api project(':chatcamp')
-//    compile(name:'chatcamp-release', ext:'aar')
+    api project(':chatcamp')
+//    implementation(name:'chatcamp-release', ext:'aar')
 }
