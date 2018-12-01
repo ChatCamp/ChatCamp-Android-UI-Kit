@@ -11,9 +11,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.chatcamp.uikit.R;
+import com.chatcamp.uikit.customview.AvatarView;
 import com.chatcamp.uikit.messages.RecyclerScrollMoreListener;
 import com.chatcamp.uikit.utils.CircleTransform;
 import com.chatcamp.uikit.utils.TextViewFont;
@@ -114,7 +114,7 @@ public class BlockedUserAdapter extends RecyclerView.Adapter<BlockedUserAdapter.
 
     public class BlockedUserViewHolder extends RecyclerView.ViewHolder {
 
-        private ImageView avatar;
+        private AvatarView avatar;
         private TextViewFont nameTv;
         private ImageView onlineIndicator;
         private TextViewFont unblockTv;
@@ -152,10 +152,7 @@ public class BlockedUserAdapter extends RecyclerView.Adapter<BlockedUserAdapter.
                 onlineIndicatorParams.height = onlineIndicatorHeight;
                 onlineIndicatorParams.width = onlineIndicatorWidth;
 
-                Picasso.with(context).load(user.getAvatarUrl())
-                        .placeholder(com.chatcamp.uikit.R.drawable.icon_default_contact)
-                        .transform(new CircleTransform()).into(avatar);
-
+                avatar.initView(user.getAvatarUrl(), user.getDisplayName());
                 if(user.isOnline()) {
                     onlineIndicator.setVisibility(View.VISIBLE);
                 } else {
@@ -206,9 +203,9 @@ public class BlockedUserAdapter extends RecyclerView.Adapter<BlockedUserAdapter.
                             eventConsumed = onUnBlockUserClickedListener.unBlockUserClicked(localUser);
                         }
                         if(!eventConsumed) {
-                            ChatCamp.unBlockUser(localUser.getId(), new ChatCamp.OnUserUnBlockListener() {
+                            ChatCamp.unblockuser(localUser.getId(), new ChatCamp.OnUserUnblockListener() {
                                 @Override
-                                public void onUserUnBlocked(Participant participant, ChatCampException exception) {
+                                public void onUserUnblocked(User user, ChatCampException exception) {
                                     userList.remove(position);
                                     notifyItemRemoved(position);
                                 }

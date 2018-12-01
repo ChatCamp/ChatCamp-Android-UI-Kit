@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:id="@+id/et_search_user"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:background="@drawable/bg_search"
+        android:hint="Search User"
+        android:padding="8dp" />
+
+    <com.chatcamp.uikit.user.SelectableUserList
+        android:id="@+id/selectable_user_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <com.chatcamp.uikit.customview.LoadingView
+        android:id="@+id/loading_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
+
+    <Button
+        android:id="@+id/button_add_participant"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add Participants"
+        android:textStyle="bold" />
+
+</LinearLayout>

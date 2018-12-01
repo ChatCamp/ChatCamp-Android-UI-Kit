@@ -43,8 +43,8 @@ public class TextMessageFactory extends MessageFactory<TextMessageFactory.TextMe
         textView.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
         textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
         textView.setTypeface(textView.getTypeface(), textStyle);
-//        textView.setAutoLinkMask(messageStyle.getTextAutoLinkMask());
-//        textView.setLinkTextColor(textLinkColor);
+        textView.setAutoLinkMask(messageStyle.getTextAutoLinkMask());
+        textView.setLinkTextColor(textLinkColor);
         textView.setTextColor(textColor);
         if(!TextUtils.isEmpty(messageStyle.getCustomFont())) {
             textView.setCustomFont(messageStyle.getCustomFont());

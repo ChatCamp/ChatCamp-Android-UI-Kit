@@ -7,6 +7,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.util.AttributeSet;
+import android.view.View;
 
 import com.chatcamp.uikit.commons.ImageLoader;
 import com.chatcamp.uikit.messages.RecyclerScrollMoreListener;
@@ -79,6 +80,10 @@ public class ChannelList extends RecyclerView {
         if(adapter != null) {
             adapter.setAvatarImageLoader(imageLoader);
         }
+    }
+
+    public void setLoadingView(View view) {
+        adapter.setLoadingView(view);
     }
 
     @Override

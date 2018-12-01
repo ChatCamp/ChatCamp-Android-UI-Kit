@@ -2,14 +2,10 @@ package com.chatcamp.uikit.messages;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.Nullable;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -18,15 +14,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.chatcamp.uikit.R;
 import com.chatcamp.uikit.commons.ImageLoader;
 import com.chatcamp.uikit.conversationdetails.GroupDetailActivity;
 import com.chatcamp.uikit.conversationdetails.UserProfileActivity;
+import com.chatcamp.uikit.customview.AvatarView;
 import com.chatcamp.uikit.utils.CircleTransform;
 import com.chatcamp.uikit.utils.HeaderViewClickListener;
 import com.chatcamp.uikit.utils.TextViewFont;
-import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -36,6 +33,7 @@ import io.chatcamp.sdk.ChatCamp;
 import io.chatcamp.sdk.ChatCampException;
 import io.chatcamp.sdk.GroupChannel;
 import io.chatcamp.sdk.Participant;
+import io.chatcamp.sdk.User;
 
 /**
  * Created by shubhamdhabhai on 10/05/18.
@@ -44,7 +42,7 @@ import io.chatcamp.sdk.Participant;
 public class HeaderView extends LinearLayout {
 
     private Toolbar toolbar;
-    private ImageView groupImageIv;
+    private AvatarView groupImageIv;
     private TextViewFont groupTitleTv;
     private BaseChannel channel;
     private Participant otherParticipant;
@@ -156,10 +154,7 @@ public class HeaderView extends LinearLayout {
             avatarLoader.loadImage(groupImageIv, imageUrl);
         } else {
 
-            Picasso.with(getContext()).load(imageUrl)
-                    .placeholder(R.drawable.icon_default_contact)
-                    .error(R.drawable.icon_default_contact)
-                    .transform(new CircleTransform()).into(groupImageIv);
+            groupImageIv.initView(imageUrl, title);
         }
         groupTitleTv.setText(title);
     }
@@ -169,15 +164,17 @@ public class HeaderView extends LinearLayout {
             if (!isBlocked) {
                 ChatCamp.blockUser(otherParticipant.getId(), new ChatCamp.OnUserBlockListener() {
                     @Override
-                    public void onUserBlocked(Participant participant, ChatCampException exception) {
+                    public void onUserBlocked(User user, ChatCampException exception) {
+                        Toast.makeText(getContext(), user.getDisplayName() + " Blocked", Toast.LENGTH_LONG).show();
                         item.setTitle("UnBlock");
                         isBlocked = true;
                     }
                 });
             } else {
-                ChatCamp.unBlockUser(otherParticipant.getId(), new ChatCamp.OnUserUnBlockListener() {
+                ChatCamp.unblockuser(otherParticipant.getId(), new ChatCamp.OnUserUnblockListener() {
                     @Override
-                    public void onUserUnBlocked(Participant participant, ChatCampException exception) {
+                    public void onUserUnblocked(User user, ChatCampException exception) {
+                        Toast.makeText(getContext(), user.getDisplayName() + " Unblocked", Toast.LENGTH_LONG).show();
                         item.setTitle("Block");
                         isBlocked = false;
                     }
@@ -198,10 +195,14 @@ public class HeaderView extends LinearLayout {
                     }
                 }
             }
-            if (isBlocked) {
-                menuItem.setTitle("UnBlock");
+            if(otherParticipant != null) {
+                if (isBlocked) {
+                    menuItem.setTitle("UnBlock");
+                } else {
+                    menuItem.setTitle("Block");
+                }
             } else {
-                menuItem.setTitle("Block");
+                menuItem.setVisible(false);
             }
         }
     }

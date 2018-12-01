@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.util.DisplayMetrics;
 
 import java.io.ObjectStreamException;
 
@@ -66,5 +67,25 @@ public class Utils {
             Fragment fragment = (Fragment) object;
             fragment.startActivityForResult(intent, requestCode);
         }
+    }
+
+    public static String getShortName(String name) {
+        String[] strings = name.split(" ");//no i18n
+        String shortName;
+        if (strings.length == 1) {
+            if(strings[0].length() > 1) {
+                shortName = strings[0].substring(0, 2);
+            } else {
+                shortName = strings[0];
+            }
+        } else {
+            shortName = strings[0].substring(0, 1) + strings[1].substring(0, 1);
+        }
+        return shortName.toUpperCase();
+    }
+
+    public static int dpToPx(int dp, Context context) {
+        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+        return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
     }
 }

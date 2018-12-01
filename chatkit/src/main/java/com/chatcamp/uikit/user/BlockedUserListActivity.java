@@ -6,6 +6,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.chatcamp.uikit.R;
 
@@ -22,11 +23,17 @@ public class BlockedUserListActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle("Blocked Users");
         final ProgressBar progressBar = findViewById(R.id.progress_bar);
-        BlockedUserList blockedUserList = findViewById(R.id.blocked_user_list);
+        final BlockedUserList blockedUserList = findViewById(R.id.blocked_user_list);
+        final TextView placeholder = findViewById(R.id.tv_place_holder);
         blockedUserList.setOnBlockedUsersLoadedListener(new BlockedUserList.OnBlockedUsersLoadedListener() {
             @Override
             public void onBlockUsersLoaded() {
                 progressBar.setVisibility(View.GONE);
+                if(blockedUserList.getAdapter().getItemCount() == 0) {
+                    placeholder.setVisibility(View.VISIBLE);
+                } else {
+                    placeholder.setVisibility(View.GONE);
+                }
             }
         });
         blockedUserList.initialize();

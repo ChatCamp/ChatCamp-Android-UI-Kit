@@ -31,6 +31,8 @@
         <activity
             android:name=".conversationdetails.UserProfileActivity"
             android:theme="@style/ChatCampTheme.NoActionBar" />
+        <activity android:name=".conversationdetails.AddParticipantActivity"
+            android:label="Add Participant"/>
 
         <activity android:name=".user.BlockedUserListActivity" />
     </application>

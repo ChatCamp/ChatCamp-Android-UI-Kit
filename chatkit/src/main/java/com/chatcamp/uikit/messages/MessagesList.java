@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.View;
 
 import com.chatcamp.uikit.channel.ChannelList;
 import com.chatcamp.uikit.commons.ImageLoader;
@@ -73,6 +74,10 @@ public class MessagesList extends RecyclerView {
 
     public void setAvatarImageLoader(ImageLoader imageLoader) {
         adapter.setAvatarImageLoader(imageLoader);
+    }
+
+    public void setLoadingView(View view) {
+        adapter.setLoadingView(view);
     }
 
     /**

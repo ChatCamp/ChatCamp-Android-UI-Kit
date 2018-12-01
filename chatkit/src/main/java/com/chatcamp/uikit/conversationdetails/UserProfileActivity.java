@@ -9,14 +9,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.chatcamp.uikit.utils.DefaultTimeFormat;
 import com.chatcamp.uikit.utils.TimeFormat;
 import com.squareup.picasso.Picasso;
 import com.chatcamp.uikit.R;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import io.chatcamp.sdk.ChatCamp;
 import io.chatcamp.sdk.ChatCampException;
@@ -76,15 +74,17 @@ public class UserProfileActivity extends AppCompatActivity {
                     if (!isBlocked) {
                         ChatCamp.blockUser(participantId, new ChatCamp.OnUserBlockListener() {
                             @Override
-                            public void onUserBlocked(Participant participant, ChatCampException exception) {
+                            public void onUserBlocked(User user, ChatCampException exception) {
+                                Toast.makeText(UserProfileActivity.this, user.getDisplayName() + " Blocked", Toast.LENGTH_LONG).show();
                                 blockTv.setText("UnBlock");
                                 isBlocked = true;
                             }
                         });
                     } else {
-                        ChatCamp.unBlockUser(participantId, new ChatCamp.OnUserUnBlockListener() {
+                        ChatCamp.unblockuser(participantId, new ChatCamp.OnUserUnblockListener() {
                             @Override
-                            public void onUserUnBlocked(Participant participant, ChatCampException exception) {
+                            public void onUserUnblocked(User user, ChatCampException exception) {
+                                Toast.makeText(UserProfileActivity.this, user.getDisplayName() + " Unblocked", Toast.LENGTH_LONG).show();
                                 blockTv.setText("Block");
                                 isBlocked = false;
                             }

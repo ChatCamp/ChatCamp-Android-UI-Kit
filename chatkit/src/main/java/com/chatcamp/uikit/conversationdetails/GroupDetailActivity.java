@@ -33,6 +33,7 @@ import io.chatcamp.sdk.Participant;
 public class GroupDetailActivity extends AppCompatActivity implements GroupDetailAdapter.OnParticipantClickedListener {
     public  static final String KEY_GROUP_ID = "key_group_id";
     public  static final String KEY_IS_GROUP_CHANNEL = "key_is_group_channel";
+    public  static final int ADD_PARTICIPANT_CODE = 101;
 
 
     private RecyclerView participantRv;
@@ -103,8 +104,8 @@ public class GroupDetailActivity extends AppCompatActivity implements GroupDetai
 //        for(Participant participant : openChannel()) {
 //            participantList.add(new ParticipantView(participant));
 //        }
-        adapter.clear();
-        adapter.addAll(participantList);
+//        adapter.clear();
+//        adapter.addAll(participantList);
     }
 
     @Override
@@ -167,7 +168,17 @@ public class GroupDetailActivity extends AppCompatActivity implements GroupDetai
 
     @Override
     public void onAddParticipantClicked() {
-        Toast.makeText(this, "Add Participant Clicked", Toast.LENGTH_LONG).show();
+        Intent intent = new Intent(this, AddParticipantActivity.class);
+        if(groupChannelGlobal != null) {
+            List<Participant> participants = groupChannelGlobal.getParticipants();
+            ArrayList<String> participantIds = new ArrayList<>();
+            for(Participant participant : participants) {
+                participantIds.add(participant.getId());
+            }
+            intent.putStringArrayListExtra(AddParticipantActivity.KEY_PARTICIPANT_IDS, participantIds);
+            intent.putExtra(AddParticipantActivity.KEY_GROUP_ID, groupChannelGlobal.getId());
+            startActivityForResult(intent, ADD_PARTICIPANT_CODE);
+        }
     }
 
     @Override
@@ -176,6 +187,7 @@ public class GroupDetailActivity extends AppCompatActivity implements GroupDetai
         Intent intent = new Intent(this, UserProfileActivity.class);
         intent.putExtra(UserProfileActivity.KEY_PARTICIPANT_ID, participant.getId());
         intent.putExtra(UserProfileActivity.KEY_GROUP_ID, groupChannelGlobal.getId());
+        intent.putExtra(UserProfileActivity.KEY_SHOW_BLOCK_OPTION, false);
         startActivity(intent);
     }
 
@@ -188,5 +200,21 @@ public class GroupDetailActivity extends AppCompatActivity implements GroupDetai
                 finish();
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(resultCode == RESULT_OK && requestCode == ADD_PARTICIPANT_CODE) {
+            if(groupChannelGlobal != null) {
+                GroupChannel.get(groupChannelGlobal.getId(), new GroupChannel.GetListener() {
+                    @Override
+                    public void onResult(GroupChannel groupChannel, ChatCampException e) {
+                        populateUi(groupChannel);
+                    }
+                });
+            }
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }

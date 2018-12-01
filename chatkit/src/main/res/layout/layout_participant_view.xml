@@ -5,7 +5,7 @@
     android:orientation="horizontal"
     android:padding="8dp">
 
-    <ImageView
+    <com.chatcamp.uikit.customview.AvatarView
         android:id="@+id/iv_participant_image"
         android:layout_width="30dp"
         android:layout_height="30dp"
