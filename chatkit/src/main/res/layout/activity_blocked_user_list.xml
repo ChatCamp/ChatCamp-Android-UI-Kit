@@ -15,4 +15,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"/>
+
+    <TextView
+        android:id="@+id/tv_place_holder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="no Users to show"
+        android:layout_centerInParent="true"
+        android:visibility="gone"/>
 </RelativeLayout>

@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import com.chatcamp.uikit.R;
 import com.chatcamp.uikit.commons.ImageLoader;
+import com.chatcamp.uikit.customview.AvatarView;
 import com.chatcamp.uikit.database.ChatCampDatabaseHelper;
 import com.chatcamp.uikit.messages.RecyclerScrollMoreListener;
 import com.chatcamp.uikit.utils.CircleTransform;
@@ -38,6 +39,7 @@ import io.chatcamp.sdk.ChatCamp;
 import io.chatcamp.sdk.ChatCampException;
 import io.chatcamp.sdk.GroupChannel;
 import io.chatcamp.sdk.GroupChannelListQuery;
+import io.chatcamp.sdk.Message;
 import io.chatcamp.sdk.OpenChannel;
 import io.chatcamp.sdk.OpenChannelListQuery;
 import io.chatcamp.sdk.Participant;
@@ -59,9 +61,14 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
     private ChannelList.OnChannelsLoadedListener onChannelsLoadedListener;
     private RecyclerScrollMoreListener recyclerScrollMoreListener;
     private RecyclerView recyclerView;
+    private View loadingView;
 
     public void setRecyclerScrollMoreListener(RecyclerScrollMoreListener recyclerScrollMoreListener) {
         this.recyclerScrollMoreListener = recyclerScrollMoreListener;
+    }
+
+    public void setLoadingView(View view) {
+        loadingView = view;
     }
 
     public interface ChannelClickedListener {
@@ -115,7 +122,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
     private void addChannelListener() {
         ChatCamp.addChannelListener(CHANNEL_LISTENER, new ChatCamp.ChannelListener() {
             @Override
-            public void onGroupChannelUpdated(GroupChannel groupChannel) {
+            public void onGroupChannelMessageReceived(GroupChannel groupChannel, Message message) {
                 if (channelType == null) {
                     return;
                 }
@@ -178,19 +185,27 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
         if (channelType == BaseChannel.ChannelType.OPEN) {
             if (openChannelListQuery == null || loadingFirstTime) {
                 openChannelListQuery = OpenChannel.createOpenChannelListQuery();
-                loadingFirstTime = false;
-                if (recyclerScrollMoreListener != null) {
-                    recyclerScrollMoreListener.resetLoading();
-                }
             }
             openChannelListQuery.load(new OpenChannelListQuery.ResultHandler() {
                 @Override
                 public void onResult(List<OpenChannel> openChannelList, ChatCampException e) {
 //                    dataset.clear();
-                    if (onChannelsLoadedListener != null) {
-                        onChannelsLoadedListener.onChannelsLoaded();
+                    boolean channelLoaded = false;
+                    if(loadingFirstTime) {
+                        loadingFirstTime = false;
+
+                        if (recyclerScrollMoreListener != null) {
+                            recyclerScrollMoreListener.resetLoading();
+                        }
+                        channelLoaded = true;
                     }
                     dataset.addAll(openChannelList);
+                    if (onChannelsLoadedListener != null && channelLoaded) {
+                        onChannelsLoadedListener.onChannelsLoaded();
+                    }
+                    if(loadingView != null) {
+                        loadingView.setVisibility(View.GONE);
+                    }
                     notifyDataSetChanged();
                 }
             });
@@ -244,6 +259,9 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
                         onChannelsLoadedListener.onChannelsLoaded();
                     }
 
+                    if(loadingView != null) {
+                        loadingView.setVisibility(View.GONE);
+                    }
                     notifyDataSetChanged();
                 }
             });
@@ -333,7 +351,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
     public class ChannelViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ChannelClickedListener channelClickedListener;
         TextView titleTv;
-        ImageView avatarIv;
+        AvatarView avatarIv;
         TextView timeTv;
         TextView lastMessageTv;
         TextView unreadMessageTv;
@@ -356,11 +374,24 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
             if (baseChannel instanceof GroupChannel && ((GroupChannel) baseChannel).getLastMessage() != null) {
                 GroupChannel groupChannel = (GroupChannel) baseChannel;
                 timeFormat.setTime(timeTv, groupChannel.getLastMessage().getInsertedAt() * 1000);
-                if (groupChannel.getLastMessage().getType().equalsIgnoreCase("text")) {
-                    lastMessageTv.setText(groupChannel.getLastMessage().getText());
+                Message message = groupChannel.getLastMessage();
+
+                String lastMessage = "";
+                if (message.getType().equals("attachment")) {
+                    if (message.getAttachment().getType().contains("image")) {
+                        lastMessage = "Image";
+                    } else if (message.getAttachment().getType().contains("video")) {
+                        lastMessage = "Video";
+                    }  else if (message.getAttachment().getType().contains("application") || message.getAttachment().getType().contains("css") ||
+                            message.getAttachment().getType().contains("csv") || message.getAttachment().getType().contains("text")) {
+                        lastMessage = "Document";
+                    }
+                } else if(message.getType().equals("text")) {
+                    lastMessage = message.getText();
                 } else {
-                    lastMessageTv.setText("");
+                    lastMessage = "New Message";
                 }
+                lastMessageTv.setText( message.getUser().getDisplayName() + " : " +lastMessage);
             } else {
                 lastMessageTv.setText("");
                 timeTv.setText("");
@@ -399,10 +430,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
             if (imageLoader != null) {
                 imageLoader.loadImage(avatarIv, imageUrl);
             } else {
-                Picasso.with(context).load(imageUrl)
-                        .placeholder(R.drawable.icon_default_contact)
-                        .error(R.drawable.icon_default_contact)
-                        .transform(new CircleTransform()).into(avatarIv);
+                avatarIv.initView(imageUrl, title);
             }
 
             titleTv.setText(title);
@@ -419,6 +447,9 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
 
     @Override
     public void onLoadMore(int page, int total) {
+        if(loadingView != null) {
+            loadingView.setVisibility(VISIBLE);
+        }
         loadChannels();
     }
 

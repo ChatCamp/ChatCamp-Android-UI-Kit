@@ -9,6 +9,7 @@ import java.io.File;
 import io.chatcamp.sdk.BaseChannel;
 import io.chatcamp.sdk.ChatCampException;
 import io.chatcamp.sdk.GroupChannel;
+import io.chatcamp.sdk.Message;
 
 /**
  * Created by shubhamdhabhai on 18/04/18.
@@ -61,7 +62,7 @@ public abstract class AttachmentSender {
                     }
 
                     @Override
-                    public void onUploadSuccess() {
+                    public void onUploadSuccess(Message message) {
                         if (uploadListener != null) {
                             uploadListener.onUploadSuccess();
                         }

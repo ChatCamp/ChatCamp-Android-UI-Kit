@@ -39,6 +39,7 @@ import io.chatcamp.sdk.ChatCamp;
 import io.chatcamp.sdk.ChatCampException;
 import io.chatcamp.sdk.GroupChannel;
 import io.chatcamp.sdk.Participant;
+import io.chatcamp.sdk.User;
 
 /**
  * Component for input outcoming messages
@@ -154,11 +155,11 @@ public class MessageInput extends RelativeLayout
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
                                         if (otherParticipant != null) {
-                                            ChatCamp.unBlockUser(otherParticipant.getId(), new ChatCamp.OnUserUnBlockListener() {
+                                            ChatCamp.unblockuser(otherParticipant.getId(), new ChatCamp.OnUserUnblockListener() {
                                                 @Override
-                                                public void onUserUnBlocked(Participant participant, ChatCampException exception) {
+                                                public void onUserUnblocked(User user, ChatCampException exception) {
                                                     if (onUserUnblockedListener != null) {
-                                                        onUserUnblockedListener.onUserUnblocked(participant);
+                                                        onUserUnblockedListener.onUserUnblocked(user);
                                                     }
                                                 }
                                             });
@@ -423,7 +424,7 @@ public class MessageInput extends RelativeLayout
     }
 
     public interface OnUserUnblockedListener {
-        void onUserUnblocked(Participant participant);
+        void onUserUnblocked(User user);
     }
 
     @Override

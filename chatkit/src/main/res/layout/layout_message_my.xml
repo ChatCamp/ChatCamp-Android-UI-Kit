@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ImageView
+        <com.chatcamp.uikit.customview.AvatarView
             android:id="@+id/messageUserAvatar"
             android:layout_width="@dimen/message_avatar_width"
             android:layout_height="@dimen/message_avatar_height"

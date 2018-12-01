@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.chatcamp.uikit.R;
 import com.chatcamp.uikit.commons.ImageLoader;
+import com.chatcamp.uikit.customview.AvatarView;
 import com.chatcamp.uikit.database.ChatCampDatabaseHelper;
 import com.chatcamp.uikit.messages.messagetypes.MessageFactory;
 import com.chatcamp.uikit.messages.messagetypes.VoiceMessageFactory;
@@ -92,6 +93,7 @@ public class MessagesListAdapter
     private MessagesList.OnMessagesLoadedListener onMessagesLoadedListener;
 
     private RecyclerScrollMoreListener recyclerScrollMoreListener;
+    private View loadingView;
 
     public void setRecyclerScrollMoreListener(RecyclerScrollMoreListener recyclerScrollMoreListener) {
         this.recyclerScrollMoreListener = recyclerScrollMoreListener;
@@ -232,6 +234,9 @@ public class MessagesListAdapter
                     //TODO should open channel also have something for mark as read?
                     ((GroupChannel) channel).markAsRead();
 
+                }
+                if(loadingView != null) {
+                    loadingView.setVisibility(View.GONE);
                 }
                 notifyDataSetChanged();
             }
@@ -518,9 +523,7 @@ public class MessagesListAdapter
             if (avatarImageLoader != null) {
                 avatarImageLoader.loadImage(holder.messageUserAvatar, message.getUser().getAvatarUrl());
             } else {
-                Picasso.with(context).load(message.getUser().getAvatarUrl())
-                        .placeholder(R.drawable.icon_default_contact)
-                        .transform(new CircleTransform()).into(holder.messageUserAvatar);
+                holder.messageUserAvatar.initView(message.getUser().getAvatarUrl(), message.getUser().getDisplayName());
             }
         } else {
             holder.messageUserAvatar.setVisibility(View.GONE);
@@ -590,6 +593,9 @@ public class MessagesListAdapter
 
     @Override
     public void onLoadMore(int page, int total) {
+        if(loadingView != null) {
+            loadingView.setVisibility(VISIBLE);
+        }
         loadMessages();
     }
 
@@ -700,6 +706,10 @@ public class MessagesListAdapter
         removeChannelListener();
     }
 
+    public void setLoadingView(View view) {
+        loadingView = view;
+    }
+
     private static class Cluster {
         public boolean dateBoundaryWithPrevious;
         public boolean clusterWithPrevious;
@@ -801,7 +811,7 @@ public class MessagesListAdapter
         protected Message message;
 
         protected TextViewFont messageDateHeader;
-        protected ImageView messageUserAvatar;
+        protected AvatarView messageUserAvatar;
         protected ViewGroup messageContainer;
         protected TextViewFont messageUsername;
         protected ViewGroup messageContentContainer;

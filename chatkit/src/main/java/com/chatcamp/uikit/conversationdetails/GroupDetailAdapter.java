@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.chatcamp.uikit.customview.AvatarView;
 import com.squareup.picasso.Picasso;
 import com.chatcamp.uikit.R;
 
@@ -50,10 +51,13 @@ public class GroupDetailAdapter extends RecyclerView.Adapter {
 
     public GroupDetailAdapter(Context context) {
         participants = new ArrayList<>();
-        participants.add(0, new ParticipantView(null));
-        participants.add(new ParticipantView(null));
-        participants.add(new ParticipantView(null));
         this.context = context;
+        if(isGroupChannel) {
+            participants.add(0, new ParticipantView(null));
+            participants.add(new ParticipantView(null));
+            participants.add(new ParticipantView(null));
+        }
+
     }
 
     public void setIsGroupChannel(boolean groupChannel) {
@@ -71,10 +75,12 @@ public class GroupDetailAdapter extends RecyclerView.Adapter {
     }
 
     public void clear() {
-        participants.clear();
-        participants.add(0, new ParticipantView(null));
-        participants.add(new ParticipantView(null));
-        participants.add(new ParticipantView(null));
+        if(isGroupChannel) {
+            participants.clear();
+            participants.add(0, new ParticipantView(null));
+            participants.add(new ParticipantView(null));
+            participants.add(new ParticipantView(null));
+        }
         notifyDataSetChanged();
     }
 
@@ -195,7 +201,7 @@ public class GroupDetailAdapter extends RecyclerView.Adapter {
 
     class ParticipantViewHolder extends RecyclerView.ViewHolder {
 
-        ImageView participantIv;
+        AvatarView participantIv;
 
         TextView participantTv;
 
@@ -212,8 +218,9 @@ public class GroupDetailAdapter extends RecyclerView.Adapter {
         }
 
         public void bind(final ParticipantView participantView) {
-            Picasso.with(context).load(participantView.getParticipant().getAvatarUrl())
-                    .placeholder(R.drawable.icon_default_contact).into(participantIv);
+
+            participantIv.initView(participantView.getParticipant().getAvatarUrl(),
+                    participantView.getParticipant().getDisplayName());
             participantTv.setText(participantView.getParticipant().getDisplayName());
             if (participantView.getParticipant().isOnline()) {
                 onlineIv.setVisibility(View.VISIBLE);

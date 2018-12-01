@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ImageView
+        <com.chatcamp.uikit.customview.AvatarView
             android:id="@+id/messageUserAvatar"
             android:layout_width="@dimen/message_avatar_width"
             android:layout_height="@dimen/message_avatar_height"
@@ -51,7 +51,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_gravity="end">
+                android:layout_gravity="start">
 
                 <com.chatcamp.uikit.utils.TextViewFont
                     android:id="@+id/messageTime"
