@@ -295,6 +295,7 @@ public class MessagesListAdapter
                     } else {
                         notifyItemInserted(0);
                     }
+                    databaseHelper.addGroupChannel(groupChannel);
                     restoreScrollPositionAfterAdAdded();
                 }
             }
