@@ -283,7 +283,7 @@ public class MessagesListAdapter
                         return;
                     }
                     items.add(0, message);
-                    databaseHelper.addMessage(message, channel.getId(), BaseChannel.ChannelType.GROUP);
+
 
                         //TODO should open channel also have something for mark as read?
                         if (lastReadTime < message.getInsertedAt() * 1000) {
@@ -295,9 +295,10 @@ public class MessagesListAdapter
                     } else {
                         notifyItemInserted(0);
                     }
-                    databaseHelper.addGroupChannel(groupChannel);
                     restoreScrollPositionAfterAdAdded();
                 }
+                databaseHelper.addMessage(message, groupChannel.getId(), BaseChannel.ChannelType.GROUP);
+                databaseHelper.addGroupChannel(groupChannel);
             }
 
             @Override
@@ -345,6 +346,7 @@ public class MessagesListAdapter
                     //TODO need to optimise this
                     notifyDataSetChanged();
                 }
+                databaseHelper.addGroupChannel(groupChannel);
             }
         });
     }

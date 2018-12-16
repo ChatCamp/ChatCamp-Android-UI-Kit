@@ -147,6 +147,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
                         RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
                         layoutManager.scrollToPosition(0);
                     }
+                    chatCampDatabaseHelper.addMessage(message, groupChannel.getId(), BaseChannel.ChannelType.GROUP);
                 }
             }
 
