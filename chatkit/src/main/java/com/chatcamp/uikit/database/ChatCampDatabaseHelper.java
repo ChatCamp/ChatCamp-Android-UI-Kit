@@ -444,6 +444,14 @@ public class ChatCampDatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    public void clearDatabase() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("DELETE FROM "+ ChatCampDatabaseContract.MessageEntry.TABLE_NAME);
+        db.execSQL("DELETE FROM "+ ChatCampDatabaseContract.GroupEntry.TABLE_NAME_ALL);
+        db.execSQL("DELETE FROM "+ ChatCampDatabaseContract.GroupEntry.TABLE_NAME_ACCEPTED);
+        db.execSQL("DELETE FROM "+ ChatCampDatabaseContract.GroupEntry.TABLE_NAME_INVITED);
+    }
+
     public interface GetMessagesListener {
         void onGetMessages(List<Message> messages);
     }

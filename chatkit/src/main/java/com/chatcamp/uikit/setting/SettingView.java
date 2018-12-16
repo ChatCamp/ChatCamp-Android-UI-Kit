@@ -33,6 +33,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.chatcamp.uikit.R;
+import com.chatcamp.uikit.database.ChatCampDatabaseHelper;
 import com.chatcamp.uikit.user.BlockedUserListActivity;
 import com.chatcamp.uikit.utils.CircleTransform;
 import com.chatcamp.uikit.utils.FileUtils;
@@ -419,6 +420,8 @@ public class SettingView extends LinearLayout {
                         ChatCamp.disconnect(new ChatCamp.DisconnectListener() {
                             @Override
                             public void onDisconnected(ChatCampException e) {
+                                ChatCampDatabaseHelper helper = new ChatCampDatabaseHelper(getContext());
+                                helper.clearDatabase();
                                 if(logoutClickListener != null) {
                                     logoutClickListener.onLogoutClicked();
                                 }
