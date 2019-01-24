@@ -236,33 +236,35 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
             groupChannelListQuery.load(new GroupChannelListQuery.ResultHandler() {
                 @Override
                 public void onResult(List<GroupChannel> groupChannelList, ChatCampException e) {
-                    boolean channelLoaded = false;
-                    if (loadingFirstTime) {
-                        loadingFirstTime = false;
-                        if (recyclerScrollMoreListener != null) {
-                            recyclerScrollMoreListener.resetLoading();
+                    if(e == null) {
+                        boolean channelLoaded = false;
+                        if (loadingFirstTime) {
+                            loadingFirstTime = false;
+                            if (recyclerScrollMoreListener != null) {
+                                recyclerScrollMoreListener.resetLoading();
+                            }
+                            Log.e("Group Channel", "result from first api call");
+                            if ((dataset.size() == 0 || groupChannelList.size() == 0) && onChannelsLoadedListener != null) {
+                                channelLoaded = true;
+                            }
+                            dataset.clear();
+                            chatCampDatabaseHelper.addGroupChannels(groupChannelList, participantState, customFilter);
+                        } else {
+                            Log.e("Group Channel", "result from subsequent api call");
                         }
-                        Log.e("Group Channel", "result from first api call");
-                        if ((dataset.size() == 0 || groupChannelList.size() == 0) && onChannelsLoadedListener != null) {
-                            channelLoaded = true;
+                        if (comparator != null) {
+                            Collections.sort(groupChannelList, comparator);
                         }
-                        dataset.clear();
-                        chatCampDatabaseHelper.addGroupChannels(groupChannelList, participantState, customFilter);
-                    } else {
-                        Log.e("Group Channel", "result from subsequent api call");
-                    }
-                    if (comparator != null) {
-                        Collections.sort(groupChannelList, comparator);
-                    }
-                    dataset.addAll(groupChannelList);
-                    if (channelLoaded) {
-                        onChannelsLoadedListener.onChannelsLoaded();
-                    }
+                        dataset.addAll(groupChannelList);
+                        if (channelLoaded) {
+                            onChannelsLoadedListener.onChannelsLoaded();
+                        }
 
-                    if(loadingView != null) {
-                        loadingView.setVisibility(View.GONE);
+                        if (loadingView != null) {
+                            loadingView.setVisibility(View.GONE);
+                        }
+                        notifyDataSetChanged();
                     }
-                    notifyDataSetChanged();
                 }
             });
         }

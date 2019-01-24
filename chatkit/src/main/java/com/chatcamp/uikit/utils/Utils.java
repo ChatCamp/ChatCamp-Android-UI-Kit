@@ -70,7 +70,7 @@ public class Utils {
     }
 
     public static String getShortName(String name) {
-        String[] strings = name.split(" ");//no i18n
+        String[] strings = name.split("\\s+");//no i18n
         String shortName;
         if (strings.length == 1) {
             if(strings[0].length() > 1) {
