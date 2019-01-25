@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.chatcamp.uikit.R;
+import com.chatcamp.uikit.database.DbMessageWrapper;
 import com.chatcamp.uikit.utils.TextViewFont;
 
 import io.chatcamp.sdk.Message;
@@ -22,7 +23,7 @@ import io.chatcamp.sdk.Message;
 public class TextMessageFactory extends MessageFactory<TextMessageFactory.TextMessageHolder> {
 
     @Override
-    public boolean isBindable(Message message) {
+    public boolean isBindable(DbMessageWrapper message) {
         return message.getType().equals("text");
     }
 
@@ -58,7 +59,7 @@ public class TextMessageFactory extends MessageFactory<TextMessageFactory.TextMe
     }
 
     @Override
-    public void bindMessageHolder(TextMessageHolder cellHolder, Message message) {
+    public void bindMessageHolder(TextMessageHolder cellHolder, DbMessageWrapper message) {
         Drawable backgroundDrawable = cellHolder.messageText.getBackground().mutate();
         cellHolder.messageText.setText(message.getText());
         boolean isFirstMessage = messageSpecs.isFirstMessage;

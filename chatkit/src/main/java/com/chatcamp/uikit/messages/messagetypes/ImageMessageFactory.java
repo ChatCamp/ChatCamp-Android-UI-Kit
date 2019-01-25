@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
+import com.chatcamp.uikit.database.DbMessageWrapper;
 import com.chatcamp.uikit.utils.Utils;
 import com.squareup.picasso.Picasso;
 import com.chatcamp.uikit.R;
@@ -56,9 +57,9 @@ public class ImageMessageFactory extends MessageFactory<ImageMessageFactory.Imag
     }
 
     @Override
-    public boolean isBindable(Message message) {
+    public boolean isBindable(DbMessageWrapper message) {
         if (message.getType().equals("attachment")) {
-            if (message.getAttachment().isImage()) {
+            if (message.getAttachment().getType().contains("image")) {
                 return true;
             }
         }
@@ -75,7 +76,7 @@ public class ImageMessageFactory extends MessageFactory<ImageMessageFactory.Imag
     }
 
     @Override
-    public void bindMessageHolder(final ImageMessageHolder messageHolder, final Message message) {
+    public void bindMessageHolder(final ImageMessageHolder messageHolder, final DbMessageWrapper message) {
         final Context context = Utils.getContext(objectWeakReference.get());
         if (context == null) {
             messageHolder.downloadIcon.setVisibility(View.GONE);

@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.chatcamp.uikit.R;
+import com.chatcamp.uikit.database.DbMessageWrapper;
 import com.chatcamp.uikit.messages.sender.AskPaymentSender;
 
 import io.chatcamp.sdk.BaseChannel;
@@ -23,7 +24,7 @@ public class AskPaymentFactory extends MessageFactory<AskPaymentFactory.PaymentM
 
 
     @Override
-    public boolean isBindable(Message message) {
+    public boolean isBindable(DbMessageWrapper message) {
         if (message.getMetadata() != null && message.getMetadata()
                 .get("type") != null && message.getMetadata()
                 .get("type").equals(AskPaymentSender.PaymentMeta.TYPE)) {
@@ -42,7 +43,7 @@ public class AskPaymentFactory extends MessageFactory<AskPaymentFactory.PaymentM
     }
 
     @Override
-    public void bindMessageHolder(PaymentMessageHolder messageHolder, final Message message) {
+    public void bindMessageHolder(PaymentMessageHolder messageHolder, final DbMessageWrapper message) {
         final String amount = message.getMetadata().get("value");
         final String userName = message.getMetadata().get("name");
         messageHolder.descriptionTv.setText(String.format("Please make a payment of ₹ %s to %s", amount, userName));
