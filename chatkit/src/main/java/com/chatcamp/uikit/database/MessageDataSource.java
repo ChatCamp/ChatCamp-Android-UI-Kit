@@ -4,6 +4,7 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.util.Log;
 
+import java.security.acl.Group;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
@@ -15,6 +16,7 @@ import io.chatcamp.sdk.ChatCamp;
 import io.chatcamp.sdk.ChatCampException;
 import io.chatcamp.sdk.GroupChannel;
 import io.chatcamp.sdk.Message;
+import io.chatcamp.sdk.MessageParams;
 import io.chatcamp.sdk.OpenChannel;
 import io.chatcamp.sdk.Participant;
 import io.chatcamp.sdk.PreviousMessageListQuery;
@@ -194,72 +196,80 @@ public class MessageDataSource {
         ChatCamp.addChannelListener("message_data_source", new ChatCamp.ChannelListener() {
 
             @Override
-            public void onOpenChannelMessageReceived(final OpenChannel openChannel, final Message message) {
-                if (!message.getUser().getId().equals(ChatCamp.getCurrentUser().getId())) {
+            public void onMessageReceived(final BaseChannel baseChannel, final Message message) {
+                if(baseChannel.getType() == BaseChannel.ChannelType.OPEN) {
+                    if (!message.getUser().getId().equals(ChatCamp.getCurrentUser().getId())) {
+                        Completable.fromAction(new Action() {
+                            @Override
+                            public void run() throws Exception {
+                                DbMessageWrapper messageWrapper = new DbMessageWrapper(message);
+                                messageWrapper.setMessageStatus("sent");
+                                messageWrapper.setGroupId(baseChannel.getId());
+                                chatCampDb.dbMessageWrapperDao().insert(messageWrapper);
+                                if (baseChannel.getId().equals(channel.getId())) {
+//                                    Diff<DbMessageWrapper> diff = new Diff<>();
+//                                    diff.setModel(messageWrapper);
+//                                    diff.setChange(Diff.CHANGE.INSERT);
+//                                    diff.setPosition(0);
+//                                    diffLiveData.postValue(diff);
+                                    for (int i = 0; i < messageWrapperList.size(); ++i) {
+                                        if (messageWrapperList.get(i).getId().equals(messageWrapper.getId())) {
+                                            Diff<DbMessageWrapper> newMessageWrapperDiff = new Diff<>();
+                                            newMessageWrapperDiff.setPosition(i);
+                                            newMessageWrapperDiff.setChange(Diff.CHANGE.UPDATE);
+                                            newMessageWrapperDiff.setModel(messageWrapper);
+                                            diffLiveData.postValue(newMessageWrapperDiff);
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }).subscribeOn(Schedulers.io()).subscribe();
+                    }
+                } else {
+
                     Completable.fromAction(new Action() {
                         @Override
                         public void run() throws Exception {
-                            DbMessageWrapper messageWrapper = new DbMessageWrapper(message);
-                            messageWrapper.setMessageStatus("sent");
-                            messageWrapper.setGroupId(openChannel.getId());
-                            chatCampDb.dbMessageWrapperDao().insert(messageWrapper);
-                            if (openChannel.getId().equals(channel.getId())) {
-                                Diff<DbMessageWrapper> diff = new Diff<>();
-                                diff.setModel(messageWrapper);
-                                diff.setChange(Diff.CHANGE.INSERT);
-                                diff.setPosition(0);
-                                diffLiveData.postValue(diff);
+//                            if (!message.getUser().getId().equals(ChatCamp.getCurrentUser().getId())) {
+                                DbMessageWrapper messageWrapper = new DbMessageWrapper(message);
+                                messageWrapper.setMessageStatus("sent");
+                                messageWrapper.setGroupId(baseChannel.getId());
+                                if (baseChannel.getId().equals(channel.getId())) {
+                                    if (lastReadTime < message.getInsertedAt() * 1000) {
+                                        markAsReadLiveData.postValue(null);
+                                    }
+                                    for (int i = 0; i < messageWrapperList.size(); ++i) {
+                                        if (messageWrapperList.get(i).getId().equals(messageWrapper.getId())) {
+                                            Diff<DbMessageWrapper> newMessageWrapperDiff = new Diff<>();
+                                            newMessageWrapperDiff.setPosition(i);
+                                            newMessageWrapperDiff.setChange(Diff.CHANGE.UPDATE);
+                                            newMessageWrapperDiff.setModel(messageWrapper);
+                                            diffLiveData.postValue(newMessageWrapperDiff);
+                                            break;
+                                        }
+                                    }
+                                }
+                                chatCampDb.dbMessageWrapperDao().insert(messageWrapper);
+//                            }
+                            final DbGroupWrapper groupWrapper = new DbGroupWrapper((GroupChannel) baseChannel);
+                            groupWrapper.setParticipantState(DbGroupWrapper.ParticipantState.ALL);
+                            Participant participant = ((GroupChannel) baseChannel).getParticipant(ChatCamp.getCurrentUser().getId());
+
+                            if (participant.getStatus().equals("accepted")) {
+                                groupWrapper.setParticipantState(DbGroupWrapper.ParticipantState.ACCEPTED);
+                            } else {
+                                groupWrapper.setParticipantState(DbGroupWrapper.ParticipantState.INVITED);
                             }
+                            chatCampDb.dbGroupWrapperDao().insert(groupWrapper);
                         }
                     }).subscribeOn(Schedulers.io()).subscribe();
                 }
             }
 
-            @Override
-            public void onGroupChannelMessageReceived(final GroupChannel groupChannel, final Message message) {
-                // super.onGroupChannelMessageReceived(groupChannel, message);
-
-                Completable.fromAction(new Action() {
-                    @Override
-                    public void run() throws Exception {
-                        if (!message.getUser().getId().equals(ChatCamp.getCurrentUser().getId())) {
-                            DbMessageWrapper messageWrapper = new DbMessageWrapper(message);
-                            messageWrapper.setMessageStatus("sent");
-                            messageWrapper.setGroupId(groupChannel.getId());
-                            if (groupChannel.getId().equals(channel.getId())) {
-                                if (lastReadTime < message.getInsertedAt() * 1000) {
-                                    markAsReadLiveData.postValue(null);
-                                }
-                                Diff<DbMessageWrapper> diff = new Diff<>();
-                                diff.setModel(messageWrapper);
-                                diff.setChange(Diff.CHANGE.INSERT);
-                                diff.setPosition(0);
-                                diffLiveData.postValue(diff);
-                            }
-                            chatCampDb.dbMessageWrapperDao().insert(messageWrapper);
-                        }
-                        final DbGroupWrapper groupWrapper = new DbGroupWrapper(groupChannel);
-                        groupWrapper.setParticipantState(DbGroupWrapper.ParticipantState.ALL);
-                        Participant participant = groupChannel.getParticipant(ChatCamp.getCurrentUser().getId());
-
-                        if (participant.getStatus().equals("accepted")) {
-                            groupWrapper.setParticipantState(DbGroupWrapper.ParticipantState.ACCEPTED);
-                        } else {
-                            groupWrapper.setParticipantState(DbGroupWrapper.ParticipantState.INVITED);
-                        }
-                        chatCampDb.dbGroupWrapperDao().insert(groupWrapper);
-                    }
-                }).subscribeOn(Schedulers.io()).subscribe();
-
-            }
 
             @Override
-            public void onGroupChannelUpdated(GroupChannel groupChannel) {
-                super.onGroupChannelUpdated(groupChannel);
-            }
-
-            @Override
-            public void onGroupChannelTypingStatusChanged(GroupChannel groupChannel) {
+            public void onTypingStatusChanged(GroupChannel groupChannel) {
                 if (!groupChannel.getId().equals(channel.getId())) {
                     return;
                 }
@@ -293,12 +303,7 @@ public class MessageDataSource {
             }
 
             @Override
-            public void onOpenChannelTypingStatusChanged(OpenChannel groupChannel) {
-                super.onOpenChannelTypingStatusChanged(groupChannel);
-            }
-
-            @Override
-            public void onGroupChannelReadStatusUpdated(final GroupChannel groupChannel) {
+            public void onReadStatusUpdated(final GroupChannel groupChannel) {
                 Map<String, Long> readReceipt = groupChannel.getReadReceipt();
                 if (readReceipt.size() == groupChannel.getParticipants().size()) {
                     Long lastRead = 0L;
@@ -321,10 +326,12 @@ public class MessageDataSource {
 
                         groupWrapper.setParticipantState(DbGroupWrapper.ParticipantState.ALL);
                         Participant participant = groupChannel.getParticipant(ChatCamp.getCurrentUser().getId());
-                        if (participant.getStatus().equals("accepted")) {
-                            groupWrapper.setParticipantState(DbGroupWrapper.ParticipantState.ACCEPTED);
-                        } else {
-                            groupWrapper.setParticipantState(DbGroupWrapper.ParticipantState.INVITED);
+                        if(participant != null) {
+                            if (participant.getStatus().equals("accepted")) {
+                                groupWrapper.setParticipantState(DbGroupWrapper.ParticipantState.ACCEPTED);
+                            } else {
+                                groupWrapper.setParticipantState(DbGroupWrapper.ParticipantState.INVITED);
+                            }
                         }
                         chatCampDb.dbGroupWrapperDao().insert(groupWrapper);
                     }
@@ -333,80 +340,21 @@ public class MessageDataSource {
             }
 
             @Override
-            public void onOpenChannelReadStatusUpdated(OpenChannel groupChannel) {
-                super.onOpenChannelReadStatusUpdated(groupChannel);
+            public void onMessageDeleted(BaseChannel baseChannel, Message message) {
+                super.onMessageDeleted(baseChannel, message);
             }
 
             @Override
-            public void onTotalGroupChannelCount(int count, TotalCountFilterParams totalCountFilterParams) {
-                super.onTotalGroupChannelCount(count, totalCountFilterParams);
+            public void onParticipantMuted(BaseChannel baseChannel, User user) {
+                super.onParticipantMuted(baseChannel, user);
             }
 
             @Override
-            public void onGroupChannelParticipantJoined(GroupChannel groupChannel, Participant participant) {
-                super.onGroupChannelParticipantJoined(groupChannel, participant);
-            }
-
-            @Override
-            public void onGroupChannelParticipantLeft(GroupChannel groupChannel, Participant participant) {
-                super.onGroupChannelParticipantLeft(groupChannel, participant);
-            }
-
-            @Override
-            public void onGroupChannelMessageUpdated(GroupChannel groupChannel, Message message) {
-                super.onGroupChannelMessageUpdated(groupChannel, message);
-            }
-
-            @Override
-            public void onOpenChannelMessageUpdated(OpenChannel groupChannel, Message message) {
-                super.onOpenChannelMessageUpdated(groupChannel, message);
-            }
-
-            @Override
-            public void onGroupChannelParticipantDeclined(GroupChannel groupChannel, Participant participant) {
-                super.onGroupChannelParticipantDeclined(groupChannel, participant);
-            }
-
-            @Override
-            public void onGroupChannelArchived(GroupChannel groupChannel) {
-                super.onGroupChannelArchived(groupChannel);
-            }
-
-            @Override
-            public void onGroupChannelUnarchived(GroupChannel groupChannel) {
-                super.onGroupChannelUnarchived(groupChannel);
-            }
-
-            @Override
-            public void onGroupChannelParticipantBanned(GroupChannel groupChannel, User user) {
-                super.onGroupChannelParticipantBanned(groupChannel, user);
-            }
-
-            @Override
-            public void onGroupChannelParticipantUnbanned(GroupChannel groupChannel, User user) {
-                super.onGroupChannelParticipantUnbanned(groupChannel, user);
-            }
-
-            @Override
-            public void onGroupChannelParticipantMuted(GroupChannel groupChannel, User user) {
-                super.onGroupChannelParticipantMuted(groupChannel, user);
-            }
-
-            @Override
-            public void onGroupChannelParticipantUnmuted(GroupChannel groupChannel, User user) {
-                super.onGroupChannelParticipantUnmuted(groupChannel, user);
-            }
-
-            @Override
-            public void onGroupChannelParticipantInvited(GroupChannel groupChannel, User user) {
-                super.onGroupChannelParticipantInvited(groupChannel, user);
-            }
-
-            @Override
-            public void onGroupChannelHistoryCleared(GroupChannel groupChannel) {
-                super.onGroupChannelHistoryCleared(groupChannel);
+            public void onParticipantUnmuted(BaseChannel baseChannel, User user) {
+                super.onParticipantUnmuted(baseChannel, user);
             }
         });
+
     }
 
     public void loadMessages() {
@@ -427,7 +375,8 @@ public class MessageDataSource {
         } else {
             loadingViewLiveData.postValue(true);
         }
-        previousMessageListQuery.load(20, true, new PreviousMessageListQuery.ResultListener() {
+        previousMessageListQuery.setLimit(20);
+        previousMessageListQuery.load( new PreviousMessageListQuery.ResultListener() {
             @Override
             public void onResult(final List<Message> list, ChatCampException e) {
                 Completable.fromAction(new Action() {
@@ -516,7 +465,13 @@ public class MessageDataSource {
                 messageWrapperDiff.setChange(Diff.CHANGE.INSERT);
                 messageWrapperDiff.setModel(messageWrapper);
                 diffLiveData.postValue(messageWrapperDiff);
-                channel.sendMessage(text, new BaseChannel.SendMessageListener() {
+                MessageParams params = new MessageParams();
+                List<String> customFilter = new ArrayList<>();
+                customFilter.add("rty");
+                customFilter.add("def");
+                params.setCustomFilter(customFilter);
+                params.setText(text);
+                channel.sendMessage(params, new BaseChannel.SendMessageListener() {
                     @Override
                     public void onSent(final Message message, ChatCampException e) {
                         Completable.fromAction(new Action() {

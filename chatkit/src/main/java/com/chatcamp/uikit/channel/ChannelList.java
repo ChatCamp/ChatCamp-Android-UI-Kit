@@ -67,15 +67,15 @@ public class ChannelList extends RecyclerView implements RecyclerScrollMoreListe
         init();
     }
 
-    public void setChannelType(BaseChannel.ChannelType channelType, GroupChannelListQuery.ParticipantState participantState) {
+    public void setChannelType(BaseChannel.ChannelType channelType, GroupChannelListQuery.GroupChannelListQueryParticipantStateFilter participantState) {
         setChannelType(channelType, participantState, null);
     }
 
-    public void setChannelType(BaseChannel.ChannelType channelType, GroupChannelListQuery.ParticipantState participantState, ChannelAdapter.ChannelComparator comparator) {
+    public void setChannelType(BaseChannel.ChannelType channelType, GroupChannelListQuery.GroupChannelListQueryParticipantStateFilter participantState, ChannelAdapter.ChannelComparator comparator) {
         setChannelType(channelType, participantState, null, comparator);
     }
 
-    public void setChannelType(BaseChannel.ChannelType channelType, GroupChannelListQuery.ParticipantState participantState,
+    public void setChannelType(BaseChannel.ChannelType channelType, GroupChannelListQuery.GroupChannelListQueryParticipantStateFilter participantState,
                                List<String> customFilter, ChannelAdapter.ChannelComparator comparator) {
 //        if(recyclerScrollMoreListener != null) {
 //            recyclerScrollMoreListener.resetLoading();
@@ -86,9 +86,9 @@ public class ChannelList extends RecyclerView implements RecyclerScrollMoreListe
         }
 
         DbGroupWrapper.ParticipantState state = DbGroupWrapper.ParticipantState.ALL;
-        if (participantState == GroupChannelListQuery.ParticipantState.ACCEPTED) {
+        if (participantState == GroupChannelListQuery.GroupChannelListQueryParticipantStateFilter.PARTICIPANT_STATE_ACCEPTED) {
             state = DbGroupWrapper.ParticipantState.ACCEPTED;
-        } else if (participantState == GroupChannelListQuery.ParticipantState.INVITED) {
+        } else if (participantState == GroupChannelListQuery.GroupChannelListQueryParticipantStateFilter.PARTICIPANT_STATE_INVITED) {
             state = DbGroupWrapper.ParticipantState.INVITED;
         }
         channelListViewModel.setChannelType(type, state, customFilter, comparator);

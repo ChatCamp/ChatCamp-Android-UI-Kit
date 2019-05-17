@@ -30,8 +30,10 @@ public class DbGroupWrapper extends DbBaseChannelWrapper {
         this.participants = groupChannel.getParticipants();
         this.participantsCount = groupChannel.getParticipantsCount();
         this.unreadMessageCount = groupChannel.getUnreadMessageCount();
-        this.lastMessage = new DbMessageWrapper(groupChannel.getLastMessage());
-        this.lastMessage.setGroupId(groupChannel.getId());
+        if(groupChannel.getLastMessage() != null) {
+            this.lastMessage = new DbMessageWrapper(groupChannel.getLastMessage());
+            this.lastMessage.setGroupId(groupChannel.getId());
+        }
         this.isDistinct = groupChannel.isDistinct();
         this.readReceipt = groupChannel.getReadReceipt();
         this.channelType = ChannelType.GROUP_CHANNEL;

@@ -1,7 +1,6 @@
 package com.chatcamp.uikit.database;
 
 import android.arch.persistence.room.ColumnInfo;
-import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
@@ -21,7 +20,7 @@ public class DbUserWrapper {
         displayName = user.getDisplayName();
         avatarUrl = user.getAvatarUrl();
         avatarUploadUrl = user.getAvatarUploadUrl();
-        isOnline = user.isOnline();
+        isOnline = user.ifOnline();
         lastSeen = user.getLastSeen();
         metadata = user.getMetadata();
     }

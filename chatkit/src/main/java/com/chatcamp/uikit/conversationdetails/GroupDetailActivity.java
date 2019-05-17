@@ -27,6 +27,7 @@ import java.util.List;
 import io.chatcamp.sdk.BaseChannel;
 import io.chatcamp.sdk.ChatCampException;
 import io.chatcamp.sdk.GroupChannel;
+import io.chatcamp.sdk.GroupChannelParams;
 import io.chatcamp.sdk.OpenChannel;
 import io.chatcamp.sdk.Participant;
 
@@ -142,7 +143,9 @@ public class GroupDetailActivity extends AppCompatActivity implements GroupDetai
                             if(TextUtils.isEmpty(input.getText())) {
                                 input.setError("Group name could not be empty");
                             } else {
-                                groupChannelGlobal.update(input.getText().toString(), null, null, new BaseChannel.UpdateListener() {
+                                GroupChannelParams params = new GroupChannelParams();
+                                params.setName(input.getText().toString());
+                                groupChannelGlobal.update(params, new BaseChannel.UpdateListener() {
                                     @Override
                                     public void onResult(BaseChannel baseChannel, ChatCampException e) {
                                         if(baseChannel instanceof GroupChannel) {

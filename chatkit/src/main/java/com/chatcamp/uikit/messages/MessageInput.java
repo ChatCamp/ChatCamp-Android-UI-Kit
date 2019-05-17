@@ -140,7 +140,7 @@ public class MessageInput extends RelativeLayout
                         for (Participant participant : participants) {
                             if (!participant.getId().equals(ChatCamp.getCurrentUser().getId())) {
                                 otherParticipant = participant;
-                                isBlocked = otherParticipant.isBlockedByMe();
+                                isBlocked = otherParticipant.ifBlockedByMe();
                             }
                         }
                     }

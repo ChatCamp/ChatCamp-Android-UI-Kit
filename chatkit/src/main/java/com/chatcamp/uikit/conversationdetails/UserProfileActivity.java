@@ -100,7 +100,7 @@ public class UserProfileActivity extends AppCompatActivity {
     private void populateUi(GroupChannel groupChannel,  String participantId) {
         Participant user = groupChannel.getParticipant(participantId);
         if (user != null) {
-            isBlocked = user.isBlockedByMe();
+            isBlocked = user.ifBlockedByMe();
             if(isBlocked) {
                 blockTv.setText("UnBlock");
             } else {
@@ -110,7 +110,7 @@ public class UserProfileActivity extends AppCompatActivity {
             Picasso.with(UserProfileActivity.this).load(user.getAvatarUrl())
                     .placeholder(R.drawable.icon_default_contact)
                     .error(R.drawable.icon_default_contact).into(toolbarIv);
-            if (user.isOnline()) {
+            if (user.ifOnline()) {
                 onlineIv.setVisibility(View.VISIBLE);
                 lastSeenTv.setVisibility(View.GONE);
                 onlineStatusTv.setText("Online");

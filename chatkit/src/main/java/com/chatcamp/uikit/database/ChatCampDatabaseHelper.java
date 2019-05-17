@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
 import android.provider.BaseColumns;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import org.json.JSONArray;
@@ -30,8 +31,21 @@ import static com.chatcamp.uikit.database.ChatCampDatabaseContract.DATABASE_VERS
  */
 
 public class ChatCampDatabaseHelper extends SQLiteOpenHelper {
+    public ChatCampDatabaseHelper(@Nullable Context context, @Nullable String name, @Nullable SQLiteDatabase.CursorFactory factory, int version) {
+        super(context, name, factory, version);
+    }
 
-    public ChatCampDatabaseHelper(Context context) {
+    @Override
+    public void onCreate(SQLiteDatabase sqLiteDatabase) {
+
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
+
+    }
+
+   /* public ChatCampDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
@@ -624,5 +638,5 @@ public class ChatCampDatabaseHelper extends SQLiteOpenHelper {
                 getGroupChannelListener.onGetGroupChannel(groupChannel);
             }
         }
-    }
+    }*/
 }

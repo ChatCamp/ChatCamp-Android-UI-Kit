@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import io.chatcamp.sdk.BaseChannel;
 import io.chatcamp.sdk.ChatCamp;
 import io.chatcamp.sdk.ChatCampException;
 import io.chatcamp.sdk.GroupChannel;
@@ -19,6 +20,8 @@ import io.chatcamp.sdk.Message;
 import io.chatcamp.sdk.OpenChannel;
 import io.chatcamp.sdk.OpenChannelListQuery;
 import io.chatcamp.sdk.Participant;
+import io.chatcamp.sdk.TotalCountFilterParams;
+import io.chatcamp.sdk.User;
 import io.reactivex.Completable;
 import io.reactivex.functions.Action;
 import io.reactivex.schedulers.Schedulers;
@@ -86,49 +89,96 @@ public class ChannelDataSource {
 
     private void addChannelListener() {
         ChatCamp.addChannelListener("channel_data_source" + channelType.toString() + participantState.toString(), new ChatCamp.ChannelListener() {
-            @Override
-            public void onOpenChannelMessageReceived(OpenChannel openChannel, Message message) {
 
+            @Override
+            public void onMessageReceived(final BaseChannel baseChannel, final Message message) {
+                if(baseChannel.getType() == BaseChannel.ChannelType.GROUP) {
+                    final GroupChannel groupChannel = (GroupChannel)baseChannel ;
+                    Completable.fromAction(new Action() {
+                        @Override
+                        public void run() throws Exception {
+                            if (channelType == null) {
+                                return;
+                            }
+                            String status = groupChannel.getParticipant(ChatCamp.getCurrentUser().getId()).getStatus();
+                            DbGroupWrapper.ParticipantState groupParticipantState;
+                            if (status.equalsIgnoreCase("accepted")) {
+                                groupParticipantState = DbGroupWrapper.ParticipantState.ACCEPTED;
+                            } else {
+                                groupParticipantState = DbGroupWrapper.ParticipantState.INVITED;
+                            }
+                            if (channelType == DbBaseChannelWrapper.ChannelType.GROUP_CHANNEL
+                                    && participantState == DbGroupWrapper.ParticipantState.ALL || groupParticipantState == participantState) {
+                                DbGroupWrapper groupWrapper = new DbGroupWrapper(groupChannel);
+                                groupWrapper.setChannelType(DbBaseChannelWrapper.ChannelType.GROUP_CHANNEL);
+                                groupWrapper.setParticipantState(DbGroupWrapper.ParticipantState.ALL);
+                                Participant participant = groupChannel.getParticipant(ChatCamp.getCurrentUser().getId());
+                                if (participant.getStatus().equals("accepted")) {
+                                    groupWrapper.setParticipantState(DbGroupWrapper.ParticipantState.ACCEPTED);
+                                } else {
+                                    groupWrapper.setParticipantState(DbGroupWrapper.ParticipantState.INVITED);
+                                }
+
+                                updateGroupLiveData.postValue(groupWrapper);
+                                chatCampDb.dbGroupWrapperDao().insert(groupWrapper);
+                                DbMessageWrapper messageWrapper = new DbMessageWrapper(message);
+                                messageWrapper.setGroupId(groupChannel.getId());
+                                messageWrapper.setMessageStatus("sent");
+                                chatCampDb.dbMessageWrapperDao().insert(messageWrapper);
+                            }
+                        }
+                    }).subscribeOn(Schedulers.io()).subscribe();
+                }
             }
 
             @Override
-            public void onGroupChannelMessageReceived(final GroupChannel groupChannel, final Message message) {
+            public void onParticipantUnmuted(BaseChannel baseChannel, User user) {
+                super.onParticipantUnmuted(baseChannel, user);
+            }
 
-                Completable.fromAction(new Action() {
-                    @Override
-                    public void run() throws Exception {
-                        if (channelType == null) {
-                            return;
-                        }
-                        String status = groupChannel.getParticipant(ChatCamp.getCurrentUser().getId()).getStatus();
-                        DbGroupWrapper.ParticipantState groupParticipantState;
-                        if (status.equalsIgnoreCase("accepted")) {
-                            groupParticipantState = DbGroupWrapper.ParticipantState.ACCEPTED;
-                        } else {
-                            groupParticipantState = DbGroupWrapper.ParticipantState.INVITED;
-                        }
-                        if (channelType == DbBaseChannelWrapper.ChannelType.GROUP_CHANNEL
-                                && participantState == DbGroupWrapper.ParticipantState.ALL || groupParticipantState == participantState) {
-                            DbGroupWrapper groupWrapper = new DbGroupWrapper(groupChannel);
-                            groupWrapper.setChannelType(DbBaseChannelWrapper.ChannelType.GROUP_CHANNEL);
-                            groupWrapper.setParticipantState(DbGroupWrapper.ParticipantState.ALL);
-                            Participant participant = groupChannel.getParticipant(ChatCamp.getCurrentUser().getId());
-                            if (participant.getStatus().equals("accepted")) {
-                                groupWrapper.setParticipantState(DbGroupWrapper.ParticipantState.ACCEPTED);
-                            } else {
-                                groupWrapper.setParticipantState(DbGroupWrapper.ParticipantState.INVITED);
-                            }
+            @Override
+            public void onParticipantBanned(BaseChannel baseChannel, User user) {
+                super.onParticipantBanned(baseChannel, user);
+            }
 
-                            updateGroupLiveData.postValue(groupWrapper);
-                            chatCampDb.dbGroupWrapperDao().insert(groupWrapper);
-                            DbMessageWrapper messageWrapper = new DbMessageWrapper(message);
-                            messageWrapper.setGroupId(groupChannel.getId());
-                            messageWrapper.setMessageStatus("sent");
-                            chatCampDb.dbMessageWrapperDao().insert(messageWrapper);
-                        }
-                    }
-                }).subscribeOn(Schedulers.io()).subscribe();
+            @Override
+            public void onParticipantUnbanned(BaseChannel baseChannel, User user) {
+                super.onParticipantUnbanned(baseChannel, user);
+            }
 
+            @Override
+            public void onTotalChannelCount(int count, TotalCountFilterParams params) {
+                super.onTotalChannelCount(count, params);
+            }
+
+            @Override
+            public void onChannelDeleted(String channelId) {
+                super.onChannelDeleted(channelId);
+            }
+
+            @Override
+            public void onArchived(GroupChannel groupChannel) {
+                super.onArchived(groupChannel);
+            }
+
+            @Override
+            public void onUnarchived(GroupChannel groupChannel) {
+                super.onUnarchived(groupChannel);
+            }
+
+            @Override
+            public void onMessageUpdated(BaseChannel baseChannel, Message message) {
+                super.onMessageUpdated(baseChannel, message);
+            }
+
+            @Override
+            public void onChannelUpdated(BaseChannel baseChannel) {
+                super.onChannelUpdated(baseChannel);
+            }
+
+            @Override
+            public void onHistoryCleared(BaseChannel baseChannel) {
+                super.onHistoryCleared(baseChannel);
             }
         });
     }
@@ -204,13 +254,14 @@ public class ChannelDataSource {
                         // TODO check custom filters
 
                         groupChannelListQuery = GroupChannel.createGroupChannelListQuery();
-                        GroupChannelListQuery.ParticipantState groupParticipantState = GroupChannelListQuery.ParticipantState.ALL;
+                        GroupChannelListQuery.GroupChannelListQueryParticipantStateFilter groupParticipantState
+                                = GroupChannelListQuery.GroupChannelListQueryParticipantStateFilter.PARTICIPANT_STATE_ALL;
                         if (participantState == DbGroupWrapper.ParticipantState.INVITED) {
-                            groupParticipantState = GroupChannelListQuery.ParticipantState.INVITED;
+                            groupParticipantState = GroupChannelListQuery.GroupChannelListQueryParticipantStateFilter.PARTICIPANT_STATE_INVITED;
                         } else if (participantState == DbGroupWrapper.ParticipantState.ACCEPTED) {
-                            groupParticipantState = GroupChannelListQuery.ParticipantState.ACCEPTED;
+                            groupParticipantState = GroupChannelListQuery.GroupChannelListQueryParticipantStateFilter.PARTICIPANT_STATE_ACCEPTED;
                         }
-                        groupChannelListQuery.setParticipantState(groupParticipantState);
+                        groupChannelListQuery.setParticipantStateFilter(groupParticipantState);
                         if (customFilter != null) {
                             groupChannelListQuery.setCustomFilter(customFilter);
                         }
@@ -232,10 +283,12 @@ public class ChannelDataSource {
                                         DbGroupWrapper groupWrapper = new DbGroupWrapper(groupChannelList.get(i));
                                         groupWrapper.setParticipantState(participantState);
                                         Participant participant = groupChannelList.get(i).getParticipant(ChatCamp.getCurrentUser().getId());
-                                        if (participant.getStatus().equals("accepted")) {
-                                            groupWrapper.setParticipantState(DbGroupWrapper.ParticipantState.ACCEPTED);
-                                        } else {
-                                            groupWrapper.setParticipantState(DbGroupWrapper.ParticipantState.INVITED);
+                                        if(participant != null) {
+                                            if (participant.getStatus().equals("accepted")) {
+                                                groupWrapper.setParticipantState(DbGroupWrapper.ParticipantState.ACCEPTED);
+                                            } else {
+                                                groupWrapper.setParticipantState(DbGroupWrapper.ParticipantState.INVITED);
+                                            }
                                         }
                                         for (DbGroupWrapper dirtyGroup : dirtyGroups) {
                                             if (dirtyGroup.getId().equals(groupWrapper.getId())

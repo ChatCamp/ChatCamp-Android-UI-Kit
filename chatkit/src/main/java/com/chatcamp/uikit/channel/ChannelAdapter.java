@@ -15,7 +15,6 @@ import android.widget.TextView;
 import com.chatcamp.uikit.R;
 import com.chatcamp.uikit.commons.ImageLoader;
 import com.chatcamp.uikit.customview.AvatarView;
-import com.chatcamp.uikit.database.ChatCampDatabaseHelper;
 import com.chatcamp.uikit.database.DbBaseChannelWrapper;
 import com.chatcamp.uikit.database.DbGroupWrapper;
 import com.chatcamp.uikit.database.DbMessageWrapper;
@@ -62,16 +61,13 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
     private Context context;
     private ChannelListStyle channelListStyle;
     private ImageLoader imageLoader;
-    private ChatCampDatabaseHelper chatCampDatabaseHelper;
     private TimeFormat timeFormat;
-    private GroupChannelListQuery.ParticipantState participantState;
     private BaseChannel.ChannelType channelType;
     private List<String> customFilter;
 
     public ChannelAdapter(Context context) {
         dataset = new ArrayList<>();
         this.context = context;
-        chatCampDatabaseHelper = new ChatCampDatabaseHelper(context);
         timeFormat = new DefaultTimeFormat();
 
     }
@@ -104,7 +100,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
             }
         }
         if (!isListUpdated) {
-             dataset.add(0, dbGroupWrapper);
+            dataset.add(0, dbGroupWrapper);
             notifyItemInserted(0);
         }
         if (recyclerView != null && recyclerView.getLayoutManager() != null) {
@@ -122,20 +118,6 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
 //
 //    }
 
-    private void addChannelListener() {
-        ChatCamp.addChannelListener(CHANNEL_LISTENER, new ChatCamp.ChannelListener() {
-            @Override
-            public void onGroupChannelMessageReceived(GroupChannel groupChannel, Message message) {
-                if (channelType == null) {
-                    return;
-                }
-                if (channelType == BaseChannel.ChannelType.GROUP) {
-
-                }
-            }
-
-        });
-    }
 
     private void removeChannelListener() {
         ChatCamp.removeChannelListener(CHANNEL_LISTENER);
