@@ -26,6 +26,7 @@ import android.widget.ProgressBar;
 import android.widget.SeekBar;
 
 import com.chatcamp.uikit.R;
+import com.chatcamp.uikit.database.DbMessageWrapper;
 import com.chatcamp.uikit.utils.DownloadFileListener;
 import com.chatcamp.uikit.utils.FileUtils;
 import com.chatcamp.uikit.utils.Utils;
@@ -67,7 +68,7 @@ public class VoiceMessageFactory extends MessageFactory<VoiceMessageFactory.Voic
     }
 
     @Override
-    public boolean isBindable(Message message) {
+    public boolean isBindable(DbMessageWrapper message) {
         if (message.getType().equals("attachment")) {
             if (message.getAttachment().getType().contains("audio")) {
                 return true;
@@ -100,7 +101,7 @@ public class VoiceMessageFactory extends MessageFactory<VoiceMessageFactory.Voic
     }
 
     @Override
-    public void bindMessageHolder(final VoiceMessageHolder messageHolder, final Message message) {
+    public void bindMessageHolder(final VoiceMessageHolder messageHolder, final DbMessageWrapper message) {
         final Context context = Utils.getContext(objectWeakReference.get());
         if (context == null) {
             messageHolder.downloadIcon.setVisibility(View.INVISIBLE);
@@ -220,15 +221,15 @@ public class VoiceMessageFactory extends MessageFactory<VoiceMessageFactory.Voic
                 }
 
 
-//                if (v.getTag() != null && v.getTag() instanceof Message) {
-//                    if (!FileUtils.fileExists(context, message.getAttachment().getUrl(), Environment.DIRECTORY_MOVIES)) {
-//                        messageHolder.progressBar.setVisibility(View.VISIBLE);
-//                        messageHolder.progressBar.setProgress(0);
-//                    } else {
-//                        messageHolder.progressBar.setVisibility(View.INVISIBLE);
-//                    }
-//                    onPlayClicked(v, messageHolder.progressBar, messageHolder.downloadIcon, messageHolder.seekBar);
-//                }
+                if (v.getTag() != null && v.getTag() instanceof DbMessageWrapper) {
+                    if (!FileUtils.fileExists(context, message.getAttachment().getUrl(), Environment.DIRECTORY_MOVIES)) {
+                        messageHolder.progressBar.setVisibility(View.VISIBLE);
+                        messageHolder.progressBar.setProgress(0);
+                    } else {
+                        messageHolder.progressBar.setVisibility(View.INVISIBLE);
+                    }
+                    onPlayClicked(v, messageHolder.progressBar, messageHolder.downloadIcon, messageHolder.seekBar);
+                }
             }
         });
 

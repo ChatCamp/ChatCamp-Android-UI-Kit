@@ -1,15 +1,10 @@
 package com.chatcamp.uikit.channel;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,27 +15,22 @@ import android.widget.TextView;
 import com.chatcamp.uikit.R;
 import com.chatcamp.uikit.commons.ImageLoader;
 import com.chatcamp.uikit.customview.AvatarView;
-import com.chatcamp.uikit.database.ChatCampDatabaseHelper;
-import com.chatcamp.uikit.messages.RecyclerScrollMoreListener;
-import com.chatcamp.uikit.utils.CircleTransform;
+import com.chatcamp.uikit.database.DbBaseChannelWrapper;
+import com.chatcamp.uikit.database.DbGroupWrapper;
+import com.chatcamp.uikit.database.DbMessageWrapper;
 import com.chatcamp.uikit.utils.DefaultTimeFormat;
 import com.chatcamp.uikit.utils.TextViewFont;
 import com.chatcamp.uikit.utils.TimeFormat;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import io.chatcamp.sdk.BaseChannel;
 import io.chatcamp.sdk.ChatCamp;
-import io.chatcamp.sdk.ChatCampException;
 import io.chatcamp.sdk.GroupChannel;
 import io.chatcamp.sdk.GroupChannelListQuery;
 import io.chatcamp.sdk.Message;
-import io.chatcamp.sdk.OpenChannel;
 import io.chatcamp.sdk.OpenChannelListQuery;
 import io.chatcamp.sdk.Participant;
 
@@ -50,7 +40,7 @@ import static android.view.View.VISIBLE;
  * Created by shubhamdhabhai on 18/05/18.
  */
 
-public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelViewHolder> implements RecyclerScrollMoreListener.OnLoadMoreListener {
+public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelViewHolder> {
 
     private static final String CHANNEL_LISTENER = "channel_list_channel_listener";
     private static final String KEY_PRODUCT_NAME = "product_name";
@@ -59,37 +49,25 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
     private boolean loadingFirstTime = true;
     private OpenChannelListQuery openChannelListQuery;
     private ChannelList.OnChannelsLoadedListener onChannelsLoadedListener;
-    private RecyclerScrollMoreListener recyclerScrollMoreListener;
     private RecyclerView recyclerView;
-    private View loadingView;
 
-    public void setRecyclerScrollMoreListener(RecyclerScrollMoreListener recyclerScrollMoreListener) {
-        this.recyclerScrollMoreListener = recyclerScrollMoreListener;
-    }
-
-    public void setLoadingView(View view) {
-        loadingView = view;
-    }
 
     public interface ChannelClickedListener {
-        void onClick(BaseChannel baseChannel);
+        void onClick(DbBaseChannelWrapper baseChannel);
     }
 
-    private List<BaseChannel> dataset;
+    private List<DbBaseChannelWrapper> dataset;
     private ChannelClickedListener channelClickedListener;
     private Context context;
     private ChannelListStyle channelListStyle;
     private ImageLoader imageLoader;
-    private ChatCampDatabaseHelper chatCampDatabaseHelper;
     private TimeFormat timeFormat;
-    private GroupChannelListQuery.ParticipantState participantState;
     private BaseChannel.ChannelType channelType;
     private List<String> customFilter;
 
     public ChannelAdapter(Context context) {
         dataset = new ArrayList<>();
         this.context = context;
-        chatCampDatabaseHelper = new ChatCampDatabaseHelper(context);
         timeFormat = new DefaultTimeFormat();
 
     }
@@ -99,8 +77,8 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
         notifyDataSetChanged();
     }
 
-    public void addAll(List<BaseChannel> data) {
-        dataset = data;
+    public void addAll(List<DbBaseChannelWrapper> data) {
+        dataset.addAll(data);
         notifyDataSetChanged();
     }
 
@@ -110,48 +88,36 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
         super.onAttachedToRecyclerView(recyclerView);
     }
 
-    public void onWindowVisibilityChanged(int visibility) {
-        if (visibility == VISIBLE) {
-            addChannelListener();
-        } else {
-            removeChannelListener();
-        }
-
-    }
-
-    private void addChannelListener() {
-        ChatCamp.addChannelListener(CHANNEL_LISTENER, new ChatCamp.ChannelListener() {
-            @Override
-            public void onGroupChannelMessageReceived(GroupChannel groupChannel, Message message) {
-                if (channelType == null) {
-                    return;
-                }
-                if (channelType == BaseChannel.ChannelType.GROUP) {
-                    boolean isListUpdated = false;
-                    for (int i = 0; i < dataset.size(); ++i) {
-                        if (dataset.get(i).getId().equals(groupChannel.getId())) {
-                            dataset.remove(i);
-                            dataset.add(0, groupChannel);
-                            notifyItemRemoved(i);
-                            notifyItemInserted(0);
-                            isListUpdated = true;
-                            chatCampDatabaseHelper.addGroupChannel(groupChannel);
-                        }
-                    }
-                    if(!isListUpdated) {
-                        dataset.add(0, groupChannel);
-                        notifyItemInserted(0);
-                        chatCampDatabaseHelper.addGroupChannel(groupChannel);
-                    }
-                    if(recyclerView != null && recyclerView.getLayoutManager() != null) {
-                        RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
-                        layoutManager.scrollToPosition(0);
-                    }
-                }
+    public void updateGroup(DbGroupWrapper dbGroupWrapper) {
+        boolean isListUpdated = false;
+        for (int i = 0; i < dataset.size(); ++i) {
+            if (dataset.get(i).getId().equals(dbGroupWrapper.getId())) {
+                dataset.remove(i);
+                dataset.add(0, dbGroupWrapper);
+                notifyItemRemoved(i);
+                notifyItemInserted(0);
+                isListUpdated = true;
             }
-
-        });
+        }
+        if (!isListUpdated) {
+            dataset.add(0, dbGroupWrapper);
+            notifyItemInserted(0);
+        }
+        if (recyclerView != null && recyclerView.getLayoutManager() != null) {
+            RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+            layoutManager.scrollToPosition(0);
+        }
     }
+
+//    public void onWindowVisibilityChanged(int visibility) {
+//        if (visibility == VISIBLE) {
+//            addChannelListener();
+//        } else {
+//            removeChannelListener();
+//        }
+//
+//    }
+
 
     private void removeChannelListener() {
         ChatCamp.removeChannelListener(CHANNEL_LISTENER);
@@ -165,108 +131,6 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
         this.timeFormat = timeFormat;
     }
 
-    public void setChannelType(final BaseChannel.ChannelType channelType, final GroupChannelListQuery.ParticipantState participantState,
-                               List<String> customFilter, ChannelComparator comparator) {
-        this.participantState = participantState;
-        this.channelType = channelType;
-        this.comparator = comparator;
-        this.customFilter = customFilter;
-        loadingFirstTime = true;
-        if (recyclerScrollMoreListener != null) {
-            recyclerScrollMoreListener.stopLoading();
-        }
-        loadChannels();
-    }
-
-    private void loadChannels() {
-        if (comparator == null) {
-            comparator = new LastMessageChannelComparator();
-        }
-        if (channelType == BaseChannel.ChannelType.OPEN) {
-            if (openChannelListQuery == null || loadingFirstTime) {
-                openChannelListQuery = OpenChannel.createOpenChannelListQuery();
-            }
-            openChannelListQuery.load(new OpenChannelListQuery.ResultHandler() {
-                @Override
-                public void onResult(List<OpenChannel> openChannelList, ChatCampException e) {
-//                    dataset.clear();
-                    boolean channelLoaded = false;
-                    if(loadingFirstTime) {
-                        loadingFirstTime = false;
-
-                        if (recyclerScrollMoreListener != null) {
-                            recyclerScrollMoreListener.resetLoading();
-                        }
-                        channelLoaded = true;
-                    }
-                    dataset.addAll(openChannelList);
-                    if (onChannelsLoadedListener != null && channelLoaded) {
-                        onChannelsLoadedListener.onChannelsLoaded();
-                    }
-                    if(loadingView != null) {
-                        loadingView.setVisibility(View.GONE);
-                    }
-                    notifyDataSetChanged();
-                }
-            });
-        } else if (channelType == BaseChannel.ChannelType.GROUP) {
-            if (groupChannelListQuery == null || loadingFirstTime) {
-                Log.e("Group Channel", "Loading for the first time from database");
-                chatCampDatabaseHelper.getGroupChannels(participantState, customFilter, new ChatCampDatabaseHelper.GetGroupChannelsListener() {
-                    @Override
-                    public void onGetGroupChannels(List<GroupChannel> groupChannels) {
-                        if (loadingFirstTime) {
-                            Collections.sort(groupChannels, comparator);
-                            dataset.clear();
-                            dataset.addAll(groupChannels);
-                            if (groupChannels.size() > 0 && onChannelsLoadedListener != null) {
-                                onChannelsLoadedListener.onChannelsLoaded();
-                            }
-                            notifyDataSetChanged();
-                        }
-                    }
-                });
-                groupChannelListQuery = GroupChannel.createGroupChannelListQuery();
-                groupChannelListQuery.setParticipantState(participantState);
-                if (customFilter != null) {
-                    groupChannelListQuery.setCustomFilter(customFilter);
-                }
-            }
-            Log.e("Group Channel", "querying group from api");
-            groupChannelListQuery.load(new GroupChannelListQuery.ResultHandler() {
-                @Override
-                public void onResult(List<GroupChannel> groupChannelList, ChatCampException e) {
-                    boolean channelLoaded = false;
-                    if (loadingFirstTime) {
-                        loadingFirstTime = false;
-                        if (recyclerScrollMoreListener != null) {
-                            recyclerScrollMoreListener.resetLoading();
-                        }
-                        Log.e("Group Channel", "result from first api call");
-                        if ((dataset.size() == 0 || groupChannelList.size() == 0) && onChannelsLoadedListener != null) {
-                            channelLoaded = true;
-                        }
-                        dataset.clear();
-                        chatCampDatabaseHelper.addGroupChannels(groupChannelList, participantState, customFilter);
-                    } else {
-                        Log.e("Group Channel", "result from subsequent api call");
-                    }
-                    if (comparator != null) {
-                        Collections.sort(groupChannelList, comparator);
-                    }
-                    dataset.addAll(groupChannelList);
-                    if (channelLoaded) {
-                        onChannelsLoadedListener.onChannelsLoaded();
-                    }
-
-                    if(loadingView != null) {
-                        loadingView.setVisibility(View.GONE);
-                    }
-                    notifyDataSetChanged();
-                }
-            });
-        }
-    }
 
     public void setStyle(ChannelListStyle channelListStyle) {
         this.channelListStyle = channelListStyle;
@@ -298,14 +162,14 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
         nameText.setTextColor(channelListStyle.getNameTextColor());
         nameText.setTextSize(TypedValue.COMPLEX_UNIT_PX, channelListStyle.getNameTextSize());
         nameText.setTypeface(nameText.getTypeface(), channelListStyle.getNameTextStyle());
-        if(!TextUtils.isEmpty(channelListStyle.getUsernameCustomFont())) {
+        if (!TextUtils.isEmpty(channelListStyle.getUsernameCustomFont())) {
             nameText.setCustomFont(channelListStyle.getUsernameCustomFont());
         }
 
         timeText.setTextSize(TypedValue.COMPLEX_UNIT_PX, channelListStyle.getLastSeenTextSize());
         timeText.setTextColor(channelListStyle.getLastSeenTextColor());
         timeText.setTypeface(timeText.getTypeface(), channelListStyle.getLastSeenTextStyle());
-        if(!TextUtils.isEmpty(channelListStyle.getCustomFont())) {
+        if (!TextUtils.isEmpty(channelListStyle.getCustomFont())) {
             timeText.setCustomFont(channelListStyle.getCustomFont());
         }
 
@@ -313,7 +177,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
         lastMessageText.setTextColor(channelListStyle.getLastMessageTextColor());
         lastMessageText.setTypeface(lastMessageText.getTypeface(), channelListStyle.getLastMessageTextStyle());
 
-        if(!TextUtils.isEmpty(channelListStyle.getCustomFont())) {
+        if (!TextUtils.isEmpty(channelListStyle.getCustomFont())) {
             lastMessageText.setCustomFont(channelListStyle.getCustomFont());
         }
         Drawable unreadMessageTextBackground = unreadMessageText.getBackground();
@@ -325,11 +189,11 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
         unreadMessageText.setTextSize(TypedValue.COMPLEX_UNIT_PX, channelListStyle.getUnreadMessageCountTextSize());
         unreadMessageText.setTextColor(channelListStyle.getUnreadMessageCountTextColor());
         unreadMessageText.setTypeface(unreadMessageText.getTypeface(), channelListStyle.getUnreadMessageCountTextStyle());
-        if(!TextUtils.isEmpty(channelListStyle.getCustomFont())) {
+        if (!TextUtils.isEmpty(channelListStyle.getCustomFont())) {
             unreadMessageText.setCustomFont(channelListStyle.getCustomFont());
         }
 
-        if(!TextUtils.isEmpty(channelListStyle.getCustomFont())) {
+        if (!TextUtils.isEmpty(channelListStyle.getCustomFont())) {
             productName.setCustomFont(channelListStyle.getCustomFont());
         }
 
@@ -368,13 +232,13 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
             channelClickedListener = listener;
         }
 
-        public void bind(BaseChannel baseChannel) {
+        public void bind(DbBaseChannelWrapper baseChannel) {
             itemView.setTag(baseChannel);
             itemView.setOnClickListener(this);
-            if (baseChannel instanceof GroupChannel && ((GroupChannel) baseChannel).getLastMessage() != null) {
-                GroupChannel groupChannel = (GroupChannel) baseChannel;
+            if (baseChannel instanceof DbGroupWrapper && ((DbGroupWrapper) baseChannel).getLastMessage() != null) {
+                DbGroupWrapper groupChannel = (DbGroupWrapper) baseChannel;
                 timeFormat.setTime(timeTv, groupChannel.getLastMessage().getInsertedAt() * 1000);
-                Message message = groupChannel.getLastMessage();
+                DbMessageWrapper message = groupChannel.getLastMessage();
 
                 String lastMessage = "";
                 if (message.getType().equals("attachment")) {
@@ -382,29 +246,29 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
                         lastMessage = "Image";
                     } else if (message.getAttachment().getType().contains("video")) {
                         lastMessage = "Video";
-                    }  else if (message.getAttachment().getType().contains("application") || message.getAttachment().getType().contains("css") ||
+                    } else if (message.getAttachment().getType().contains("application") || message.getAttachment().getType().contains("css") ||
                             message.getAttachment().getType().contains("csv") || message.getAttachment().getType().contains("text")) {
                         lastMessage = "Document";
                     }
-                } else if(message.getType().equals("text")) {
+                } else if (message.getType().equals("text")) {
                     lastMessage = message.getText();
                 } else {
                     lastMessage = "New Message";
                 }
-                lastMessageTv.setText( message.getUser().getDisplayName() + " : " +lastMessage);
+                lastMessageTv.setText(message.getUser().getDisplayName() + " : " + lastMessage);
             } else {
                 lastMessageTv.setText("");
                 timeTv.setText("");
             }
-            if (baseChannel instanceof GroupChannel && ((GroupChannel) baseChannel).getUnreadMessageCount() > 0) {
+            if (baseChannel instanceof DbGroupWrapper && ((DbGroupWrapper) baseChannel).getUnreadMessageCount() > 0) {
                 unreadMessageTv.setVisibility(VISIBLE);
-                unreadMessageTv.setText(String.valueOf(((GroupChannel) baseChannel).getUnreadMessageCount()));
+                unreadMessageTv.setText(String.valueOf(((DbGroupWrapper) baseChannel).getUnreadMessageCount()));
             } else {
                 unreadMessageTv.setVisibility(View.GONE);
             }
-            if (baseChannel instanceof GroupChannel
-                    && ((GroupChannel) baseChannel).getParticipantsCount() == 2 && !channelListStyle.isAlwaysShowChannelName()) {
-                GroupChannel groupChannel = (GroupChannel) baseChannel;
+            if (baseChannel instanceof DbGroupWrapper
+                    && ((DbGroupWrapper) baseChannel).getParticipantsCount() == 2 && !channelListStyle.isAlwaysShowChannelName()) {
+                DbGroupWrapper groupChannel = (DbGroupWrapper) baseChannel;
                 if (groupChannel != null && groupChannel.getParticipants() != null && groupChannel.getParticipants().size() > 0) {
                     List<Participant> participants = groupChannel.getParticipants();
                     for (Participant participant : participants) {
@@ -416,7 +280,7 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
             } else {
                 populateTitle(baseChannel.getAvatarUrl(), baseChannel.getName());
             }
-            if(baseChannel.getMetadata() != null && baseChannel.getMetadata().get(KEY_PRODUCT_NAME) != null &&
+            if (baseChannel.getMetadata() != null && baseChannel.getMetadata().get(KEY_PRODUCT_NAME) != null &&
                     !TextUtils.isEmpty((CharSequence) baseChannel.getMetadata().get(KEY_PRODUCT_NAME))) {
                 productNameTv.setText((CharSequence) baseChannel.getMetadata().get(KEY_PRODUCT_NAME));
                 productNameTv.setVisibility(VISIBLE);
@@ -440,20 +304,20 @@ public class ChannelAdapter extends RecyclerView.Adapter<ChannelAdapter.ChannelV
         @Override
         public void onClick(View view) {
             if (channelClickedListener != null) {
-                channelClickedListener.onClick((BaseChannel) view.getTag()); // call the onClick in the OnItemClickListener
+                channelClickedListener.onClick((DbBaseChannelWrapper) view.getTag()); // call the onClick in the OnItemClickListener
             }
         }
     }
 
-    @Override
-    public void onLoadMore(int page, int total) {
-        if(loadingView != null) {
-            loadingView.setVisibility(VISIBLE);
-        }
-        loadChannels();
-    }
+//    @Override
+//    public void onLoadMore(int page, int total) {
+//        if (loadingView != null) {
+//            loadingView.setVisibility(VISIBLE);
+//        }
+////        loadChannels();
+//    }
 
-    public interface ChannelComparator extends Comparator<GroupChannel> {
+    public interface ChannelComparator extends Comparator<DbGroupWrapper> {
 
     }
 }

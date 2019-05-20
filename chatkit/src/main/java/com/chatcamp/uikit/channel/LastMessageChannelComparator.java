@@ -1,5 +1,7 @@
 package com.chatcamp.uikit.channel;
 
+import com.chatcamp.uikit.database.DbGroupWrapper;
+
 import io.chatcamp.sdk.GroupChannel;
 
 /**
@@ -8,7 +10,7 @@ import io.chatcamp.sdk.GroupChannel;
 
 public class LastMessageChannelComparator implements ChannelAdapter.ChannelComparator {
     @Override
-    public int compare(GroupChannel o1, GroupChannel o2) {
+    public int compare(DbGroupWrapper o1, DbGroupWrapper o2) {
         if(o1.getLastMessage() != null && o2.getLastMessage() != null){
             if (o1.getLastMessage().getInsertedAt() > o2.getLastMessage().getInsertedAt()) {
                 return -1;

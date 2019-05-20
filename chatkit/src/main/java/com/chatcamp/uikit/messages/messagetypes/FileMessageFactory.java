@@ -23,6 +23,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.chatcamp.uikit.R;
+import com.chatcamp.uikit.database.DbMessageWrapper;
 import com.chatcamp.uikit.utils.DownloadFileListener;
 import com.chatcamp.uikit.utils.FileUtils;
 import com.chatcamp.uikit.utils.TextViewFont;
@@ -58,7 +59,7 @@ public class FileMessageFactory<T> extends MessageFactory<FileMessageFactory.Doc
     }
 
     @Override
-    public boolean isBindable(Message message) {
+    public boolean isBindable(DbMessageWrapper message) {
         if (message.getType().equals("attachment")) {
             if (message.getAttachment().getType().contains("application") || message.getAttachment().getType().contains("css") ||
                     message.getAttachment().getType().contains("csv") || message.getAttachment().getType().contains("text")) {
@@ -97,7 +98,7 @@ public class FileMessageFactory<T> extends MessageFactory<FileMessageFactory.Doc
     }
 
     @Override
-    public void bindMessageHolder(final DocumentMessageHolder messageHolder, final Message message) {
+    public void bindMessageHolder(final DocumentMessageHolder messageHolder, final DbMessageWrapper message) {
         messageHolder.view.setTag(message);
         messageHolder.documentName.setText(message.getAttachment().getName());
         Context context = Utils.getContext(objectWeakReference.get());

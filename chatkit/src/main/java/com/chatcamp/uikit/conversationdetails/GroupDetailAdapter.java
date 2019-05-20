@@ -9,7 +9,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.chatcamp.uikit.customview.AvatarView;
-import com.squareup.picasso.Picasso;
 import com.chatcamp.uikit.R;
 
 import java.text.SimpleDateFormat;
@@ -222,7 +221,7 @@ public class GroupDetailAdapter extends RecyclerView.Adapter {
             participantIv.initView(participantView.getParticipant().getAvatarUrl(),
                     participantView.getParticipant().getDisplayName());
             participantTv.setText(participantView.getParticipant().getDisplayName());
-            if (participantView.getParticipant().isOnline()) {
+            if (participantView.getParticipant().ifOnline()) {
                 onlineIv.setVisibility(View.VISIBLE);
                 lastSeenTv.setVisibility(View.GONE);
             } else {

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import com.chatcamp.uikit.database.DbMessageWrapper;
 import com.chatcamp.uikit.messages.MessagesListStyle;
 
 import io.chatcamp.sdk.Message;
@@ -20,11 +21,11 @@ public abstract class MessageFactory<T extends MessageFactory.MessageHolder> {
 
     protected MessagesListStyle messageStyle;
 
-    public abstract boolean isBindable(Message message);
+    public abstract boolean isBindable(DbMessageWrapper message);
 
     public abstract T createMessageHolder(ViewGroup cellView, boolean isMe, LayoutInflater layoutInflater);
 
-    public abstract void bindMessageHolder(T messageHolder, Message message);
+    public abstract void bindMessageHolder(T messageHolder, DbMessageWrapper message);
 
     public void setMessageSpecs(MessageSpecs messageStyle) {
         this.messageSpecs = messageStyle;

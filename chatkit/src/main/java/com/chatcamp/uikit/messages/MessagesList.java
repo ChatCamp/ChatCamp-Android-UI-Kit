@@ -1,8 +1,12 @@
 package com.chatcamp.uikit.messages;
 
+import android.arch.lifecycle.Lifecycle;
+import android.arch.lifecycle.LifecycleOwner;
+import android.arch.lifecycle.LifecycleRegistry;
+import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.content.Intent;
-import android.media.Image;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,22 +16,37 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 
-import com.chatcamp.uikit.channel.ChannelList;
 import com.chatcamp.uikit.commons.ImageLoader;
+import com.chatcamp.uikit.database.DbMessageWrapper;
+import com.chatcamp.uikit.database.Diff;
+import com.chatcamp.uikit.database.MessageDataSource;
+import com.chatcamp.uikit.database.MessageViewModel;
 import com.chatcamp.uikit.messages.messagetypes.MessageFactory;
 import com.chatcamp.uikit.messages.typing.TypingFactory;
 
+import java.util.List;
+
 import io.chatcamp.sdk.BaseChannel;
+import io.chatcamp.sdk.ChatCamp;
 
 /**
  * Component for displaying list of messages
  */
-public class MessagesList extends RecyclerView {
+public class MessagesList extends RecyclerView implements RecyclerScrollMoreListener.OnLoadMoreListener, LifecycleOwner {
     private MessagesListStyle messagesListStyle;
-    private RecyclerScrollMoreListener recyclerScrollMoreListener;
     private BaseChannel channel;
     private MessagesListAdapter adapter;
     private OnMessagesLoadedListener onMessagesLoadedListener;
+    private View loadingView;
+    private MessageViewModel messageModelView;
+    private LifecycleRegistry lifecycleRegistry;
+    private RecyclerScrollMoreListener recyclerScrollMoreListener;
+
+    @NonNull
+    @Override
+    public Lifecycle getLifecycle() {
+        return lifecycleRegistry;
+    }
 
     public interface OnMessagesLoadedListener {
         void onMessagesLoaded();
@@ -51,6 +70,7 @@ public class MessagesList extends RecyclerView {
 
     private void init() {
         adapter = new MessagesListAdapter(getContext());
+        lifecycleRegistry = new LifecycleRegistry(this);
         setAdapter(adapter);
     }
 
@@ -65,11 +85,111 @@ public class MessagesList extends RecyclerView {
     public void setChannel(BaseChannel channel) {
         this.channel = channel;
         adapter.setChannel(channel);
+        messageModelView = new MessageViewModel(getContext(), channel);
+        adapter.setViewModel(messageModelView);
+
+        messageModelView.getInitialMessageListLiveData().observe(this, new Observer<List<DbMessageWrapper>>() {
+            @Override
+            public void onChanged(@Nullable List<DbMessageWrapper> messageWrappers) {
+                adapter.clear();
+                adapter.addAll(messageWrappers);
+                adapter.notifyDataSetChanged();
+                messageModelView.setMessageList(adapter.getMessageList());
+            }
+        });
+
+        messageModelView.getDiffLiveData().observe(this, new Observer<Diff<DbMessageWrapper>>() {
+            @Override
+            public void onChanged(@Nullable Diff<DbMessageWrapper> diff) {
+                Log.e("message ", diff.getPosition() + ": position in message list : " + diff.getChange().toString());
+                if (diff.getChange() == Diff.CHANGE.INSERT) {
+                    adapter.add(diff.getModel());
+                    Log.e("insert message ", diff.getPosition() + ": position in message list");
+                } else if (diff.getChange() == Diff.CHANGE.REMOVE) {
+                    Log.e("remove message ", diff.getPosition() + ": position in message list");
+                    adapter.remove(diff.getPosition());
+                    adapter.add(diff.getModel());
+                } else if (diff.getChange() == Diff.CHANGE.UPDATE) {
+                    adapter.update(diff.getModel(), diff.getPosition());
+                }
+                messageModelView.setMessageList(adapter.getMessageList());
+            }
+        });
+
+        messageModelView.getMessageListLiveData().observe(this, new Observer<List<DbMessageWrapper>>() {
+            @Override
+            public void onChanged(@Nullable List<DbMessageWrapper> messageWrappers) {
+                adapter.addAll(messageWrappers);
+                adapter.notifyDataSetChanged();
+                messageModelView.setMessageList(adapter.getMessageList());
+            }
+        });
+
+        messageModelView.getRecyclerLoadingStateLiveData().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(@Nullable Boolean recyclerLoadingState) {
+                if (recyclerLoadingState) {
+                    recyclerScrollMoreListener.resetLoading();
+                } else {
+                    recyclerScrollMoreListener.stopLoading();
+                }
+            }
+        });
+
+        messageModelView.getMessageLastReadLiveData().observe(this, new Observer<Long>() {
+            @Override
+            public void onChanged(@Nullable Long messageLastRead) {
+                adapter.setLastReadTime(messageLastRead);
+            }
+        });
+
+        messageModelView.getOnMessageLoadedLiveData().observe(this, new Observer() {
+            @Override
+            public void onChanged(@Nullable Object o) {
+                if(onMessagesLoadedListener != null) {
+                    onMessagesLoadedListener.onMessagesLoaded();
+                }
+            }
+        });
+
+        messageModelView.getLoadingViewLiveData().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(@Nullable Boolean aBoolean) {
+                if(aBoolean) {
+                    loadingView.setVisibility(VISIBLE);
+                } else {
+                    loadingView.setVisibility(GONE);
+                }
+            }
+        });
+        messageModelView.loadMessages();
+
+
+        messageModelView.getTypingStatusLiveData().observe(this, new Observer<Diff<MessageDataSource.TypingStatus>>() {
+            @Override
+            public void onChanged(@Nullable Diff<MessageDataSource.TypingStatus> booleanDiff) {
+                adapter.setTypingStatus(booleanDiff);
+            }
+        });
+
+        messageModelView.getNetworkStateMutableLiveData().observe(this, new Observer<ChatCamp.NetworkState>() {
+            @Override
+            public void onChanged(@Nullable ChatCamp.NetworkState networkState) {
+
+            }
+        });
+
+        messageModelView.getMarkAsReadLiveData().observe(this, new Observer() {
+            @Override
+            public void onChanged(@Nullable Object o) {
+                messageModelView.markAsRead();
+            }
+        });
     }
 
     public void setOnMessagesLoadedListener(OnMessagesLoadedListener onMessagesLoadedListener) {
         this.onMessagesLoadedListener = onMessagesLoadedListener;
-        adapter.setOnMesaageLoadedListener(onMessagesLoadedListener);
+       // adapter.setOnMesaageLoadedListener(onMessagesLoadedListener);
     }
 
     public void setAvatarImageLoader(ImageLoader imageLoader) {
@@ -77,7 +197,7 @@ public class MessagesList extends RecyclerView {
     }
 
     public void setLoadingView(View view) {
-        adapter.setLoadingView(view);
+        this.loadingView = view;
     }
 
     /**
@@ -114,10 +234,17 @@ public class MessagesList extends RecyclerView {
         setItemAnimator(itemAnimator);
         setLayoutManager(layoutManager);
         adapter.setMessagesListStyle(messagesListStyle);
-        recyclerScrollMoreListener = new RecyclerScrollMoreListener(layoutManager, adapter);
+        recyclerScrollMoreListener = new RecyclerScrollMoreListener(layoutManager, this);
         addOnScrollListener(recyclerScrollMoreListener);
-        adapter.setRecyclerScrollMoreListener(recyclerScrollMoreListener);
         super.setAdapter(adapter);
+    }
+
+    @Override
+    public void onLoadMore(int page, int total) {
+//        if (loadingView != null) {
+//            loadingView.setVisibility(VISIBLE);
+//        }
+        messageModelView.loadMessages();
     }
 
     @SuppressWarnings("ResourceType")
@@ -142,10 +269,18 @@ public class MessagesList extends RecyclerView {
     }
 
     @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        lifecycleRegistry.markState(Lifecycle.State.STARTED);
+    }
+
+    @Override
     protected void onDetachedFromWindow() {
+        lifecycleRegistry.markState(Lifecycle.State.DESTROYED);
         super.onDetachedFromWindow();
-        if(adapter != null) {
+        if (adapter != null) {
             adapter.onDetachedFromWindow();
         }
     }
+
 }

@@ -12,7 +12,6 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -21,10 +20,8 @@ import com.chatcamp.uikit.commons.ImageLoader;
 import com.chatcamp.uikit.conversationdetails.GroupDetailActivity;
 import com.chatcamp.uikit.conversationdetails.UserProfileActivity;
 import com.chatcamp.uikit.customview.AvatarView;
-import com.chatcamp.uikit.utils.CircleTransform;
 import com.chatcamp.uikit.utils.HeaderViewClickListener;
 import com.chatcamp.uikit.utils.TextViewFont;
-import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -191,7 +188,7 @@ public class HeaderView extends LinearLayout {
                 for (Participant participant : participants) {
                     if (!participant.getId().equals(ChatCamp.getCurrentUser().getId())) {
                         otherParticipant = participant;
-                        isBlocked = otherParticipant.isBlockedByMe();
+                        isBlocked = otherParticipant.ifBlockedByMe();
                     }
                 }
             }
@@ -216,7 +213,7 @@ public class HeaderView extends LinearLayout {
                     for (Participant participant : participants) {
                         if (!participant.getId().equals(ChatCamp.getCurrentUser().getId())) {
                             otherParticipant = participant;
-                            isBlocked = otherParticipant.isBlockedByMe();
+                            isBlocked = otherParticipant.ifBlockedByMe();
                         }
                     }
                     if (isBlocked) {

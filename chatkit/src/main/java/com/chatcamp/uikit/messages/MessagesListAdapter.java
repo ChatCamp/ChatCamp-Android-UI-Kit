@@ -12,7 +12,6 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -20,30 +19,28 @@ import com.chatcamp.uikit.R;
 import com.chatcamp.uikit.commons.ImageLoader;
 import com.chatcamp.uikit.customview.AvatarView;
 import com.chatcamp.uikit.database.ChatCampDatabaseHelper;
+import com.chatcamp.uikit.database.DbMessageWrapper;
+import com.chatcamp.uikit.database.Diff;
+import com.chatcamp.uikit.database.MessageDataSource;
+import com.chatcamp.uikit.database.MessageViewModel;
 import com.chatcamp.uikit.messages.messagetypes.MessageFactory;
 import com.chatcamp.uikit.messages.messagetypes.VoiceMessageFactory;
 import com.chatcamp.uikit.messages.typing.TypingFactory;
-import com.chatcamp.uikit.utils.CircleTransform;
 import com.chatcamp.uikit.utils.DateFormatter;
 import com.chatcamp.uikit.utils.TextViewFont;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import io.chatcamp.sdk.BaseChannel;
 import io.chatcamp.sdk.ChatCamp;
-import io.chatcamp.sdk.ChatCampException;
 import io.chatcamp.sdk.GroupChannel;
-import io.chatcamp.sdk.Message;
-import io.chatcamp.sdk.OpenChannel;
 import io.chatcamp.sdk.Participant;
 import io.chatcamp.sdk.PreviousMessageListQuery;
-import io.chatcamp.sdk.TotalCountFilterParams;
 
 import static android.view.View.VISIBLE;
 
@@ -52,13 +49,12 @@ import static android.view.View.VISIBLE;
  */
 @SuppressWarnings("WeakerAccess")
 public class MessagesListAdapter
-        extends RecyclerView.Adapter<MessagesListAdapter.ViewHolder>
-        implements RecyclerScrollMoreListener.OnLoadMoreListener {
+        extends RecyclerView.Adapter<MessagesListAdapter.ViewHolder> {
 
     private static final int VIEW_TYPE_FOOTER = 0;
     private static final String CHANNEL_LISTENER = "message_list_channel_listener";
 
-    private List<Message> items;
+    private List<DbMessageWrapper> items;
 
     private MessagesListStyle messagesListStyle;
 
@@ -84,33 +80,72 @@ public class MessagesListAdapter
 
     private RecyclerView recyclerView;
 
-    PreviousMessageListQuery previousMessageListQuery;
-    private ChatCampDatabaseHelper databaseHelper;
     private boolean loadingFirstTime = true;
 
     private Context context;
     private ImageLoader avatarImageLoader;
-    private MessagesList.OnMessagesLoadedListener onMessagesLoadedListener;
-
-    private RecyclerScrollMoreListener recyclerScrollMoreListener;
-    private View loadingView;
-
-    public void setRecyclerScrollMoreListener(RecyclerScrollMoreListener recyclerScrollMoreListener) {
-        this.recyclerScrollMoreListener = recyclerScrollMoreListener;
-    }
+    private MessageViewModel messageViewModel;
 
     public MessagesListAdapter(Context context) {
         items = new ArrayList<>();
         mUiThreadHandler = new Handler(Looper.getMainLooper());
         typingParticipantList = new ArrayList<>();
         this.context = context;
-        databaseHelper = new ChatCampDatabaseHelper(context);
     }
 
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         this.recyclerView = recyclerView;
         super.onAttachedToRecyclerView(recyclerView);
+    }
+
+    public void clear() {
+        items.clear();
+    }
+
+    public void addAll(List<DbMessageWrapper> list) {
+        items.addAll(list);
+    }
+
+    public void add(DbMessageWrapper dbMessageWrapper) {
+        items.add(0, dbMessageWrapper);
+        if (isTyping) {
+            notifyItemInserted(1);
+        } else {
+            notifyItemInserted(0);
+        }
+        restoreScrollPositionAfterAdAdded();
+    }
+
+    public void setTypingStatus(Diff<MessageDataSource.TypingStatus> diff) {
+        if(diff.getChange() == Diff.CHANGE.INSERT) {
+            notifyItemInserted(footerPosition);
+        } else if(diff.getChange() == Diff.CHANGE.REMOVE) {
+            notifyItemRemoved(footerPosition);
+        } else if(diff.getChange() == Diff.CHANGE.UPDATE) {
+            notifyItemChanged(footerPosition);
+        }
+        this.typingParticipantList = diff.getModel().getParticipants();
+        this.isTyping = diff.getModel().isTyping();
+        restoreScrollPositionAfterAdAdded();
+    }
+
+    public void update(DbMessageWrapper dbMessageWrapper, int position) {
+        items.set(position, dbMessageWrapper);
+        notifyItemChanged(position);
+    }
+
+    public void remove(int position) {
+        items.remove(position);
+        notifyItemRemoved(position);
+    }
+
+    public void setViewModel(MessageViewModel viewModel) {
+        this.messageViewModel = viewModel;
+    }
+
+    public List<DbMessageWrapper> getMessageList() {
+        return items;
     }
 
     private void removeChannelListener() {
@@ -143,36 +178,9 @@ public class MessagesListAdapter
         this.messagesListStyle = messagesListStyle;
     }
 
-    public void setChannel(final BaseChannel channel) {
-        this.channel = channel;
-        if (channel instanceof GroupChannel) {
-            databaseHelper.addGroupChannel((GroupChannel) channel);
-        }
-        if(channel instanceof GroupChannel) {
-            GroupChannel groupChannel = (GroupChannel) channel;
-            Map<String, Long> readReceipt = groupChannel.getReadReceipt();
-            if (readReceipt.size() == groupChannel.getParticipants().size()) {
-                Long lastRead = 0L;
-                for (Map.Entry<String, Long> entry : readReceipt.entrySet()) {
-                    if (lastRead == 0L || entry.getValue() < lastRead) {
-                        lastRead = entry.getValue();
-                    }
-                }
-                lastReadTime = lastRead * 1000;
-                //TODO need to optimise this
-                notifyDataSetChanged();
-            }
-        }
-        //TODO get the number of message from client
-        if (recyclerScrollMoreListener != null) {
-            recyclerScrollMoreListener.stopLoading();
-        }
-        loadMessages();
-    }
-
     public void onWindowVisibilityChanged(int visibility) {
         if (visibility == VISIBLE) {
-            addChannelListener();
+            //addChannelListener();
         } else {
             //TODO find a more elegant solution
             for (MessageFactory messageFactory : messageFactories) {
@@ -185,168 +193,6 @@ public class MessagesListAdapter
 
     public void setAvatarImageLoader(ImageLoader imageLoader) {
         this.avatarImageLoader = imageLoader;
-    }
-
-    //TODO We can create a layout for showing loading indicator for pagination.
-    private void loadMessages() {
-        if (previousMessageListQuery == null || loadingFirstTime) {
-            databaseHelper.getMessages(channel.getId(), channel.isGroupChannel()
-                    ? BaseChannel.ChannelType.GROUP : BaseChannel.ChannelType.OPEN, new ChatCampDatabaseHelper.GetMessagesListener() {
-                @Override
-                public void onGetMessages(List<Message> messages) {
-                    if (loadingFirstTime) {
-                        items.addAll(messages);
-                        if (items.size() > 0 && onMessagesLoadedListener != null) {
-                            onMessagesLoadedListener.onMessagesLoaded();
-                        }
-                        notifyDataSetChanged();
-                    }
-                }
-            });
-            previousMessageListQuery = channel.createPreviousMessageListQuery();
-        }
-        previousMessageListQuery.load(20, true, new PreviousMessageListQuery.ResultListener() {
-            @Override
-            public void onResult(List<Message> list, ChatCampException e) {
-                //TODO handle announcements
-                Iterator<Message> iterator = list.iterator();
-                while (iterator.hasNext()) {
-                    if (iterator.next().getType().equals("announcement")) {
-                        iterator.remove();
-                    }
-                }
-                if (loadingFirstTime) {
-                    loadingFirstTime = false;
-                    if (recyclerScrollMoreListener != null) {
-                        recyclerScrollMoreListener.resetLoading();
-                    }
-                    if (items.size() == 0 && onMessagesLoadedListener != null) {
-                        onMessagesLoadedListener.onMessagesLoaded();
-                    }
-                    items.clear();
-                    items.addAll(list);
-                    databaseHelper.addMessages(list, channel.getId(), channel.isGroupChannel()
-                            ? BaseChannel.ChannelType.GROUP : BaseChannel.ChannelType.OPEN);
-                } else {
-                    items.addAll(list);
-                }
-                if (channel instanceof GroupChannel) {
-                    //TODO should open channel also have something for mark as read?
-                    ((GroupChannel) channel).markAsRead();
-
-                }
-                if(loadingView != null) {
-                    loadingView.setVisibility(View.GONE);
-                }
-                notifyDataSetChanged();
-            }
-        });
-    }
-
-    private void addChannelListener() {
-
-        ChatCamp.addChannelListener(CHANNEL_LISTENER, new ChatCamp.ChannelListener() {
-
-            @Override
-            public void onOpenChannelMessageReceived(OpenChannel openChannel, Message message) {
-                if (channel == null) {
-                    return;
-                }
-                if (openChannel.getId().equals(channel.getId())) {
-                    //TODO handle announcements
-                    if (message.getType().equals("announcement")) {
-                        return;
-                    }
-                    items.add(0, message);
-                    databaseHelper.addMessage(message, channel.getId(), BaseChannel.ChannelType.OPEN);
-
-
-                    //TODO add is typing implementation once it is added
-//                    if (isTyping) {
-//                        notifyItemInserted(1);
-//                    } else {
-//                        notifyItemInserted(0);
-//                    }
-                    notifyItemInserted(0);
-                    restoreScrollPositionAfterAdAdded();
-                }
-            }
-
-            @Override
-            public void onGroupChannelMessageReceived(GroupChannel groupChannel, Message message) {
-                if (channel == null) {
-                    return;
-                }
-                if (groupChannel.getId().equals(channel.getId())) {
-                    //TODO handle announcements
-                    if (message.getType().equals("announcement")) {
-                        return;
-                    }
-                    items.add(0, message);
-                    databaseHelper.addMessage(message, channel.getId(), BaseChannel.ChannelType.GROUP);
-
-                        //TODO should open channel also have something for mark as read?
-                        if (lastReadTime < message.getInsertedAt() * 1000) {
-                            ((GroupChannel) channel).markAsRead();
-                        }
-
-                    if (isTyping) {
-                        notifyItemInserted(1);
-                    } else {
-                        notifyItemInserted(0);
-                    }
-                    databaseHelper.addGroupChannel(groupChannel);
-                    restoreScrollPositionAfterAdAdded();
-                }
-            }
-
-            @Override
-            public void onGroupChannelTypingStatusChanged(GroupChannel groupChannel) {
-                if (channel == null) {
-                    return;
-                }
-                if (!groupChannel.getId().equals(channel.getId())) {
-                    return;
-                }
-                //TODO use same method for open and group channel
-                List<Participant> typingParticipants = groupChannel.getTypingParticipants();
-                boolean isTyping;
-                if (typingParticipants.size() > 0 && !isCurrentUserTyping(typingParticipants)) {
-                    isTyping = true;
-                    typingParticipantList = typingParticipants;
-                } else {
-                    isTyping = false;
-                    typingParticipantList.clear();
-                }
-                if (isTyping ^ MessagesListAdapter.this.isTyping) {
-                    if (isTyping) {
-                        notifyItemInserted(footerPosition);
-                    } else {
-                        notifyItemRemoved(footerPosition);
-                    }
-                } else {
-                    notifyItemChanged(footerPosition);
-                }
-                MessagesListAdapter.this.isTyping = isTyping;
-                restoreScrollPositionAfterAdAdded();
-            }
-
-            @Override
-            public void onGroupChannelReadStatusUpdated(GroupChannel groupChannel) {
-                Map<String, Long> readReceipt = groupChannel.getReadReceipt();
-                if (readReceipt.size() == groupChannel.getParticipants().size()) {
-                    Long lastRead = 0L;
-                    for (Map.Entry<String, Long> entry : readReceipt.entrySet()) {
-                        if (lastRead == 0L || entry.getValue() < lastRead) {
-                            lastRead = entry.getValue();
-                        }
-                    }
-                    lastReadTime = lastRead * 1000;
-                    //TODO need to optimise this
-                    notifyDataSetChanged();
-                }
-            }
-        });
     }
 
     @Override
@@ -395,7 +241,7 @@ public class MessagesListAdapter
     }
 
     private void bindMessageViewHolder(MessageViewHolder holder, int position) {
-        Message message = getItem(position);
+        final DbMessageWrapper message = getItem(position);
         holder.message = message;
         MessageType messageType = viewTypeMessageTypeMap.get(holder.getItemViewType());
         MessageFactory.MessageHolder messageHolder = holder.messageHolder;
@@ -407,7 +253,7 @@ public class MessagesListAdapter
             if (readReceiptVisibility && channel.isGroupChannel()) {
                 holder.readReceiptContainer.setVisibility(View.VISIBLE);
                 holder.readReceiptContainer.removeAllViews();
-                if (message.getInsertedAt() * 1000 > lastReadTime) {
+                if ((message.getInsertedAt() * 1000 > lastReadTime) || (message.getMessageStatus() != null && message.getMessageStatus().equals("unsent")))  {
                     // message is not read by everyone
                     int layoutRes = messagesListStyle.getReadReceiptUnReadLayout();
                     holder.readReceiptContainer.addView(LayoutInflater.from(context).inflate(layoutRes, holder.readReceiptContainer, false));
@@ -435,7 +281,7 @@ public class MessagesListAdapter
                     holder.messageDateHeader.setTypeface(holder.messageDateHeader.getTypeface(), dateHeaderTextStyle);
                     holder.messageDateHeader.setTextColor(dateHeaderTextColor);
                     holder.messageDateHeader.setVisibility(View.VISIBLE);
-                    if(!TextUtils.isEmpty(messagesListStyle.getCustomFont())) {
+                    if (!TextUtils.isEmpty(messagesListStyle.getCustomFont())) {
                         holder.messageDateHeader.setCustomFont(messagesListStyle.getCustomFont());
                     }
                     bindDateTimeForMessage(holder, message);
@@ -464,7 +310,7 @@ public class MessagesListAdapter
                 holder.messageTime.setTextSize(TypedValue.COMPLEX_UNIT_PX, timeTextSize);
                 holder.messageTime.setTypeface(holder.messageTime.getTypeface(), timeTextStyle);
                 holder.messageTime.setTextColor(timeTextColor);
-                if(!TextUtils.isEmpty(messagesListStyle.getCustomFont())) {
+                if (!TextUtils.isEmpty(messagesListStyle.getCustomFont())) {
                     holder.messageTime.setCustomFont(messagesListStyle.getCustomFont());
                 }
                 Date date = new Date();
@@ -493,7 +339,7 @@ public class MessagesListAdapter
             int usernameTextPaddingTop = messageType.isMe ? messagesListStyle.getOutcomingUsernameTextPaddingTop() : messagesListStyle.getIncomingUsernameTextPaddingTop();
             int usernameTextPaddingBottom = messageType.isMe ? messagesListStyle.getOutcomingUsernameTextPaddingBottom() : messagesListStyle.getIncomingUsernameTextPaddingBottom();
             String username = "Unknown";
-            if (message.getUser() != null && !TextUtils.isEmpty(message.getUser().getDisplayName())) {
+            if (!TextUtils.isEmpty(message.getUser().getDisplayName())) {
                 username = message.getUser().getDisplayName();
             }
             holder.messageUsername.setPadding(usernameTextPaddingLeft, usernameTextPaddingTop, usernameTextPaddingRight, usernameTextPaddingBottom);
@@ -501,7 +347,7 @@ public class MessagesListAdapter
             holder.messageUsername.setTypeface(holder.messageUsername.getTypeface(), usernameTextStyle);
             holder.messageUsername.setTextColor(usernameTextColor);
             holder.messageUsername.setText(username);
-            if(!TextUtils.isEmpty(messagesListStyle.getCustomFont())) {
+            if (!TextUtils.isEmpty(messagesListStyle.getCustomFont())) {
                 holder.messageUsername.setCustomFont(messagesListStyle.getCustomFont());
             }
         } else {
@@ -566,11 +412,25 @@ public class MessagesListAdapter
                 holder.messageSpecs.isFirstMessage = true;
             }
         }
+
+        if (holder.retry != null) {
+            if (message.getMessageStatus() != null && message.getMessageStatus().equals("unsent") && Calendar.getInstance().getTimeInMillis() / 1000 - message.getInsertedAt() > 10) {
+                holder.retry.setVisibility(VISIBLE);
+                holder.retry.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        messageViewModel.sendMessage(message);
+                    }
+                });
+            } else {
+                holder.retry.setVisibility(View.GONE);
+            }
+        }
         messageType.messageFactory.setMessageSpecs(holder.messageSpecs);
         messageType.messageFactory.bindMessageHolder(messageHolder, message);
     }
 
-    private void bindDateTimeForMessage(MessageViewHolder holder, Message message) {
+    private void bindDateTimeForMessage(MessageViewHolder holder, DbMessageWrapper message) {
         String dateString = "";
         Long time = message.getInsertedAt() * 1000;
         Date date = new Date();
@@ -592,15 +452,8 @@ public class MessagesListAdapter
         return isTyping ? items.size() + 1 : items.size();
     }
 
-    @Override
-    public void onLoadMore(int page, int total) {
-        if(loadingView != null) {
-            loadingView.setVisibility(VISIBLE);
-        }
-        loadMessages();
-    }
 
-    private Message getItem(int position) {
+    private DbMessageWrapper getItem(int position) {
         if (isTyping && position == footerPosition) {
             return null;
         } else if (isTyping) {
@@ -615,8 +468,8 @@ public class MessagesListAdapter
         if (isTyping && position == footerPosition) {
             return VIEW_TYPE_FOOTER;
         }
-        Message message = getItem(position);
-        if (message.getUser() != null) {
+        DbMessageWrapper message = getItem(position);
+        if (message.getUser().getId() != null) {
             boolean isMe = message.getUser().getId().equals(ChatCamp.getCurrentUser().getId());
             for (MessageFactory messageFactory : messageFactories) {
                 if (messageFactory.isBindable(message)) {
@@ -627,7 +480,7 @@ public class MessagesListAdapter
         return -1;
     }
 
-    private Cluster getClustering(Message message, int position) {
+    private Cluster getClustering(DbMessageWrapper message, int position) {
         Cluster result = messageIdClusterMap.get(message.getId());
         if (result == null) {
             result = new Cluster();
@@ -635,7 +488,7 @@ public class MessagesListAdapter
         }
 
         int previousPosition = position - 1;
-        Message previousMessage = (previousPosition >= 0) ? getItem(previousPosition) : null;
+        DbMessageWrapper previousMessage = (previousPosition >= 0) ? getItem(previousPosition) : null;
         if (previousMessage != null) {
             result.dateBoundaryWithPrevious = isDateBoundary(previousMessage.getInsertedAt(), message.getInsertedAt());
             result.clusterWithPrevious = !isNewUser(previousMessage, message);
@@ -656,7 +509,7 @@ public class MessagesListAdapter
         }
 
         int nextPosition = position + 1;
-        Message nextMessage = (nextPosition < getItemCount()) ? getItem(nextPosition) : null;
+        DbMessageWrapper nextMessage = (nextPosition < getItemCount()) ? getItem(nextPosition) : null;
         if (nextMessage != null) {
             result.dateBoundaryWithNext = isDateBoundary(message.getInsertedAt(), nextMessage.getInsertedAt());
             result.clusterWithNext = !isNewUser(message, nextMessage);
@@ -699,16 +552,18 @@ public class MessagesListAdapter
         return (d1.getYear() != d2.getYear()) || (d1.getMonth() != d2.getMonth()) || (d1.getDay() != d2.getDay());
     }
 
-    public void setOnMesaageLoadedListener(MessagesList.OnMessagesLoadedListener onMessagesLoadedListener) {
-        this.onMessagesLoadedListener = onMessagesLoadedListener;
-    }
-
     public void onDetachedFromWindow() {
         removeChannelListener();
     }
 
-    public void setLoadingView(View view) {
-        loadingView = view;
+
+    public void setLastReadTime(long lastReadTime) {
+        this.lastReadTime = lastReadTime;
+        notifyDataSetChanged();
+    }
+
+    public void setChannel(BaseChannel channel) {
+        this.channel = channel;
     }
 
     private static class Cluster {
@@ -720,15 +575,11 @@ public class MessagesListAdapter
     }
 
 
-    public boolean isNewUser(Message older, Message newer) {
+    public boolean isNewUser(DbMessageWrapper older, DbMessageWrapper newer) {
         if (!older.getUser().getId().equals(newer.getUser().getId())) {
             return true;
         }
         return false;
-    }
-
-    private boolean isCurrentUserTyping(List<Participant> participants) {
-        return (participants.size() == 1 && participants.get(0).getId().equals(ChatCamp.getCurrentUser().getId()));
     }
 
     //TODO This function is a workaround for scrolling the list when item is inserted at the bottom, there
@@ -809,7 +660,7 @@ public class MessagesListAdapter
         public static final int RESOURCE_ID_MY = R.layout.layout_message_my;
         public static final int RESOURCE_ID_THEIR = R.layout.layout_message_their;
 
-        protected Message message;
+        protected DbMessageWrapper message;
 
         protected TextViewFont messageDateHeader;
         protected AvatarView messageUserAvatar;
@@ -819,6 +670,7 @@ public class MessagesListAdapter
         protected ViewGroup messageTimeContainer;
         protected TextViewFont messageTime;
         protected ViewGroup readReceiptContainer;
+        protected TextView retry;
 
         protected MessageFactory.MessageHolder messageHolder;
         protected MessageFactory.MessageSpecs messageSpecs;
@@ -833,6 +685,7 @@ public class MessagesListAdapter
             messageTimeContainer = itemView.findViewById(R.id.messageTimeContainer);
             messageTime = itemView.findViewById(R.id.messageTime);
             readReceiptContainer = itemView.findViewById(R.id.readReceiptContainer);
+            retry = itemView.findViewById(R.id.tv_retry);
         }
     }
 }

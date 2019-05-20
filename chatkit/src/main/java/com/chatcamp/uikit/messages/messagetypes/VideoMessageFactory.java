@@ -23,6 +23,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.chatcamp.uikit.R;
+import com.chatcamp.uikit.database.DbMessageWrapper;
 import com.chatcamp.uikit.preview.ShowVideoActivity;
 import com.chatcamp.uikit.utils.DownloadFileListener;
 import com.chatcamp.uikit.utils.FileUtils;
@@ -57,9 +58,9 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
     }
 
     @Override
-    public boolean isBindable(Message message) {
+    public boolean isBindable(DbMessageWrapper message) {
         if (message.getType().equals("attachment")) {
-            if (message.getAttachment().isVideo()) {
+            if (message.getAttachment().getType().contains("video")) {
                 return true;
             }
         }
@@ -93,7 +94,7 @@ public class VideoMessageFactory extends MessageFactory<VideoMessageFactory.Vide
     }
 
     @Override
-    public void bindMessageHolder(final VideoMessageHolder messageHolder, final Message message) {
+    public void bindMessageHolder(final VideoMessageHolder messageHolder, final DbMessageWrapper message) {
         final Context context = Utils.getContext(objectWeakReference.get());
         if (context == null) {
             messageHolder.downloadIcon.setVisibility(View.INVISIBLE);

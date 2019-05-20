@@ -1,13 +1,13 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
-group = 'com.github.ChatCamp'
+//apply plugin: 'com.github.dcendents.android-maven'
+//group = 'com.github.ChatCamp'
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 27
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionCode 4
         versionName "0.0.4"
         consumerProguardFile 'proguard-chatkit-rules.pro'
@@ -32,15 +32,51 @@ repositories {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    api 'io.chatcamp.sdk:chatcamp-android-sdk:0.1.67'
-    implementation 'com.android.support:appcompat-v7:26.1.0'
-    implementation 'com.android.support:design:26.1.0'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    //    api 'io.chatcamp.sdk:chatcamp-android-sdk:0.1.68'
+    implementation 'com.android.support:appcompat-v7:27.1.0'
+    implementation 'com.android.support:design:27.1.0'
     implementation 'com.wang.avi:library:2.1.3'
     implementation 'org.apmem.tools:layouts:1.10@aar'
-    implementation "com.squareup.picasso:picasso:2.5.2"
+    implementation 'com.squareup.picasso:picasso:2.5.2'
     implementation 'me.zhanghai.android.materialprogressbar:library:1.4.2'
     implementation 'com.davemorrissey.labs:subsampling-scale-image-view:3.10.0'
-//    api project(':chatcamp')
-//    implementation(name:'chatcamp-release', ext:'aar')
+
+
+
+    implementation 'android.arch.persistence.room:runtime:1.1.1'
+    annotationProcessor "android.arch.persistence.room:compiler:1.1.1"
+    implementation 'android.arch.persistence.room:rxjava2:1.1.1'
+
+
+    compile 'io.reactivex.rxjava2:rxjava:2.1.9'
+    compile 'io.reactivex.rxjava2:rxandroid:2.0.2'
+
+//    def room_version = "2.1.0-alpha03"
+//
+//    implementation "androidx.room:room-runtime:$room_version"
+//    annotationProcessor "androidx.room:room-compiler:$room_version" // use kapt for Kotlin
+//
+//    // optional - RxJava support for Room
+//    implementation "androidx.room:room-rxjava2:$room_version"
+
+
+
+    implementation 'android.arch.paging:runtime:1.0.1'
+
+//    def paging_version = "2.1.0-rc01"
+//
+//    implementation "androidx.paging:paging-runtime:$paging_version"
+
+    api 'android.arch.lifecycle:extensions:1.1.1'
+    annotationProcessor 'android.arch.lifecycle:compiler:1.1.1'
+
+//    def lifecycle_version = "2.0.0"
+//
+//    // ViewModel and LiveData
+//    implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
+//    annotationProcessor "androidx.lifecycle:lifecycle-compiler:$lifecycle_version"
+
+    api project(':chatcamp')
+    //    implementation(name:'chatcamp-release', ext:'aar')
 }

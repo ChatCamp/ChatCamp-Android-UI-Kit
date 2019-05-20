@@ -15,16 +15,13 @@ import android.widget.RelativeLayout;
 import com.chatcamp.uikit.R;
 import com.chatcamp.uikit.customview.AvatarView;
 import com.chatcamp.uikit.messages.RecyclerScrollMoreListener;
-import com.chatcamp.uikit.utils.CircleTransform;
 import com.chatcamp.uikit.utils.TextViewFont;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import io.chatcamp.sdk.ChatCamp;
 import io.chatcamp.sdk.ChatCampException;
-import io.chatcamp.sdk.Participant;
 import io.chatcamp.sdk.User;
 import io.chatcamp.sdk.UserListQuery;
 
@@ -153,7 +150,7 @@ public class BlockedUserAdapter extends RecyclerView.Adapter<BlockedUserAdapter.
                 onlineIndicatorParams.width = onlineIndicatorWidth;
 
                 avatar.initView(user.getAvatarUrl(), user.getDisplayName());
-                if(user.isOnline()) {
+                if(user.ifOnline()) {
                     onlineIndicator.setVisibility(View.VISIBLE);
                 } else {
                     onlineIndicator.setVisibility(View.GONE);
